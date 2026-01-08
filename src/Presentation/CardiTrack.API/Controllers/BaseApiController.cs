@@ -1,0 +1,61 @@
+using CardiTrack.Application.DTOs.Responses;
+using CardiTrack.API.Infrastructure.UserContext;
+using Microsoft.AspNetCore.Mvc;
+
+namespace CardiTrack.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+public abstract class BaseApiController : ControllerBase
+{
+    protected readonly IUserContext UserContext;
+    protected readonly ILogger Logger;
+
+    protected BaseApiController(IUserContext userContext, ILogger logger)
+    {
+        UserContext = userContext;
+        Logger = logger;
+    }
+
+    /// <summary>
+    /// Returns a successful API response with data
+    /// </summary>
+    protected ActionResult<ApiResponse<T>> Success<T>(T data, string message = "Success")
+    {
+        return Ok(new ApiResponse<T>
+        {
+            Success = true,
+            Message = message,
+            Data = data,
+            Timestamp = DateTime.UtcNow
+        });
+    }
+
+    /// <summary>
+    /// Returns a successful API response without data
+    /// </summary>
+    protected ActionResult<ApiResponse<object>> Success(string message = "Success")
+    {
+        return Ok(new ApiResponse<object>
+        {
+            Success = true,
+            Message = message,
+            Timestamp = DateTime.UtcNow
+        });
+    }
+
+    /// <summary>
+    /// Returns an error response
+    /// </summary>
+    protected ActionResult Error(string message, int statusCode = 400)
+    {
+        return StatusCode(statusCode, new ErrorResponse
+        {
+            Success = false,
+            Message = message,
+            Timestamp = DateTime.UtcNow
+        });
+    }
+}

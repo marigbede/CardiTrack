@@ -9,7 +9,8 @@
       "Bash(tree:*)",
       "Bash(terraform version:*)",
       "Bash(terraform init:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(dotnet ef migrations:*)"
     ]
   }
 }

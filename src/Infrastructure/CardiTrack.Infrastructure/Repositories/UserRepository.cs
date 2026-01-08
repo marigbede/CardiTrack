@@ -1,0 +1,33 @@
+using CardiTrack.Domain.Entities;
+using CardiTrack.Infrastructure.Persistence;
+using CardiTrack.Application.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
+
+namespace CardiTrack.Infrastructure.Repositories;
+
+public class UserRepository : Repository<User>, IUserRepository
+{
+    public UserRepository(CardiTrackDbContext context) : base(context)
+    {
+    }
+
+    public async Task<User?> GetByAuth0UserIdAsync(string auth0UserId)
+    {
+        return await _dbSet.FirstOrDefaultAsync(u => u.Auth0UserId == auth0UserId);
+    }
+
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        return await _dbSet.FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public async Task UpdateLastLoginAsync(Guid userId)
+    {
+        var user = await GetByIdAsync(userId);
+        if (user != null)
+        {
+            user.LastLoginDate = DateTime.UtcNow;
+            Update(user);
+        }
+    }
+}

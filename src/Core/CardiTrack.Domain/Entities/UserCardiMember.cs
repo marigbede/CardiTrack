@@ -19,6 +19,10 @@ public class UserCardiMember : BaseEntity, ISoftDeletable
     public DateTime AssignedDate { get; set; }
     public bool IsActive { get; set; } = true;
 
+    // Navigation properties
+    public User? User { get; set; }
+    public CardiMember? CardiMember { get; set; }
+
     public UserCardiMember()
     {
         AssignedDate = DateTime.UtcNow;

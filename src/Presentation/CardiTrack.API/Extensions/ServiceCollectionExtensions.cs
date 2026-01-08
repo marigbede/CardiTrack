@@ -7,14 +7,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // TODO: Register application services when they are created
-        // services.AddScoped<IOrganizationService, OrganizationService>();
-        // services.AddScoped<IUserService, UserService>();
-        // services.AddScoped<ICardiMemberService, CardiMemberService>();
-        // services.AddScoped<IDeviceService, DeviceService>();
-        // services.AddScoped<INotificationService, NotificationService>();
-        // services.AddScoped<ISubscriptionService, SubscriptionService>();
-        // services.AddScoped<IAuth0Service, Auth0Service>();
+        // Register application services
+        services.AddScoped<CardiTrack.Application.Interfaces.Services.IOrganizationService, CardiTrack.Application.Services.OrganizationService>();
+        services.AddScoped<CardiTrack.Application.Interfaces.Services.IUserService, CardiTrack.Application.Services.UserService>();
+        services.AddScoped<CardiTrack.Application.Interfaces.Services.ICardiMemberService, CardiTrack.Application.Services.CardiMemberService>();
+        services.AddScoped<CardiTrack.Application.Interfaces.Services.ISubscriptionService, CardiTrack.Application.Services.SubscriptionService>();
 
         return services;
     }
@@ -23,10 +20,15 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // TODO: Register infrastructure services when they are created
-        // services.AddScoped<IUnitOfWork, UnitOfWork>();
-        // services.AddScoped<IEncryptionService, AesEncryptionService>();
-        // services.AddScoped<IAuditService, AuditService>();
+        // Register repositories
+        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.IOrganizationRepository, CardiTrack.Infrastructure.Repositories.OrganizationRepository>();
+        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.IUserRepository, CardiTrack.Infrastructure.Repositories.UserRepository>();
+        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.ICardiMemberRepository, CardiTrack.Infrastructure.Repositories.CardiMemberRepository>();
+        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.ISubscriptionRepository, CardiTrack.Infrastructure.Repositories.SubscriptionRepository>();
+        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.IUserCardiMemberRepository, CardiTrack.Infrastructure.Repositories.UserCardiMemberRepository>();
+
+        // Register Unit of Work
+        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.IUnitOfWork, CardiTrack.Infrastructure.Repositories.UnitOfWork>();
 
         // HTTP Client for Auth0 service
         services.AddHttpClient("Auth0Client", client =>

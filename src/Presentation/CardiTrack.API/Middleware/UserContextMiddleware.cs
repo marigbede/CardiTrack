@@ -1,0 +1,52 @@
+using System.Security.Claims;
+using Serilog.Context;
+using CardiTrack.API.Infrastructure.UserContext;
+
+namespace CardiTrack.API.Middleware;
+
+public class UserContextMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger<UserContextMiddleware> _logger;
+
+    public UserContextMiddleware(RequestDelegate next, ILogger<UserContextMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+
+    public async Task InvokeAsync(
+        HttpContext httpContext,
+        IUserContext userContext)
+    {
+        if (httpContext.User.Identity?.IsAuthenticated == true)
+        {
+            try
+            {
+                var auth0UserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var email = httpContext.User.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
+
+                if (!string.IsNullOrEmpty(auth0UserId))
+                {
+                    // Set basic claims from JWT
+                    if (userContext is UserContext concreteContext)
+                    {
+                        concreteContext.SetAuthenticatedUser(auth0UserId, email);
+                    }
+
+                    // Add user context to logs
+                    LogContext.PushProperty("Auth0UserId", auth0UserId);
+                    LogContext.PushProperty("Email", email);
+
+                    _logger.LogDebug("User context set for Auth0 user: {Auth0UserId}", auth0UserId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to set user context from JWT claims");
+            }
+        }
+
+        await _next(httpContext);
+    }
+}
