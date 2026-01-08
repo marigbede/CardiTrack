@@ -1,0 +1,34 @@
+using CardiTrack.Domain.Common;
+using CardiTrack.Domain.Enums;
+using CardiTrack.Domain.Interfaces;
+
+namespace CardiTrack.Domain.Entities;
+
+public class DeviceConnection : BaseEntity, ISoftDeletable
+{
+    public Guid CardiMemberId { get; set; }
+    public DeviceType DeviceType { get; set; }
+    public string DeviceName { get; set; } = string.Empty; // e.g., "Mom's Fitbit"
+    public bool IsPrimary { get; set; } // Primary device for data sync
+    public ConnectionStatus ConnectionStatus { get; set; }
+
+    // OAuth Tokens (encrypted in database)
+    public string? AccessToken { get; set; }
+    public string? RefreshToken { get; set; }
+    public DateTime? TokenExpiry { get; set; }
+
+    // JSON: ["activity", "heartrate", "sleep", "profile"]
+    public string Scopes { get; set; } = "[]";
+
+    public DateTime? ConnectedDate { get; set; }
+    public DateTime? LastSyncDate { get; set; }
+    public int SyncFrequencyMinutes { get; set; } = 30; // Default: every 30 minutes
+
+    // JSON: { "model": "Charge 6", "version": "1.0", "firmwareVersion": "2.3.1" }
+    public string? Metadata { get; set; }
+
+    public bool IsActive { get; set; } = true;
+
+    // Navigation properties
+    public ICollection<ActivityLog> ActivityLogs { get; set; } = new List<ActivityLog>();
+}

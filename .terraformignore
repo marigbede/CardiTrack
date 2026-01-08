@@ -1,0 +1,30 @@
+# .terraformignore
+
+# .git
+.git/
+.gitignore
+
+# .terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Backup files
+*.backup
+*.bak
+
+# Documentation
+README.md
+*.md
+
+# Example files
+*.example
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,79 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+
+namespace CardiTrack.API.Extensions;
+
+public static class Auth0Extensions
+{
+    public static IServiceCollection AddAuth0Authentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var auth0Config = configuration.GetSection("Auth0");
+        var domain = auth0Config["Domain"];
+        var audience = auth0Config["Audience"];
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.Authority = $"https://{domain}/";
+                options.Audience = audience;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = $"https://{domain}/",
+                    ValidateAudience = true,
+                    ValidAudience = audience,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ClockSkew = TimeSpan.Zero,
+                    NameClaimType = ClaimTypes.NameIdentifier
+                };
+
+                options.RequireHttpsMetadata = true;
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Log.Warning("JWT Authentication failed: {Error}", context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        var userId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        Log.Debug("JWT validated for user: {UserId}", userId);
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+        return services;
+    }
+
+    public static IServiceCollection AddAuth0Authorization(this IServiceCollection services)
+    {
+        services.AddAuthorization(options =>
+        {
+            // Default policy - require authenticated user
+            options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+
+            // Business admin policy
+            options.AddPolicy("RequireAdmin", policy =>
+                policy.RequireClaim("role", "Admin"));
+
+            // Business account policy
+            options.AddPolicy("RequireBusinessAccount", policy =>
+                policy.RequireClaim("organization_type", "Business"));
+
+            // Family account policy
+            options.AddPolicy("RequireFamilyAccount", policy =>
+                policy.RequireClaim("organization_type", "Family"));
+        });
+
+        return services;
+    }
+}

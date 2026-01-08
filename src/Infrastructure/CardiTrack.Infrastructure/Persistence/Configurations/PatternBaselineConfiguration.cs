@@ -1,0 +1,56 @@
+using CardiTrack.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace CardiTrack.Infrastructure.Persistence.Configurations;
+
+public class PatternBaselineConfiguration : IEntityTypeConfiguration<PatternBaseline>
+{
+    public void Configure(EntityTypeBuilder<PatternBaseline> builder)
+    {
+        builder.ToTable("PatternBaselines");
+
+        builder.HasKey(p => p.Id);
+
+        builder.Property(p => p.CardiMemberId)
+            .IsRequired();
+
+        builder.Property(p => p.CalculatedDate)
+            .IsRequired()
+            .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.Property(p => p.PeriodDays)
+            .IsRequired();
+
+        // Activity Baseline Metrics
+        builder.Property(p => p.AvgSteps);
+        builder.Property(p => p.StdDevSteps).HasColumnType("decimal(10,2)");
+        builder.Property(p => p.AvgActiveMinutes);
+
+        // Heart Rate Baseline Metrics
+        builder.Property(p => p.AvgRestingHeartRate);
+        builder.Property(p => p.StdDevHeartRate).HasColumnType("decimal(10,2)");
+        builder.Property(p => p.MaxHeartRateObserved);
+
+        // Sleep Baseline Metrics
+        builder.Property(p => p.AvgSleepMinutes);
+        builder.Property(p => p.TypicalBedtime);
+        builder.Property(p => p.TypicalWakeTime);
+        builder.Property(p => p.AvgSleepEfficiency);
+
+        // JSON field for day-of-week patterns
+        builder.Property(p => p.StepsByDayOfWeek)
+            .HasMaxLength(500);
+
+        builder.Property(p => p.CreatedDate)
+            .IsRequired()
+            .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.Property(p => p.UpdatedDate);
+
+        // Indexes
+        builder.HasIndex(p => p.CardiMemberId);
+        builder.HasIndex(p => p.CalculatedDate);
+        builder.HasIndex(p => new { p.CardiMemberId, p.PeriodDays, p.CalculatedDate });
+    }
+}

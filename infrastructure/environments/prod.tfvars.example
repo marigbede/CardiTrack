@@ -1,0 +1,48 @@
+# Production Environment Configuration Example
+# Copy this file to prod.tfvars and fill in sensitive/specific values
+# terraform apply -var-file="environments/prod.tfvars"
+
+environment  = "prod"
+location     = "eastus"
+project_name = "carditrack"
+
+# SQL Server Credentials (REQUIRED - fill these in)
+sql_admin_username      = "sqladmin"
+sql_admin_password      = "CHANGE_ME_VERY_STRONG_PASSWORD_123!"
+sql_aad_admin_login     = "admin@yourdomain.com"
+sql_aad_admin_object_id = "00000000-0000-0000-0000-000000000000"
+
+# App Service
+app_service_sku       = "P1v2"  # Premium tier for production
+app_service_always_on = true    # Always on for production
+
+# SQL Database
+sql_database_sku         = "S2"   # Standard tier for production
+sql_database_max_size_gb = 250    # Larger database for production
+
+# Storage
+storage_replication_type                 = "GRS"  # Geo-redundant storage
+storage_enable_infrastructure_encryption = true   # Required for HIPAA
+
+# Key Vault
+key_vault_sku                        = "premium"  # Premium for HSM-backed keys
+key_vault_soft_delete_retention_days = 90         # HIPAA requirement
+key_vault_purge_protection_enabled   = true       # Prevent accidental deletion
+
+# Application Insights
+app_insights_retention_days = 90  # HIPAA requirement
+
+# SignalR
+enable_signalr   = true
+signalr_sku_name = "Standard_S1"
+
+# HIPAA Compliance
+enable_hipaa_compliance  = true
+sql_audit_retention_days = 90  # HIPAA requirement
+
+# Additional Tags
+additional_tags = {
+  CostCenter = "Engineering"
+  Owner      = "ProductionTeam"
+  Compliance = "HIPAA"
+}

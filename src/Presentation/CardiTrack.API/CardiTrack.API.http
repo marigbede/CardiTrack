@@ -1,0 +1,6 @@
+@CardiTrack.API_HostAddress = http://localhost:5230
+
+GET {{CardiTrack.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
