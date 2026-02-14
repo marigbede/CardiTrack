@@ -1,59 +1,237 @@
-# CardiTrack MAUI Mobile UI Screen Descriptions
+# CardiTrack - Mobile App Screen Specifications
 
-Detailed UI specifications for the .NET MAUI mobile application (iOS and Android).
+## Project Overview
 
-**Platform:** .NET MAUI (iOS & Android)
-**Target Devices:** iPhone 12+, Android 10+
-**Orientation:** Portrait (primary), Landscape (supported)
-**Document Version:** 1.0
-**Last Updated:** January 10, 2026
-
----
-
-## Table of Contents
-
-1. [Mobile App Architecture](#mobile-app-architecture)
-2. [Onboarding Flow](#onboarding-flow)
-3. [Dashboard Screens](#dashboard-screens)
-4. [Alert Screens](#alert-screens)
-5. [Family & Collaboration](#family--collaboration)
-6. [Settings & Account](#settings--account)
-7. [CardiMember Management](#cardimember-management)
-8. [Offline Features](#offline-features)
-9. [Native Features](#native-features)
-10. [Navigation Patterns](#navigation-patterns)
+**Product:** CardiTrack - Remote health monitoring for elderly family members
+**Platform:** iOS (iPhone 12+) & Android (10+)
+**Orientation:** Portrait primary, landscape supported
+**Target Users:** Adult children (30-55) monitoring elderly parents' wearable health data
+**Document Version:** 3.0
+**Last Updated:** February 14, 2026
 
 ---
 
-## Mobile App Architecture
+## Release Strategy
 
-### Navigation Structure
-- **Shell Navigation:** MAUI Shell for consistent navigation
-- **Flyout Menu:** Left slide-out menu for main navigation
-- **Tab Bar:** Bottom navigation for primary sections
-- **Modal Pages:** For focused tasks (alerts, adding CardiMembers)
+35 screens across 3 MVPs. Each MVP is a fully functional, shippable release.
 
-### Bottom Tab Bar (Always Visible)
+| Release | Screens | Theme | User Gets |
+|---------|---------|-------|-----------|
+| **MVP 1** | 20 | Solo Monitoring | Sign up, connect device(s), monitor one parent, view trends, get alerts, configure notifications, manage devices, manage profile and subscription, export health data (HL7, FHIR) |
+| **MVP 2** | 8 | Family & Multi-Member | Invite family, share notes, manage multiple CardiMembers, all alert types, scan test results with AI medical insights, export data in LOINC/CCD/SNOMED CT |
+| **MVP 3** | 7 | Native & Offline | Biometric setup and login, offline support, push notification actions, home screen widget, native sharing |
+
+---
+
+## Screen Index
+
+| ID | Screen | Release |
+|----|--------|---------|
+| M1-01 | Splash Screen | MVP 1 |
+| M1-02 | Welcome / Landing | MVP 1 |
+| M1-03 | Sign Up | MVP 1 |
+| M1-04 | Add First CardiMember | MVP 1 |
+| M1-05 | Device Connection - Selection | MVP 1 |
+| M1-06 | Device Connection - OAuth | MVP 1 |
+| M1-07 | Device Connection - Success | MVP 1 |
+| M1-08 | Baseline Learning Info | MVP 1 |
+| M1-09 | Main Dashboard | MVP 1 |
+| M1-10 | Alerts List | MVP 1 |
+| M1-11 | Alert Detail - Activity | MVP 1 |
+| M1-12 | Alert Detail - Critical | MVP 1 |
+| M1-13 | Settings Main | MVP 1 |
+| M1-14 | Subscription Management | MVP 1 |
+| M1-15 | Trend Charts | MVP 1 |
+| M1-16 | Notification Settings | MVP 1 |
+| M1-17 | CardiMember Detail | MVP 1 |
+| M1-18 | Edit CardiMember | MVP 1 |
+| M1-19 | Device Management | MVP 1 |
+| M1-20 | Health Data Export | MVP 1 |
+| M2-01 | Alert Detail - Heart Rate | MVP 2 |
+| M2-02 | Family Members List | MVP 2 |
+| M2-03 | Invite Family Modal | MVP 2 |
+| M2-04 | Multi-Member Dashboard | MVP 2 |
+| M2-05 | Shared Notes Feed | MVP 2 |
+| M2-06 | Add / Edit Note | MVP 2 |
+| M2-07 | Test Results Scanner | MVP 2 |
+| M2-08 | Test Results Detail | MVP 2 |
+| M3-01 | Biometric Setup | MVP 3 |
+| M3-02 | Biometric Login | MVP 3 |
+| M3-03 | Offline Mode Indicator | MVP 3 |
+| M3-04 | Offline Data Cache Settings | MVP 3 |
+| M3-05 | Push Notifications | MVP 3 |
+| M3-06 | Home Screen Widget | MVP 3 |
+| M3-07 | Share Sheet Integration | MVP 3 |
+
+---
+
+## User Flows
+
+### Flow 1: First-Time Onboarding (MVP 1)
+
 ```
-[Dashboard] [Alerts] [Family] [Settings]
-    🏠         🔔        👥        ⚙️
+[M1-01 Splash] → [M1-02 Welcome] → [M1-03 Sign Up] → [M1-04 Add CardiMember]
+                       │                                        │
+                       │ "Sign In"                              │ "Skip"
+                       ▼                                        ▼
+                 (Login screen)                           [M1-09 Dashboard]
+                                                          (empty state)
+
+                       [M1-04 Add CardiMember]
+                               │
+                               ▼
+                       [M1-05 Device Selection]
+                               │
+                               ▼
+                       [M1-06 OAuth Permission]
+                               │
+                          ┌────┴────┐
+                          │ Success │ Failure
+                          ▼         ▼
+                       [M1-07 Success] → Retry / Help
+                          │
+                          ▼
+                       [M1-08 Baseline Info]
+                          │
+                          ▼
+                       [M1-09 Dashboard]
 ```
 
-### Flyout Menu Items
-- My Dashboard
-- CardiMembers (with count badge)
-- Alerts (with unread count)
-- Family & Sharing
+### Flow 2: Daily Monitoring (MVP 1)
+
+```
+[App Launch] → [M1-09 Dashboard]
+                     │
+           ┌─────────┼───────────┐
+           ▼         ▼           ▼
+      [Call/SMS] [M1-10 Alerts] [M1-15 Trends]
+                     │
+                ┌────┴────┐
+                ▼         ▼
+           [M1-11]    [M1-12]
+           Activity   Critical
+                │         │
+                ▼         ▼
+           [Acknowledge] [Call Now]
+```
+
+### Flow 3: Settings & Management (MVP 1)
+
+```
+[Tab: Settings] → [M1-13 Settings Main]
+                         │
+               ┌─────────┼──────────┬──────────┐
+               ▼         ▼          ▼          ▼
+         [M1-14 Sub] [M1-16 Notif] [M1-17 Detail] [M1-19 Devices]
+                                        │
+                                        ▼
+                                   [M1-18 Edit]
+```
+
+### Flow 3b: Data Export (MVP 1)
+
+```
+[M1-15 Trends] → Export icon → [M1-20 Health Data Export]
+[M1-13 Settings] → "Export Health Data" → [M1-20 Health Data Export]
+[M1-17 Detail] → "Export Data" → [M1-20 Health Data Export]
+                                        │
+                                   ┌────┴────┐
+                                   ▼         ▼
+                              [Save/Share] [Email]
+```
+
+### Flow 4: Family Collaboration (MVP 2)
+
+```
+[Tab: Family] → [M2-02 Family List]
+                       │
+                 ┌─────┴─────┐
+                 ▼           ▼
+           [M2-03 Invite] [M2-05 Notes]
+                               │
+                               ▼
+                          [M2-06 Add Note]
+```
+
+### Flow 5: Multi-Member (MVP 2)
+
+```
+[M2-04 Multi-Dashboard] → tap member → [M1-09 Single Dashboard]
+```
+
+### Flow 6: Test Results (MVP 2)
+
+```
+[M2-07 Scanner] → Camera/Upload → OCR Processing
+                                        │
+                                        ▼
+                                  [M2-08 Results Detail]
+                                        │
+                              ┌─────────┼──────────┐
+                              ▼         ▼          ▼
+                         [AI Insights] [Export]  [Share]
+                                        │
+                                        ▼
+                                  [M1-20 Export]
+```
+
+---
+
+## Navigation Structure
+
+### Bottom Tab Bar (always visible)
+
+```
+┌────────────────────────────────────┐
+│                                    │
+│          Content Area              │
+│                                    │
+├──────────┬──────────┬─────┬────────┤
+│ Dashboard│  Alerts  │Family│Settings│
+└──────────┴──────────┴─────┴────────┘
+```
+
+- Badge count on Alerts tab for unread alerts
+- Badge count on Family tab for pending invites (MVP 2)
+- Family tab shows placeholder / "Coming Soon" in MVP 1, or can be hidden
+
+### Flyout Menu (swipe from left edge)
+
+- User profile header (photo, name, email)
+- Dashboard
+- CardiMembers (badge: member count)
+- Alerts (badge: unread count)
+- Family & Sharing (MVP 2)
 - Subscription
 - Settings
 - Help & Support
 - Sign Out
 
+### Gesture Patterns
+
+| Gesture | Context | Action |
+|---------|---------|--------|
+| Pull down | Any scrollable screen | Refresh data |
+| Swipe left | List items | Reveal quick actions |
+| Swipe right | List items | Reveal secondary actions |
+| Swipe right (edge) | Any screen | Open flyout menu |
+| Pinch | Chart views | Zoom in/out |
+| Long press | Chart data points | Show tooltip |
+| Long press | CardiMember photo | Change photo |
+
 ---
 
-## Onboarding Flow
+## MVP 1 — Solo Monitoring (20 screens)
 
-### Screen 1.1: Splash Screen
+A single user can sign up, add one CardiMember, connect one or more devices, monitor their health, view trends, receive and manage alerts, configure notification preferences, manage the CardiMember's profile, manage connected devices, export health data in HL7 and FHIR formats, and handle their subscription.
+
+---
+
+### M1-01: Splash Screen
+**User Story:** 1.1-1.3 Onboarding
+**Entry:** App launch
+**Exit:** → M1-02 Welcome (first launch) | → M1-09 Dashboard (returning user) | → M3-02 Biometric Login (MVP 3, if enabled)
+
 **Duration:** 2-3 seconds while app initializes
 
 **Layout:**
@@ -61,675 +239,436 @@ Detailed UI specifications for the .NET MAUI mobile application (iOS and Android
 - Large CardiTrack logo (centered)
 - App name beneath logo
 - Loading spinner (bottom third)
-- Version number (bottom, small)
+- Version number (bottom, small text)
 
-**MAUI Implementation:**
-```xml
-ContentPage with:
-- AbsoluteLayout for centering
-- Image for logo
-- ActivityIndicator
-- Label for version
-```
+**States:**
+- **Default:** Logo + spinner animation
+- **Error:** If initialization fails → "Something went wrong. Tap to retry" with retry button
 
 ---
 
-### Screen 1.2: Welcome/Landing Screen
-**User Story:** 1.1 - First-Time User Registration
+### M1-02: Welcome / Landing Screen
+**User Story:** 1.1 First-Time Registration
+**Entry:** ← M1-01 Splash (first launch only)
+**Exit:** → M1-03 Sign Up | → Login screen ("Sign In")
 
 **Layout:**
 
-**Header (20% of screen):**
+**Header (top 20%):**
 - CardiTrack logo (top-left, small)
-- Skip button (top-right) → "Sign In"
+- "Sign In" link (top-right)
 
-**Hero Section (50% of screen):**
-- Carousel view with 3 slides:
+**Hero Carousel (middle 50%):**
+- 3 swipeable slides with pagination dots:
 
-  **Slide 1:**
-  - Illustration: Happy elderly person with smartwatch
-  - Headline: "Peace of Mind for Your Family"
-  - Subtext: "Monitor loved ones' health from anywhere"
+| Slide | Illustration | Headline | Subtext |
+|-------|-------------|----------|---------|
+| 1 | Happy elderly person with smartwatch | "Peace of Mind for Your Family" | "Monitor loved ones' health from anywhere" |
+| 2 | Phone showing health dashboard | "Works with Devices They Own" | "Fitbit, Apple Watch, Garmin & more" |
+| 3 | Family members on phones | "Stay Connected as a Family" | "Share caregiving with siblings" |
 
-  **Slide 2:**
-  - Illustration: Phone showing health dashboard
-  - Headline: "Works with Devices They Own"
-  - Subtext: "Fitbit, Apple Watch, Garmin & more"
+**CTA Section (bottom 30%):**
+- Primary button (full width, bold): "Start Free 30-Day Trial"
+- Pricing text (small, muted): "Then $8/month - Cancel anytime"
+- Secondary button (text style, subtle): "Sign In"
+- Legal link (small): "By continuing, you agree to Terms & Privacy"
 
-  **Slide 3:**
-  - Illustration: Family members on phones
-  - Headline: "Stay Connected as a Family"
-  - Subtext: "Share caregiving with siblings"
-
-- Pagination dots (below carousel)
-
-**CTA Section (30% of screen):**
-- Primary button: "Start Free 30-Day Trial" (full width, bold)
-- Pricing text: "Then $8/month • Cancel anytime"
-- Secondary button: "Sign In" (text button, subtle)
-- Terms link: "By continuing, you agree to Terms & Privacy"
-
-**MAUI Controls:**
-- CarouselView for slides
-- Button (style: Primary, Secondary)
-- Label with TapGestureRecognizer for links
+**Interactions:**
+- Carousel auto-advances every 4 seconds, pauses on touch
+- Pagination dots indicate current slide
+- Swipe left/right between slides
 
 ---
 
-### Screen 1.3: Sign Up Screen
-**User Story:** 1.1 - Account Creation
-
-**Layout:**
+### M1-03: Sign Up Screen
+**User Story:** 1.1 Account Creation
+**Entry:** ← M1-02 Welcome ("Start Free Trial")
+**Exit:** → M1-04 Add CardiMember (success) | ← M1-02 Welcome (back) | → Login screen ("Already have an account?")
 
 **Header:**
-- Back button (< Back)
+- Back button
 - Title: "Create Account"
-- Progress: "Step 1 of 4" (top-right)
+- Progress indicator: "Step 1 of 4"
 
-**Form Section (Scrollable):**
+**Form (scrollable):**
 
-**Email & Password:**
+**Email & Password Section:**
 - Label: "Email Address"
-- Entry: email keyboard type, autocapitalization off
+  - Text input, email keyboard, autocapitalization off
 - Label: "Password"
-- Entry: IsPassword=true
-- Password strength indicator (bar: red→yellow→green)
-  - Weak / Medium / Strong
+  - Password input (masked)
+  - Password strength bar below (weak → medium → strong)
+  - Strength label: "Weak" / "Medium" / "Strong"
 - Label: "Confirm Password"
-- Entry: IsPassword=true
+  - Password input (masked)
 
-**OR Divider:**
-- Horizontal line with "OR" in center
+**Divider:** Horizontal line with "OR" centered
 
-**Social Login Buttons:**
-- "Continue with Google" button (white, Google logo)
-- "Continue with Apple" button (black, Apple logo)
+**Social Login:**
+- Button: "Continue with Google" (white background, Google logo)
+- Button: "Continue with Apple" (black background, Apple logo)
 
-**Terms Checkbox:**
-- CheckBox + Label: "I agree to Terms of Service and Privacy Policy"
-- Links are tappable
+**Terms:**
+- Checkbox + label: "I agree to Terms of Service and Privacy Policy"
+- "Terms of Service" and "Privacy Policy" are tappable links
 
 **CTA:**
-- Primary button: "Create Account" (disabled until valid)
-- Error label (hidden until error occurs)
+- Primary button: "Create Account" (disabled until form is valid)
+- Error message area (hidden until error occurs)
 
-**Bottom Link:**
-- "Already have an account? Sign In"
+**Bottom:**
+- Link: "Already have an account? Sign In"
 
-**MAUI Implementation:**
-```xml
-ContentPage with ScrollView containing:
-- StackLayout with Entry controls
-- ProgressBar for password strength
-- CheckBox for terms
-- Button with IsEnabled binding
-- TapGestureRecognizer for social login
-```
+**Validation Rules:**
+- Email: valid format, real-time feedback
+- Password: min 8 characters, 1 uppercase, 1 number
+- Confirm password: must match
+- Terms checkbox: must be checked
+- Button enables only when all validations pass
 
-**Validation:**
-- Real-time email format validation
-- Password: minimum 8 chars, 1 uppercase, 1 number
-- Matching password confirmation
-- Terms must be checked
+**States:**
+- **Default:** Empty form
+- **Validating:** Inline error messages appear beneath invalid fields
+- **Loading:** Button shows spinner, form disabled
+- **Error:** Error banner at top (e.g., "Email already registered")
 
 ---
 
-### Screen 1.4: Add First CardiMember
-**User Story:** 1.2 - Adding First CardiMember
-
-**Layout:**
+### M1-04: Add First CardiMember
+**User Story:** 1.2 Adding First CardiMember
+**Entry:** ← M1-03 Sign Up (success)
+**Exit:** → M1-05 Device Selection ("Continue") | → M1-09 Dashboard ("Skip for Now")
 
 **Header:**
 - Back button
 - Title: "Add CardiMember"
-- Progress: "Step 2 of 4"
+- Progress indicator: "Step 2 of 4"
 
 **Introduction:**
-- Icon: 👤
+- Icon: person silhouette
 - Text: "Who would you like to monitor?"
 - Subtext: "We'll help you set up monitoring in just a few steps"
 
-**Form (Scrollable):**
-
 **Photo Section:**
-- Circular image placeholder (80x80 dp)
-- "Add Photo" button (centered below)
-- Camera icon + Gallery icon (choose source)
+- Circular photo placeholder (large)
+- "Add Photo" button below
+- Tap opens choice: Camera or Gallery
 
-**Required Information:**
-- Label: "Full Name *"
-  - Entry (TextKeyboard)
-- Label: "Date of Birth *"
-  - DatePicker (shows picker on tap)
-  - Display format: "MM/DD/YYYY"
-- Label: "Relationship *"
-  - Picker (dropdown):
-    - Parent
-    - Grandparent
-    - Spouse
-    - Sibling
-    - Other
+**Required Fields:**
+- "Full Name *" — text input
+- "Date of Birth *" — date picker (format: MM/DD/YYYY)
+- "Relationship *" — dropdown picker:
+  - Parent, Grandparent, Spouse, Sibling, Other
 
-**Optional Information (Collapsible):**
-- Expander: "Add More Details (Optional)"
-  - Label: "Medical Notes"
-    - Editor (multi-line, encrypted icon shown)
-    - Character counter: "0/500"
-  - Label: "Emergency Contact Name"
-    - Entry
-  - Label: "Emergency Contact Phone"
-    - Entry (PhoneKeyboard)
+**Optional Fields (collapsible section):**
+- Toggle: "Add More Details (Optional)"
+- When expanded:
+  - "Medical Notes" — multi-line text (max 500 chars, character counter shown)
+    - Encrypted indicator icon visible
+  - "Emergency Contact Name" — text input
+  - "Emergency Contact Phone" — phone keyboard input
 
 **Privacy Notice:**
-- Frame with info icon
-- Text: "🔒 Your parent will be notified and can provide consent"
+- Info card with lock icon
+- Text: "Your parent will be notified and can provide consent"
 
 **CTA:**
 - Primary button: "Continue"
-- Secondary button (text): "Skip for Now"
+- Text link: "Skip for Now"
 
-**MAUI Controls:**
-- Image with TapGestureRecognizer for photo
-- MediaPicker API for camera/gallery
-- DatePicker
-- Picker for dropdown
-- Expander for collapsible section
-- Editor for multi-line
+**States:**
+- **Default:** Empty form with photo placeholder
+- **Photo added:** Shows uploaded image in circle
+- **Loading:** Button shows spinner on submit
 
 ---
 
-### Screen 1.5: Device Connection - Selection
-**User Story:** 1.3 - Device Connection Wizard
-
-**Layout:**
+### M1-05: Device Connection - Selection
+**User Story:** 1.3 Device Connection Wizard
+**Entry:** ← M1-04 Add CardiMember ("Continue")
+**Exit:** → M1-06 OAuth Permission (device selected)
 
 **Header:**
 - Back button
 - Title: "Connect Device"
-- Progress: "Step 3 of 4"
+- Progress indicator: "Step 3 of 4"
 
 **Introduction:**
 - Text: "What device does [Name] use?"
 - Subtext: "We support all major fitness trackers"
 
-**Device Grid:**
-- CollectionView (2 columns on phone, 3 on tablet)
+**Device Grid (2 columns on phone, 3 on tablet):**
 
-**Device Card (Repeated):**
-- Frame with rounded corners, shadow
-- Device logo image (64x64 dp)
-- Device name (Label, bold)
-- "Supported" badge (green checkmark)
-- Tap = Select device
+Each device card:
+- Rounded frame with shadow
+- Device logo (medium)
+- Device name (bold)
+- "Supported" badge (checkmark)
+- Entire card is tappable, highlights on selection
 
 **Supported Devices:**
-1. **Fitbit** (Charge, Versa, Sense series)
-2. **Apple Watch** (Series 4+)
-3. **Garmin** (Venu, Forerunner, etc.)
-4. **Samsung Galaxy Watch**
-5. **Withings** (ScanWatch, Move)
-6. **Other/Manual Entry** (limited features)
+
+| Device | Models |
+|--------|--------|
+| Fitbit | Charge, Versa, Sense series |
+| Apple Watch | Series 4+ |
+| Garmin | Venu, Forerunner, etc. |
+| Samsung Galaxy Watch | All models |
+| Withings | ScanWatch, Move |
+| Other / Manual Entry | Limited features |
 
 **Bottom:**
-- Text link: "Don't see your device? Contact support"
+- Link: "Don't see your device? Contact support"
 
-**MAUI Implementation:**
-```xml
-CollectionView with:
-- ItemsLayout: GridItemsLayout, Span=2
-- ItemTemplate: Frame with Image, Label
-- SelectionMode: Single
-- SelectionChanged event
-```
+**Interactions:**
+- Single selection — tap to select, tap again to deselect
+- Selected card shows highlighted border + checkmark overlay
+- Selecting a device automatically proceeds to M1-06
 
 ---
 
-### Screen 1.6: Device Connection - OAuth Permission
-**User Story:** 1.3 - OAuth Flow
-
-**Layout:**
+### M1-06: Device Connection - OAuth Permission
+**User Story:** 1.3 OAuth Flow
+**Entry:** ← M1-05 Device Selection (device chosen)
+**Exit:** → M1-07 Success (authorization complete) | ← M1-05 Device Selection ("Cancel")
 
 **Header:**
 - Back button
 - Title: "[Device Name] Connection"
 
-**Content (Centered):**
-
-**Device Logo:**
-- Large device logo (128x128 dp)
-- Connection arrow icon
-- CardiTrack logo (128x128 dp)
+**Visual Connection (centered):**
+- Large device logo
+- Arrow/connection icon
+- Large CardiTrack logo
 
 **Permission List:**
 - Label: "CardiTrack needs access to:"
-- Frame for each permission:
+- Each permission in its own row:
 
-  **Permission Item:**
-  - Icon (left): ❤️
-  - Label: "Heart Rate Data"
-  - Info button (right): (i)
-    - Tap shows tooltip: "Used to detect unusual patterns"
+| Icon | Permission | Info Tooltip |
+|------|-----------|-------------|
+| Heart | Heart Rate Data | "Used to detect unusual patterns" |
+| Shoe | Activity & Steps | "To monitor daily movement" |
+| Moon | Sleep Data | "To spot rest pattern changes" |
 
-  **Permission Item:**
-  - Icon: 👟
-  - Label: "Activity & Steps"
-  - Info: "To monitor daily movement"
-
-  **Permission Item:**
-  - Icon: 😴
-  - Label: "Sleep Data"
-  - Info: "To spot rest pattern changes"
+- Each row has an (i) info button that shows the tooltip on tap
 
 **Privacy Notice:**
-- Frame (light background)
-- Text: "🔒 We never sell your data. Your information stays private and secure."
+- Card with light background
+- Lock icon + text: "We never sell your data. Your information stays private and secure."
 
 **CTA:**
-- Primary button: "Authorize [Device]"
-  - Tap → Opens WebView with OAuth flow
-- Text button: "Cancel"
+- Primary button: "Authorize [Device Name]"
+  - Tap opens device's OAuth login in a browser/webview
+- Text link: "Cancel"
 
-**MAUI Implementation:**
-- WebAuthenticator API for OAuth
-- WebView for embedded auth (fallback)
-- Platform-specific OAuth handling
+**States:**
+- **Default:** Permission list visible
+- **Authorizing:** Loading overlay with "Connecting to [Device]..." message
+- **Error:** "Authorization failed. Please try again." with retry button
 
 ---
 
-### Screen 1.7: Device Connection - Success
-**User Story:** 1.3 - Connection Success
+### M1-07: Device Connection - Success
+**User Story:** 1.3 Connection Success
+**Entry:** ← M1-06 OAuth (authorization complete)
+**Exit:** → M1-08 Baseline Info ("Continue to Dashboard") | → M1-05 Device Selection ("Add Another Device")
 
-**Layout:**
-
-**Animation Section:**
-- Lottie animation: Checkmark success (plays once)
-- Or: Animated checkmark using MAUI Animations
+**Animation:**
+- Animated checkmark (plays once on entry)
 
 **Success Message:**
 - Heading: "Connected Successfully!"
 - Text: "We're syncing [Name]'s data from [Device]"
 - Subtext: "This may take a few minutes"
 
-**Data Preview:**
-- Frame: "Latest Data"
-  - Label: "Steps Today: 4,250"
-  - Label: "Last Synced: Just now"
-  - Label: "Heart Rate: 72 bpm"
+**Data Preview Card:**
+- Title: "Latest Data"
+- Rows:
+  - Steps Today: 4,250
+  - Last Synced: Just now
+  - Heart Rate: 72 bpm
 
 **Options:**
-- Button: "+ Add Another Device" (outlined)
-- Text: "You can connect multiple devices for [Name]"
+- Outlined button: "+ Add Another Device"
+- Helper text: "You can connect multiple devices for [Name]"
 
 **CTA:**
 - Primary button: "Continue to Dashboard"
 
-**MAUI Implementation:**
-- SkiaSharp or Lottie for animations
-- Timer for "syncing" status updates
-- Data binding for preview values
+**States:**
+- **Syncing:** Preview card shows shimmer/skeleton loading
+- **Synced:** Preview card shows real data
+- **Partial sync:** Some values show, others show "Syncing..."
 
 ---
 
-### Screen 1.8: Baseline Learning Info
-**User Story:** Baseline Setup
-
-**Layout:**
+### M1-08: Baseline Learning Info
+**User Story:** 1.3 Baseline Setup
+**Entry:** ← M1-07 Device Success
+**Exit:** → M1-09 Dashboard ("Go to Dashboard")
 
 **Header:**
 - Title: "Learning Phase"
-- Progress: "Step 4 of 4"
+- Progress indicator: "Step 4 of 4"
 
 **Illustration:**
-- Animated graphic: Brain with gears (learning)
-- Or: Progress circle filling up
+- Animated graphic: brain with gears (learning concept)
 
 **Explanation:**
 - Heading: "CardiTrack is Learning [Name]'s Patterns"
-- Text: "Over the next 30 days, our AI will learn what's normal for [Name]:"
+- Body: "Over the next 30 days, our AI will learn what's normal for [Name]:"
 - Bullet list:
   - "Typical wake/sleep times"
   - "Average daily activity levels"
   - "Resting heart rate baseline"
 
 **Progress:**
-- ProgressBar: "Day 1 of 30"
+- Progress bar: "Day 1 of 30"
 - Label: "3% Complete"
 
-**Options:**
-- Frame with toggle:
-  - Switch: "Use basic alerts while learning"
-  - Text: "Get simple threshold alerts (e.g., heart rate >100)"
+**Options Card:**
+- Toggle switch: "Use basic alerts while learning"
+- Description: "Get simple threshold alerts (e.g., heart rate > 100)"
 
 **CTA:**
 - Primary button: "Go to Dashboard"
-- Text button: "Invite Family Members First"
+
+**MVP 2 addition:** Text link "Invite Family Members First" → M2-03
 
 ---
 
-### Screen 1.9: Biometric Setup
-**User Story:** 10.2 - Biometric Login
+### M1-09: Main Dashboard (Single CardiMember)
+**User Story:** 2.1 Daily Health Overview
+**Entry:** Tab bar (Home) | ← M1-08 Baseline Info (first time)
+**Exit:** → M1-10 Alerts List | → M1-15 Trend Charts | → M1-17 CardiMember Detail | → Phone call / SMS
 
-**Layout:**
-
-**Header:**
-- Skip button (top-right)
-- Title: "Secure Your Account"
-
-**Icon:**
-- Platform-specific biometric icon (centered, large)
-  - iOS: Face ID icon
-  - Android: Fingerprint icon
-
-**Explanation:**
-- Heading: "Enable [Face ID / Fingerprint]"
-- Text: "Quickly and securely access health data"
-- Bullet benefits:
-  - "Login in seconds"
-  - "Extra security layer"
-  - "Required for sensitive actions"
-
-**CTA:**
-- Primary button: "Enable [Biometric]"
-  - Triggers platform biometric enrollment
-- Text button: "Set Up Later"
-
-**MAUI Implementation:**
-```csharp
-// Use platform-specific APIs
-#if IOS
-BiometricAuthentication.FaceID
-#elif ANDROID
-BiometricAuthentication.Fingerprint
-#endif
-```
-
----
-
-## Dashboard Screens
-
-### Screen 2.1: Main Dashboard (Single CardiMember)
-**User Story:** 2.1 - Daily Health Overview
-
-**Layout:**
-
-**Header (Fixed):**
+**Header (fixed):**
 - Greeting: "Good Morning, [User First Name]"
-- Notification bell icon (with badge count)
-- Refresh icon (pull-to-refresh also works)
+- Notification bell icon (with unread badge count)
+- Refresh icon (pull-to-refresh also supported)
 
 **Status Hero Card:**
-- Large card with gradient background (status-colored)
-- CardiMember photo (circular, 80dp)
+- Large card with gradient background colored by status
+- CardiMember photo (circular, large)
 - Name and age: "[Name], 78"
 - Large status indicator:
-  - **Green:** "All Good!" + ✓ icon
-  - **Yellow:** "Needs Attention" + ⚠️ icon
-  - **Orange:** "Action Recommended" + ⚡ icon
-  - **Red:** "Urgent" + 🚨 icon
+
+| Status | Label | Icon |
+|--------|-------|------|
+| Normal | "All Good!" | Checkmark |
+| Caution | "Needs Attention" | Warning triangle |
+| Urgent | "Action Recommended" | Lightning bolt |
+| Critical | "Urgent" | Siren |
+
 - Last synced: "Updated 10 minutes ago"
-- Sync icon (tap to manual refresh)
+- Tap sync icon for manual refresh
 
-**Quick Actions Row:**
-- 3 buttons in horizontal stack:
-  - "Call [Name]" (phone icon) → Direct dial
-  - "Send Message" (SMS icon)
-  - "View Details" (chart icon)
+**Quick Actions Row (3 horizontal buttons):**
+- "Call [Name]" (phone icon) → initiates phone call
+- "Send Message" (SMS icon) → opens SMS
+- "View Details" (chart icon) → navigates to M1-17
 
-**Key Metrics Cards (3 cards):**
+**Key Metrics (3 cards in a row):**
 
 **Card 1: Activity**
-- Icon: 👟
-- Large number: "4,250 steps"
-- Comparison bar (visual progress):
-  - Filled: Current vs Goal
-  - Color: Green (on track) / Yellow (low)
-- Text: "85% of normal" (with arrow ↓)
-- Mini sparkline chart (last 7 days)
+- Icon: shoe
+- Large value: "4,250 steps"
+- Visual progress bar (current vs. goal)
+- Comparison text: "85% of normal" with trend arrow (up/down)
+- Mini 7-day sparkline chart
 
 **Card 2: Heart Rate**
-- Icon: ❤️
-- Large number: "72 bpm"
+- Icon: heart
+- Large value: "72 bpm"
 - Status: "Normal range"
-- Range indicator: "68-75 bpm typical"
+- Range text: "68-75 bpm typical"
 - Mini sparkline
 
 **Card 3: Sleep**
-- Icon: 😴
-- Large number: "7.2 hours"
-- Quality: "Good" (stars ⭐⭐⭐⭐)
-- Text: "Better than average"
+- Icon: moon
+- Large value: "7.2 hours"
+- Quality: "Good" (4 out of 5 stars)
+- Comparison: "Better than average"
 - Mini sparkline
 
-**Recent Alerts Section (if any):**
-- Heading: "Recent Alerts"
-- Alert cards (scrollable horizontal):
-  - Each shows: Icon, title, time, status
-  - Tap to expand details
+**Recent Alerts (conditional — only shown if alerts exist):**
+- Section heading: "Recent Alerts"
+- Horizontal scrollable alert cards
+- Each card: icon, title, time, status
+- Tap any card → M1-11 or M1-12 Alert Detail
 
-**Bottom CTA:**
-- Button: "View Trends & History"
+**Bottom:**
+- Button: "View Trends & History" → M1-15
 
-**MAUI Implementation:**
-```xml
-RefreshView (pull to refresh)
-ScrollView containing:
-- Grid for header
-- Frame for status card
-- CollectionView (horizontal) for quick actions
-- FlexLayout for metric cards
-- CarouselView for alerts
-```
+**Interactions:**
+- Pull-to-refresh triggers data sync
+- Swipe left on metric card → see detail view
+- Long-press on photo → change photo option
 
-**Gestures:**
-- Pull-to-refresh
-- Swipe left on metric card → See details
-- Long-press on photo → Change photo
+**States:**
+- **Loading:** Skeleton/shimmer cards
+- **Normal:** Full data displayed
+- **Stale data:** Banner: "Data is X hours old. Pull to refresh."
+- **No device connected:** Prompt card: "Connect a device to start monitoring" → M1-05
+- **Baseline learning:** Shows progress bar instead of "% of normal" comparisons
+
+**MVP 2 change:** When user has multiple CardiMembers, Home tab shows M2-04 instead
 
 ---
 
-### Screen 2.2: Multi-Member Dashboard
-**User Story:** 2.2 - Multi-Member View
-
-**Layout:**
-
-**Header:**
-- Title: "My CardiMembers"
-- Filter icon (top-right) → Opens filter sheet
-- "+ Add" button (top-right)
-
-**Filter Bar (Collapsible):**
-- Horizontal scroll chips:
-  - [All] [Alerts Only] [Good Status]
-- Sort button: "Sort by Status ▼"
-
-**CardiMember Cards (Vertical Scroll):**
-
-**Card Layout:**
-- Frame with shadow, rounded corners
-- Horizontal layout:
-
-  **Left Section (30%):**
-  - Circular photo (64dp)
-  - Status badge (overlaid on photo)
-
-  **Middle Section (50%):**
-  - Name: "[Name]" (bold, large)
-  - Age & relationship: "78 • Dad"
-  - Status text: "All good" or alert summary
-  - Last synced: "10 min ago"
-
-  **Right Section (20%):**
-  - Chevron (>)
-  - Alert count badge (if any)
-
-**Swipe Actions:**
-- Swipe left: Reveals "Call" button (green)
-- Swipe right: Reveals "Details" button (blue)
-
-**Empty State:**
-- Illustration: Elderly person with heart
-- Text: "No CardiMembers Yet"
-- Button: "Add Your First CardiMember"
-
-**Floating Action Button (FAB):**
-- Bottom-right corner
-- "+" icon
-- Tap → Add CardiMember flow
-
-**MAUI Implementation:**
-```xml
-CollectionView with:
-- ItemTemplate: SwipeView with Frame
-- EmptyView: Custom template
-- RefreshView parent
-- FAB using platform-specific positioning
-```
-
----
-
-### Screen 2.3: Trend Charts Screen
-**User Story:** 2.3 - Historical Data
-
-**Layout:**
-
-**Header:**
-- Back button
-- Title: "[Name]'s Trends"
-- Export icon (share sheet)
-
-**Time Range Selector:**
-- Segmented control:
-  ```
-  [7D] [30D] [90D] [Custom]
-  ```
-- Custom date range picker (modal)
-
-**Metric Tabs:**
-- Horizontal scroll tabs:
-  ```
-  [Activity] [Heart Rate] [Sleep] [All]
-  ```
-
-**Chart Area:**
-
-**Chart Container:**
-- Scrollable chart view (Syncfusion/LiveCharts)
-- Line chart with:
-  - X-axis: Dates
-  - Y-axis: Metric values
-  - Baseline range (shaded green area)
-  - Data line (blue)
-  - Alert markers (red dots on timeline)
-
-**Zoom Controls:**
-- Pinch to zoom (native gesture)
-- Double-tap to reset zoom
-
-**Interactive Tooltip:**
-- Long-press on chart point shows:
-  - Frame popup with:
-    - Date/time
-    - Exact value
-    - "120% above baseline"
-    - Note icon (if notes exist)
-
-**Timeline Annotations (Below Chart):**
-- Horizontal scroll of events:
-  - Alert markers with icons
-  - Notes markers with text preview
-  - Tap to expand details
-
-**Summary Stats Card:**
-- Frame at bottom:
-  - "Average: 4,500 steps"
-  - "High: 8,200 (Jan 5)"
-  - "Low: 1,200 (Jan 8)"
-  - "Trend: ↓ Declining 15%"
-
-**Export Options (Share Sheet):**
-- Export to PDF
-- Export to CSV
-- Share screenshot
-- Send to email
-
-**MAUI Implementation:**
-- Syncfusion Charts or LiveCharts2
-- Platform-specific chart interactions
-- Share API for export
-- Pinch/zoom gestures
-
----
-
-## Alert Screens
-
-### Screen 3.1: Alerts List
-**User Story:** 3.1 - Alert Management
-
-**Layout:**
+### M1-10: Alerts List
+**User Story:** 3.1 Alert Management
+**Entry:** Tab bar (Alerts) | ← M1-09 Dashboard (Recent Alerts)
+**Exit:** → M1-11 Alert Detail (Activity) | → M1-12 Alert Detail (Critical) | → Phone call
 
 **Header:**
 - Title: "Alerts"
 - Filter icon (funnel)
-- Settings icon (gear) → Notification preferences
+- Settings icon (gear) → M1-16 Notification Settings
 
-**Filter Chips:**
-- Horizontal scroll:
-  ```
-  [All] [Unread] [Critical] [Today] [This Week]
-  ```
+**Filter Chips (horizontal scroll):**
+- [All] [Unread] [Critical] [Today] [This Week]
 
-**Alert Groups (CollectionView):**
+**Alert List (grouped by date):**
 
-**Grouped by Date:**
-- Section header: "Today" / "Yesterday" / "This Week"
+Section headers: "Today" / "Yesterday" / "This Week" / "Older"
 
-**Alert Card:**
-- Frame with left border (color = severity)
-
-  **Top Row:**
-  - Severity badge: "CRITICAL" (red) / "URGENT" (orange) / "INFO" (yellow)
+**Alert Card Layout:**
+- Left border colored by severity
+- Top row:
+  - Severity badge: "CRITICAL" / "URGENT" / "INFO"
   - Timestamp: "2 hours ago"
   - Unread dot (if unread)
-
-  **Content:**
-  - CardiMember name + photo (small, inline)
-  - Alert title (bold): "Low Activity Detected"
-  - Preview text: "Dad hasn't moved this morning. Typical wake time..."
-
-  **Bottom Row:**
-  - Status: "New" / "Acknowledged" / "Resolved"
-  - Quick actions:
-    - Call icon (tap to call)
-    - Checkmark icon (acknowledge)
-    - Chevron (expand details)
+- Content:
+  - CardiMember name + small photo (inline)
+  - Alert title (bold): e.g., "Low Activity Detected"
+  - Preview text (2 lines max): "Dad hasn't moved this morning. Typical wake time..."
+- Bottom row:
+  - Status label: "New" / "Acknowledged" / "Resolved"
+  - Quick action icons: Call (phone) | Acknowledge (checkmark) | Expand (chevron)
 
 **Swipe Actions:**
-- Swipe right: "Acknowledge" (green)
-- Swipe left: "Call" (blue)
-
-**Empty State:**
-- Icon: 🔔 (large, gray)
-- Text: "No Alerts"
-- Subtext: "We'll notify you if anything needs attention"
+- Swipe right → "Acknowledge"
+- Swipe left → "Call"
 
 **Bottom:**
-- Button: "View Archived Alerts"
+- Link: "View Archived Alerts"
 
-**MAUI Implementation:**
-```xml
-CollectionView with:
-- IsGrouped=true
-- GroupHeaderTemplate
-- ItemTemplate with SwipeView
-- RefreshView
-```
+**States:**
+- **Default:** Grouped alert list
+- **Empty:** Large bell icon (muted) + "No Alerts" + "We'll notify you if anything needs attention"
+- **Filtered empty:** "No alerts match this filter"
+- **Loading:** Skeleton cards
+
+**MVP 2 addition:** Heart rate alerts tap → M2-01
 
 ---
 
-### Screen 3.2: Alert Detail (Activity Alert)
-**User Story:** 11.1 - Activity Decline
-
-**Layout:**
+### M1-11: Alert Detail - Activity
+**User Story:** 11.1 Activity Decline
+**Entry:** ← M1-10 Alerts List (tap alert card)
+**Exit:** ← M1-10 Alerts List (back) | → Phone call | → SMS | → M1-15 Trend Charts
 
 **Header:**
 - Back button
@@ -737,301 +676,578 @@ CollectionView with:
 - Share button
 
 **Alert Header Card:**
-- Severity banner (yellow background)
-- Icon: ⚠️
+- Caution-level severity banner
+- Warning icon
 - Title: "Low Activity Alert"
-- CardiMember: Photo + Name
+- CardiMember photo + name
 - Timestamp: "January 10, 2026 at 11:30 AM"
 
-**Description Section:**
-- Frame with icon
-- Text (large, readable):
-  "Dad's activity has been lower than usual"
+**Description:**
+- Card with icon
+- Large readable text: "Dad's activity has been lower than usual"
 
-**Data Visualization:**
-- Chart: 2-week trend (mini version)
-- Shows declining steps line
+**Mini Trend Chart:**
+- 2-week activity trend showing declining line
+- Baseline range shaded, current data overlaid
 
-**Comparison Card:**
-- Grid layout (2 columns):
+**Comparison Card (2-column grid):**
 
-  **Current:**
-  - Label: "Recent Average"
-  - Value: "2,500 steps/day"
-  - Icon: ↓
+| Current | Normal |
+|---------|--------|
+| "Recent Average" | "Normal Average" |
+| 2,500 steps/day | 5,000 steps/day |
 
-  **Normal:**
-  - Label: "Normal Average"
-  - Value: "5,000 steps/day"
-  - Icon: —
+- Full-width highlighted row: "-50% below normal"
 
-  **Difference:**
-  - Full width, highlighted
-  - "-50% below normal"
+**Context Card:**
+- Lightbulb icon
+- "This could indicate:"
+  - Illness or fatigue
+  - Pain or discomfort
+  - Low mood or depression
 
-**Context Frame:**
-- Background: Light blue
-- Icon: 💡
-- Text: "This could indicate:"
-  - Bullet: "Illness or fatigue"
-  - Bullet: "Pain or discomfort"
-  - Bullet: "Low mood or depression"
+**Recommended Actions (full-width button list):**
+1. "Call to Check In" (primary, phone icon)
+2. "Send a Message" (secondary, SMS icon)
+3. "Schedule Doctor Visit" (secondary, calendar icon)
 
-**Recommended Actions:**
-- Heading: "What You Can Do"
-- Button list (full width):
-  1. "Call to Check In" (primary, phone icon)
-  2. "Send a Message" (outlined, SMS icon)
-  3. "Schedule Doctor Visit" (outlined, calendar icon)
-
-**Additional Actions:**
-- Expander: "More Options"
-  - "Adjust Baseline" (if new normal)
-  - "Add Note About This Alert"
-  - "Share with Family"
+**More Options (collapsible):**
+- "Adjust Baseline" (if this is a new normal)
+- "Add Note About This Alert"
+- "Share with Family"
 
 **Acknowledgment Section:**
 - If unread: Button "Mark as Acknowledged"
-- If acknowledged: Shows who + when
-  - "Acknowledged by Sarah, 30 min ago"
-  - Notes (if any)
+- If acknowledged: "Acknowledged by Sarah, 30 min ago" + any notes
 
 **Bottom:**
-- Button: "View Detailed Activity Data"
+- Button: "View Detailed Activity Data" → M1-15
 
 ---
 
-### Screen 3.3: Alert Detail (Heart Rate)
-**User Story:** 11.2 - Elevated HR
+### M1-12: Alert Detail - Critical (No Movement)
+**User Story:** 11.3 No Morning Activity
+**Entry:** ← M1-10 Alerts List | Push notification (direct)
+**Exit:** ← M1-10 Alerts List (back) | → Phone call | → Note input
 
-**Layout:**
+This is the most safety-critical screen in the app. Design for urgency and immediate action.
 
 **Alert Header:**
-- Orange severity banner
-- Icon: ⚡
+- Full-width critical severity banner (pulsing animation)
+- Large siren icon
+- Title: "CRITICAL: No Movement Detected"
+- CardiMember photo + name
+- Timestamp
+
+**Urgent Message Card (thick border, critical severity):**
+- Large text: "Dad hasn't moved today"
+- Details:
+  - "Typical wake time: 7:00 AM"
+  - "Current time: 11:00 AM"
+  - "No activity for 4 hours"
+
+**Last Known Activity Card:**
+- "Last Movement Detected:"
+- "Yesterday, 10:30 PM"
+- "Location: Bedroom (based on device)"
+
+**Immediate Actions (large, prominent buttons):**
+1. **"CALL NOW"** — critical severity, oversized, phone icon, one-tap to dial, shows phone number
+2. **"I'M CHECKING IN PERSON"** — urgent severity, large — updates status and notifies family immediately
+
+**Dismissal Option:**
+- Button: "He Told Me He'd Sleep In"
+  - Opens a note field for context
+  - Dismisses alert with explanation logged
+
+**Family Notification Card:**
+- "Who else has been notified:"
+  - Sarah (via SMS) — timestamp
+  - John (via Push) — timestamp
+
+**Event Timeline:**
+- Vertical timeline:
+  - 10:30 PM — Last movement
+  - 7:00 AM — Expected wake time
+  - 9:00 AM — Alert threshold reached
+  - 11:30 AM — You were notified
+
+---
+
+### M1-13: Settings Main
+**User Story:** 6.1, 6.2 Settings
+**Entry:** Tab bar (Settings) | Flyout menu
+**Exit:** → M1-14 Subscription | → M1-16 Notification Settings | → M1-17 CardiMember Detail | → M1-19 Device Management | → M1-20 Health Data Export
+
+**User Profile Section (top card):**
+- Profile photo (large, tappable to edit)
+- Name: "[User Name]"
+- Email: "[user@email.com]"
+- Edit button (pencil icon)
+
+**Settings Groups (grouped list):**
+
+**Account**
+- My Profile →
+- Subscription & Billing → (badge: current plan name)
+- Family & Sharing → (MVP 2)
+
+**CardiMembers**
+- Manage CardiMembers →
+- Connected Devices → M1-19
+- Export Health Data → M1-20
+
+**Health Records (MVP 2)**
+- Scan Test Results → M2-07
+
+**Notifications**
+- Alert Settings →
+- Notification Preferences →
+- Quiet Hours →
+
+**Security**
+- Change Password →
+- Biometric Login (inline toggle switch)
+- Privacy Settings →
+
+**Support**
+- Help Center →
+- Contact Support →
+- Terms & Privacy →
+
+**About**
+- App Version (value: "1.0.0")
+- Check for Updates
+
+**Danger Zone (separated visually):**
+- "Sign Out" (destructive text)
+- "Delete Account" (destructive text)
+
+**MVP 2 addition:** Family & Sharing → M2-02
+
+---
+
+### M1-14: Subscription Management
+**User Story:** 6.1 Subscription
+**Entry:** ← M1-13 Settings ("Subscription & Billing")
+**Exit:** ← M1-13 Settings (back) | → Payment method change | → Plan change
+
+**Current Plan Card (gradient background):**
+- Badge: "COMPLETE CARE"
+- Price: "$15/month"
+- Renewal date: "Renews Feb 10, 2026"
+- Button: "Manage Subscription"
+
+**Included Features (checklist):**
+- Unlimited CardiMembers
+- Advanced ML Alerts
+- Family Sharing (5 members)
+- 90-day data retention
+- Priority support
+
+**Usage Section:**
+- Progress bars with labels:
+  - CardiMembers: 2 of unlimited
+  - Family Members: 3 of 5
+  - Data retention: 45 days of 90
+
+**Plan Comparison (horizontal swipeable cards):**
+- 3 plan cards, swipe to compare
+- Each card:
+  - Plan name + price/month
+  - "Current Plan" badge (if active)
+  - Condensed feature list
+  - Button: "Current Plan" (disabled) / "Upgrade" / "Downgrade"
+
+**Annual Discount Banner:**
+- "Save 15% with Annual Billing"
+- "Switch to Annual" button
+
+**Billing Section:**
+- Payment method: "Visa ---- 1234" (with card icon)
+- "Change" button
+- "Billing History" button
+
+---
+
+### M1-15: Trend Charts
+**User Story:** 2.3 Historical Data
+**Entry:** ← M1-09 Dashboard ("View Trends") | ← M1-11 Alert Detail ("View Detailed Data")
+**Exit:** ← Previous screen (back) | → M1-20 Health Data Export
+
+**Header:**
+- Back button
+- Title: "[Name]'s Trends"
+- Export/share icon
+
+**Time Range Selector (segmented control):**
+- [7D] [30D] [90D] [Custom]
+- Custom opens a date range picker modal
+
+**Metric Tabs (horizontal scroll):**
+- [Activity] [Heart Rate] [Sleep] [All]
+
+**Chart Area:**
+- Line chart:
+  - X-axis: dates
+  - Y-axis: metric values
+  - Shaded area: baseline/normal range
+  - Line: actual data
+  - Markers: alert events on timeline
+- Pinch to zoom
+- Double-tap to reset zoom
+
+**Interactive Tooltip (long-press on data point):**
+- Popup showing:
+  - Date/time
+  - Exact value
+  - "120% above baseline"
+  - Note icon (if notes exist for that date)
+
+**Timeline Annotations (below chart, horizontal scroll):**
+- Alert markers with icons
+- Note markers with text preview
+- Tap to expand details
+
+**Summary Stats Card (bottom):**
+- Average: "4,500 steps"
+- High: "8,200 (Jan 5)"
+- Low: "1,200 (Jan 8)"
+- Trend: "Declining 15%" with down arrow
+
+**Export Options (via share icon):**
+- Export to PDF
+- Export to CSV
+- Share screenshot
+- Send to email
+
+---
+
+### M1-16: Notification Settings
+**User Story:** 3.2 Alert Preferences
+**Entry:** ← M1-13 Settings | ← M1-10 Alerts List (gear icon)
+**Exit:** ← Previous screen (back)
+
+**CardiMember Selector (if multiple members):**
+- Dropdown: "Settings for: [Dad]"
+
+**Alert Type Groups (each with enable toggle):**
+
+**Activity Alerts**
+- Toggle: enabled/disabled
+- Sensitivity slider: Low | Medium | High
+- Description: "Alert when activity is 30% below normal"
+
+**Heart Rate Alerts**
+- Toggle: enabled/disabled
+- Sensitivity slider: Low | Medium | High
+- Description: "Alert when HR exceeds baseline by 20%"
+
+**Sleep Alerts**
+- Toggle: enabled/disabled
+- Checkboxes:
+  - Poor sleep quality
+  - Unusual sleep patterns
+
+**Pattern Break Alerts**
+- Toggle: always on (cannot disable)
+- Label: "Required for emergency detection"
+
+**Notification Channels (per alert type):**
+- Multi-select chips: [Email] [SMS] [Push] [All]
+
+**Quiet Hours (collapsible):**
+- Toggle: "Enable Quiet Hours"
+- Time pickers: From 10:00 PM → To 7:00 AM
+- Exception toggle: "Still alert for Critical events"
+
+**Family Routing (MVP 2):**
+- "Also notify these family members:"
+- Checkboxes with severity chips:
+  - Sarah Johnson — [High Severity] [Critical]
+  - John Doe — [Critical Only]
+
+**Test Section:**
+- "Send Test Push Notification" button
+- "Send Test Email" button
+- "Send Test SMS" button
+
+---
+
+### M1-17: CardiMember Detail
+**Entry:** ← M1-09 Dashboard ("View Details") | ← M1-13 Settings ("Manage CardiMembers")
+**Exit:** ← Previous screen (back) | → M1-18 Edit CardiMember | → M1-09 Dashboard | → M1-10 Alerts
+
+**Profile Section (centered):**
+- Large photo (prominent, centered)
+- Name (large text)
+- Age & relationship: "78 years old - Dad"
+
+**Contact Info Card:**
+- Emergency contact: name, phone (tappable to call), relationship
+
+**Medical Info Card (encrypted):**
+- Lock icon in card header
+- Collapsible: "Medical Notes"
+- Viewing requires biometric authentication
+- "Edit" also requires biometric auth
+
+**Monitoring Info Card:**
+- Connected devices: "2 devices"
+- Monitoring since: "Jan 1, 2026"
+- Baseline status: "Learning (15 days)" or "Established"
+
+**Action Buttons:**
+- "View Dashboard" → M1-09
+- "View Alerts" → M1-10
+- "Manage Devices" → M1-19
+
+**Danger Zone (separated):**
+- "Pause Monitoring" button (warning treatment)
+- "Remove CardiMember" button (destructive treatment)
+
+---
+
+### M1-18: Edit CardiMember
+**Entry:** ← M1-17 CardiMember Detail (edit button)
+**Exit:** ← M1-17 CardiMember Detail (cancel or save)
+
+**Header:**
+- Cancel button
+- Title: "Edit [Name]"
+- Save button (enabled when changes exist)
+
+**Form (scrollable):**
+
+**Photo:** Large circular image + "Change Photo" button
+
+**Basic Info:**
+- "Full Name" — text input
+- "Date of Birth" — date picker
+- "Relationship" — dropdown picker
+
+**Optional Info:**
+- "Medical Notes" — multi-line (encrypted)
+- "Emergency Contact Name" — text input
+- "Emergency Contact Phone" — phone input
+
+**Monitoring Preferences:**
+- Toggle: "Enable Monitoring"
+- Dropdown: "Alert Sensitivity" — Low / Medium / High
+
+**CTA:**
+- Primary button: "Save Changes"
+
+**Behavior:**
+- Tracks unsaved changes
+- "Unsaved changes" warning if navigating away without saving
+
+---
+
+### M1-19: Device Management
+**User Story:** 6.2 Devices
+**Entry:** ← M1-13 Settings ("Connected Devices") | ← M1-17 CardiMember Detail ("Manage Devices")
+**Exit:** ← Previous screen (back) | → M1-05 Device Selection ("Add Device")
+
+**Header:**
+- Back button
+- Title: "Connected Devices"
+- "+ Add Device" button
+
+**Devices List (grouped by CardiMember):**
+
+**Group Header:** CardiMember name + photo
+
+**Device Card:**
+- Device logo (small, left)
+- Device info:
+  - Name: "Dad's Fitbit Charge 5"
+  - Status badge:
+    - Normal: "Active" (synced 10m ago)
+    - Caution: "Token Expiring Soon"
+    - Critical: "Disconnected"
+  - Data sources: "Activity, HR, Sleep"
+  - Primary device star (if designated)
+- Menu icon (three dots)
+
+**Context Menu:**
+- Refresh Connection
+- Set as Primary (toggle)
+- View Sync History
+- Remove Device (destructive text)
+
+**Expanded Detail (tap card to expand):**
+- Last sync: "10 minutes ago"
+- Next sync: "In 20 minutes"
+- Data synced today: "4 updates"
+- Battery: "75%" (if available from device)
+
+**Troubleshooting (bottom, collapsible):**
+- "Device Not Syncing?"
+  - Check Bluetooth
+  - Reconnect OAuth
+  - Contact support
+
+---
+
+### M1-20: Health Data Export
+**User Story:** 6.3 Data Export
+**Entry:** ← M1-15 Trend Charts (Export icon) | ← M1-13 Settings ("Export Health Data") | ← M1-17 CardiMember Detail ("Export Data")
+**Exit:** ← Previous screen (back) | → Share sheet / email
+
+**Header:**
+- Back button
+- Title: "Export Health Data"
+
+**CardiMember Selector:**
+- Dropdown: "Export data for: [Dad]"
+
+**Date Range:**
+- "From" date picker
+- "To" date picker
+- Quick presets: [Last 7 Days] [Last 30 Days] [Last 90 Days] [All Data]
+
+**Data Selection (checkboxes):**
+- Activity & Steps
+- Heart Rate
+- Sleep Data
+- Alerts & Events
+- Notes (if any)
+
+**Export Format (radio buttons):**
+
+| Format | Description | Use Case |
+|--------|-------------|----------|
+| PDF Report | Human-readable summary with charts | Sharing with family or personal records |
+| CSV | Raw data spreadsheet | Personal analysis |
+| HL7 v2 | Health Level Seven messaging format | Hospital system integration |
+| FHIR (R4) | Fast Healthcare Interoperability Resources | Modern EHR integration, patient portals |
+
+**MVP 2 addition:** LOINC, CCD, and SNOMED CT formats added (see M2-08)
+
+**Format Info (expandable per format):**
+- Tap info icon next to HL7/FHIR → explains format, typical recipients (hospitals, clinics, patient portals)
+
+**Delivery Method:**
+- "Save to Device" (default)
+- "Email to..." — email input with autocomplete (self, doctor, family)
+- "Share via..." — opens native share sheet
+
+**Preview Section:**
+- "Preview Export" button — shows first page / sample of export
+- Estimated file size: "~2.4 MB"
+
+**CTA:**
+- Primary button: "Export Data"
+- Progress: "Generating export..." with progress bar
+- Success: "Export complete!" with option to share or save
+
+**States:**
+- **Default:** Format and date selection
+- **Generating:** Progress bar with cancel option
+- **Complete:** Success message with share/save actions
+- **Error:** "Export failed. Please try again." with retry
+
+---
+
+## MVP 2 — Family, Multi-Member & Clinical (8 screens)
+
+Adds family collaboration: invite siblings to share caregiving, shared notes, manage multiple CardiMembers from a dedicated dashboard, all alert detail types, test results scanning with medical inference, and expanded data export formats (LOINC, CCD, SNOMED CT).
+
+**Prerequisite:** MVP 1 must be complete. MVP 2 extends existing screens (noted as "MVP 2 addition/change" in MVP 1 specs).
+
+---
+
+### M2-01: Alert Detail - Heart Rate
+**User Story:** 11.2 Elevated HR
+**Entry:** ← M1-10 Alerts List
+**Exit:** ← M1-10 Alerts List (back) | → Phone call | → M1-15 Trend Charts
+
+**Alert Header:**
+- Urgent severity banner
+- Lightning bolt icon
 - Title: "Elevated Heart Rate Alert"
-- CardiMember + timestamp
+- CardiMember photo + name + timestamp
 
 **Description:**
 - "Mom's resting heart rate has been elevated for 3 consecutive days"
 
 **Chart:**
 - 7-day heart rate chart
-- Shaded area: Normal range (68-75 bpm)
-- Line: Actual values (elevated portion in orange)
+- Shaded normal range (68-75 bpm)
+- Elevated portion highlighted with urgent severity treatment
 
 **Comparison Grid:**
-- Current: "88 bpm"
-- Normal: "68 bpm"
-- Difference: "+29% above baseline"
 
-**Context:**
+| Current | Normal | Difference |
+|---------|--------|-----------|
+| 88 bpm | 68 bpm | +29% above baseline |
+
+**Context Card:**
 - "Possible causes:"
-  - "Infection or illness"
-  - "Stress or anxiety"
-  - "Dehydration"
-  - "Medication side effects"
+  - Infection or illness
+  - Stress or anxiety
+  - Dehydration
+  - Medication side effects
 
 **Recommended Actions:**
-- "Recommend Doctor Visit" (primary, red)
-- "Monitor for 2 More Days" (secondary)
-- "Call to Check Symptoms"
+1. "Recommend Doctor Visit" (primary, urgent treatment)
+2. "Monitor for 2 More Days" (secondary)
+3. "Call to Check Symptoms" (secondary)
 
-**Medical History (if available):**
-- Expander: "Related Health Info"
-  - Shows medications, conditions from profile
-
----
-
-### Screen 3.4: Alert Detail (Pattern Break - Critical)
-**User Story:** 11.3 - No Morning Activity
-
-**Layout:**
-
-**Alert Header:**
-- Red severity banner (full width)
-- Large icon: 🚨
-- Title: "CRITICAL: No Movement Detected"
-- CardiMember + timestamp
-- Pulsing animation on banner
-
-**Urgent Message:**
-- Frame (red border, 4dp)
-- Large text: "Dad hasn't moved today"
-- Subtext:
-  - "Typical wake time: 7:00 AM"
-  - "Current time: 11:00 AM"
-  - "No activity for 4 hours"
-
-**Last Known Activity:**
-- Frame
-- "Last Movement Detected:"
-- Text: "Yesterday, 10:30 PM"
-- Location: "Bedroom (based on device)"
-
-**Immediate Actions (Large Buttons):**
-1. "CALL NOW" (red, huge, phone icon)
-   - One-tap to initiate call
-   - Shows phone number
-2. "I'M CHECKING IN PERSON" (orange)
-   - Updates status immediately
-   - Notifies family
-
-**Secondary Actions:**
-- Button: "He Told Me He'd Sleep In"
-  - Opens note field
-  - Dismisses alert with context
-
-**Family Notification:**
-- Frame: "Who else has been notified:"
-  - List: Sarah (via SMS), John (via Push)
-  - Timestamps of notifications
-
-**Timeline:**
-- Shows progression:
-  - "10:30 PM: Last movement"
-  - "7:00 AM: Expected wake time"
-  - "9:00 AM: Alert threshold reached"
-  - "11:30 AM: You were notified"
+**Medical History (collapsible):**
+- "Related Health Info"
+- Shows medications, conditions from CardiMember profile
 
 ---
 
-### Screen 3.5: Notification Settings
-**User Story:** 3.2 - Alert Preferences
-
-**Layout:**
+### M2-02: Family Members List
+**User Story:** 4.1 Family Management
+**Entry:** Tab bar (Family) | ← M1-13 Settings ("Family & Sharing")
+**Exit:** → M2-03 Invite Modal | → Role management | → M2-05 Shared Notes
 
 **Header:**
-- Back button
-- Title: "Notification Settings"
-- Save button (if changes)
-
-**CardiMember Selector:**
-- If multiple members:
-  - Picker: "Settings for: [Dad] ▼"
-
-**Alert Types Section:**
-
-**Grouped List:**
-
-**Group: Activity Alerts**
-- Switch: Enable Activity Alerts
-- Expanded (if enabled):
-  - Slider: Sensitivity
-    - Low | Medium | High
-  - Text: "Alert when activity is 30% below normal"
-
-**Group: Heart Rate Alerts**
-- Switch: Enable
-- Slider: Sensitivity
-- Text: "Alert when HR exceeds baseline by 20%"
-
-**Group: Sleep Alerts**
-- Switch: Enable
-- Options:
-  - Checkbox: "Poor sleep quality"
-  - Checkbox: "Unusual sleep patterns"
-
-**Group: Pattern Break Alerts**
-- Switch: Enable (always on for safety, greyed)
-- Text: "Required for emergency detection"
-
-**Notification Channels:**
-
-**For Each Alert Type:**
-- Multi-select chips:
-  ```
-  [Email] [SMS] [Push] [All]
-  ```
-
-**Quiet Hours:**
-- Frame (expandable)
-- Switch: "Enable Quiet Hours"
-- Time pickers:
-  - From: 10:00 PM
-  - To: 7:00 AM
-- Exception switch:
-  - "Still alert for Critical (Red) events"
-
-**Multi-User Routing:**
-- Frame
-- "Also notify these family members:"
-- List of family with checkboxes:
-  - Checkbox: Sarah Johnson
-    - Chips: [High Severity] [Critical]
-  - Checkbox: John Doe
-    - Chips: [Critical Only]
-
-**Test Notifications:**
-- Button: "Send Test Push Notification"
-- Button: "Send Test Email"
-- Button: "Send Test SMS"
-
-**MAUI Implementation:**
-- CollectionView with groups
-- Switch controls with ValueChanged
-- Slider with custom styling
-- TimePicker for quiet hours
-
----
-
-## Family & Collaboration
-
-### Screen 4.1: Family Members List
-**User Story:** 4.1 - Family Management
-
-**Layout:**
-
-**Header:**
-- Back button
 - Title: "Family & Sharing"
 - "+ Invite" button
 
 **Tabs:**
-```
-[Active Members] [Pending Invites]
-```
+- [Active Members] [Pending Invites]
 
-**Active Members Section:**
+**Active Members List:**
 
-**List Items (CollectionView):**
-- Frame per member
+Each member card:
+- Profile photo (circular, small)
+- Name: "Sarah Johnson"
+- Email: "sarah@email.com"
+- Role badge: "ADMIN" / "STAFF" / "VIEWER"
+- Last active: "Active 2 hours ago"
+- Menu icon (three dots)
 
-  **Layout:**
-  - Profile photo (circular, 48dp)
-  - Name: "Sarah Johnson"
-  - Email: "sarah@email.com"
-  - Role badge: "ADMIN" / "STAFF" / "VIEWER"
-  - Last active: "Active 2 hours ago"
-  - Menu icon (⋮)
+**Context Menu (on three-dot tap):**
+- Change Role → role picker
+- View Activity Log
+- Remove Access (destructive text)
 
-**Context Menu (on ⋮ tap):**
-- "Change Role" → Role picker
-- "View Activity Log"
-- "Remove Access" (red text)
+**Pending Invites Tab:**
+- Email shown
+- Role assigned
+- Sent date: "2 days ago"
+- "Resend" button
+- "Revoke" button (destructive text)
 
-**Pending Invites Section:**
+**Empty State (pending tab):** "No pending invitations"
 
-**List Items:**
-- Email: "john@email.com"
-- Role: "Viewer"
-- Sent: "2 days ago"
-- Button: "Resend"
-- Button: "Revoke" (text, red)
-
-**Empty State (Pending):**
-- Text: "No pending invitations"
-
-**FAB:**
-- "+" button (bottom-right)
-- Tap → Invite modal
+**Floating Action Button (bottom-right):**
+- "+" icon → opens M2-03 Invite Modal
 
 ---
 
-### Screen 4.2: Invite Family Modal
-**User Story:** 4.1 - Inviting Members
+### M2-03: Invite Family Modal
+**User Story:** 4.1 Inviting Members
+**Entry:** ← M2-02 Family List ("+" or "Invite") | ← M1-08 Baseline Info ("Invite Family Members First")
+**Exit:** ← M2-02 Family List (close/cancel) | → Success confirmation
 
-**Modal Sheet (Bottom sheet or full screen modal):**
+**Presentation:** Bottom sheet or full-screen modal
 
 **Header:**
 - Close button (X)
@@ -1041,774 +1257,446 @@ CollectionView with:
 
 **Email Input:**
 - Label: "Email Address"
-- Entry (keyboard: Email)
-- Validation indicator
+- Email keyboard
+- Inline validation indicator
 
-**Role Selection:**
-- Label: "Access Level"
-- Segmented control:
-  ```
-  [Admin] [Staff] [Viewer]
-  ```
-- Selected role shows description below:
+**Role Selection (segmented control):**
+- [Admin] [Staff] [Viewer]
+- Selected role shows description:
 
-  **Admin Description:**
-  - "Can view, modify settings, invite others"
+| Role | Description |
+|------|-------------|
+| Admin | Can view, modify settings, invite others |
+| Staff | Can view and acknowledge alerts |
+| Viewer | Can only view health data |
 
-  **Staff:**
-  - "Can view and acknowledge alerts"
+**Permission Details (collapsible):**
+- Table showing what each role can/cannot do
 
-  **Viewer:**
-  - "Can only view health data"
-
-**Permission Matrix (Collapsible):**
-- Expander: "View Permission Details"
-- Table showing what each role can do
-
-**Personal Message (Optional):**
+**Personal Message (optional):**
 - Label: "Add a message (optional)"
-- Editor: Multi-line input
+- Multi-line input
 - Placeholder: "Hi Sarah, I'd like to share Dad's health monitoring with you..."
 
 **CTA:**
 - Primary button: "Send Invitation"
-- Text button: "Cancel"
-
-**MAUI Implementation:**
-- Modal using Navigation.PushModalAsync
-- Or BottomSheet using community toolkit
+- Text link: "Cancel"
 
 ---
 
-### Screen 4.3: Shared Notes Feed
-**User Story:** 4.2 - Coordination
+### M2-04: Multi-Member Dashboard
+**User Story:** 2.2 Multi-Member View
+**Entry:** Tab bar (Home) — replaces M1-09 when user has multiple CardiMembers
+**Exit:** → M1-09 Single Dashboard (tap member) | → M1-04 Add CardiMember ("+ Add")
 
-**Layout:**
+**Header:**
+- Title: "My CardiMembers"
+- Filter icon → opens filter sheet
+- "+ Add" button
+
+**Filter Bar (collapsible, horizontal scroll):**
+- Chips: [All] [Alerts Only] [Good Status]
+- Sort button: "Sort by Status"
+
+**CardiMember Cards (vertical scroll):**
+
+Each card:
+- Left: Circular photo (medium) with status badge overlay
+- Middle: Name (bold), Age & relationship, Status text, Last synced
+- Right: Chevron + alert count badge (if any)
+
+**Swipe Actions:**
+- Swipe left → "Call" button
+- Swipe right → "Details" button
+
+**Floating Action Button (bottom-right):**
+- "+" icon → Add CardiMember flow
+
+**States:**
+- **Default:** Member cards listed
+- **Empty:** Illustration + "No CardiMembers Yet" + "Add Your First CardiMember" button
+
+---
+
+### M2-05: Shared Notes Feed
+**User Story:** 4.2 Coordination
+**Entry:** ← M2-02 Family List | Tab bar (Family) → Notes sub-tab
+**Exit:** → M2-06 Add Note | ← Previous screen (back)
 
 **Header:**
 - Back button
 - Title: "Family Notes"
-- Filter: "All Notes ▼"
+- Filter dropdown: "All Notes"
 
-**Add Note Section (Top):**
-- Frame with user photo
-- Entry: "Add a note for the family..."
-- Tap → Expands to full composer
+**Add Note Input (top):**
+- User photo + text input: "Add a note for the family..."
+- Tap → opens M2-06 full composer
 
-**Notes Feed (CollectionView):**
+**Notes Feed:**
 
-**Note Card:**
-- Frame with rounded corners
-- Header row:
-  - Author photo (small, 32dp)
-  - Author name
-  - Timestamp: "2 hours ago"
-  - Menu (⋮) - if author is you
-- Content:
-  - Text with @mentions highlighted
-  - Attachments (if any)
-- CardiMember tag (if associated): "About: Dad"
-- Footer:
-  - Reply button (💬) + count
-  - Like button (❤️) + count
+Each note card:
+- Author photo (small) + author name + timestamp ("2 hours ago")
+- Menu (three dots) — only shown if you're the author
+- Note text content (with @mentions highlighted)
+- Attachments (if any)
+- CardiMember tag: "About: Dad" (if associated)
+- Footer: Reply button + count | Like button + count
 
-**Threaded Replies (Expandable):**
-- Tap reply count → Expands
-- Indented replies shown
-- "Load more replies" if >3
+**Threaded Replies (expandable):**
+- Tap reply count → expands inline
+- Indented reply cards
+- "Load more replies" if more than 3
 
-**Filters (from header dropdown):**
-- All Notes
-- About Dad
-- About Mom
-- My Notes Only
-- Mentions Me
+**Filter Options (dropdown):**
+- All Notes / About Dad / About Mom / My Notes Only / Mentions Me
 
 ---
 
-### Screen 4.4: Add/Edit Note Screen
-**User Story:** 4.2 - Shared Notes
+### M2-06: Add / Edit Note
+**User Story:** 4.2 Shared Notes
+**Entry:** ← M2-05 Notes Feed (tap input or "+" button)
+**Exit:** ← M2-05 Notes Feed (cancel or post)
 
-**Full Screen Modal:**
+**Presentation:** Full-screen modal
 
 **Header:**
 - Cancel button
 - Title: "New Note"
-- Post button (enabled when valid)
+- Post button (enabled when content exists)
 
-**Form:**
-
-**Note Content:**
-- Editor (multi-line, expands)
+**Note Input:**
+- Multi-line text editor (expands with content)
 - Placeholder: "Share an update with family..."
 - Character counter: "0 / 500"
-- @ symbol → Shows mention picker
-
-**Mention Picker (Overlay):**
-- Appears when typing @
-- List of family members
-- Tap to insert @Sarah Johnson
+- Typing "@" triggers a mention picker overlay listing family members
 
 **CardiMember Association:**
 - Label: "About (optional)"
-- Picker: "Select CardiMember ▼"
-  - None (General)
-  - Dad
-  - Mom
+- Dropdown: None (General) / Dad / Mom
 
 **Attachments:**
 - Button: "+ Attach Photo"
-- Shows thumbnail grid if added
-- Max 3 attachments
+- Shows thumbnail grid when photos added
+- Maximum 3 attachments
 
 **Visibility:**
 - Label: "Who can see this"
 - Default: "All family members"
-- (Future: Selective sharing)
 
 **CTA:**
 - Primary button: "Post Note"
-- Confirmation toast on success
+- Success → toast confirmation + return to feed
 
 ---
 
-## Settings & Account
+### M2-07: Test Results Scanner
+**User Story:** 7.1 Lab Results Capture
+**Entry:** ← M1-13 Settings ("Scan Test Results") | ← M1-17 CardiMember Detail ("Add Test Results") | Tab bar (dedicated entry point)
+**Exit:** → M2-08 Test Results Detail (scan complete) | ← Previous screen (cancel)
 
-### Screen 5.1: Settings Main
-**User Story:** 6.1, 6.2 - Settings
+**Header:**
+- Close button (X)
+- Title: "Scan Test Results"
 
-**Layout:**
+**CardiMember Selector:**
+- Dropdown: "Scan for: [Dad]"
+
+**Capture Options (2 large cards):**
+
+| Option | Icon | Description |
+|--------|------|-------------|
+| Camera Scan | Camera icon | "Take a photo of a lab report or test result" |
+| Upload File | Document icon | "Upload a PDF or image from your files" |
+
+**Camera View (after selecting Camera Scan):**
+- Full-screen camera viewfinder
+- Guide overlay: document frame outline with corner markers
+- Instructions: "Align the test results within the frame"
+- Capture button (large, centered bottom)
+- Flash toggle (top-right)
+- Gallery shortcut (bottom-left)
+
+**Processing State (after capture/upload):**
+- Document thumbnail (showing captured image)
+- Progress animation: "Analyzing results..."
+- Steps indicator:
+  1. "Extracting text..." (OCR)
+  2. "Identifying test values..."
+  3. "Cross-referencing medical standards..."
+- Cancel button: "Cancel Analysis"
+
+**Multi-Page Support:**
+- After first page captured: "Add Another Page" button
+- Page indicator: "Page 1 of 1"
+- Swipe between captured pages
+
+**Error Handling:**
+- Blurry image: "Image is too blurry. Please retake."
+- Unreadable: "Could not read the document. Try better lighting or upload a PDF."
+- Partial read: "Some values couldn't be identified. You can review and correct them."
+
+**States:**
+- **Default:** Capture options
+- **Camera active:** Viewfinder with guide overlay
+- **Processing:** Analysis progress animation
+- **Error:** Error message with retry/retake options
+
+---
+
+### M2-08: Test Results Detail
+**User Story:** 7.2 Results Analysis
+**Entry:** ← M2-07 Test Results Scanner (analysis complete) | ← M1-17 CardiMember Detail ("View Test Results")
+**Exit:** ← Previous screen (back) | → M1-20 Health Data Export | → Share
 
 **Header:**
 - Back button
-- Title: "Settings"
+- Title: "Test Results"
+- Share icon | Export icon
 
-**User Profile Section:**
-- Frame (top)
-- Profile photo (large, 80dp, tappable)
-- Name: "[User Name]"
-- Email: "[user@email.com]"
-- Edit button (pencil icon)
+**Result Summary Card:**
+- CardiMember photo + name
+- Test date: "February 10, 2026"
+- Source: "Scanned lab report" | "Uploaded PDF"
+- Lab name (if detected): "City Medical Lab"
 
-**Settings Groups (CollectionView):**
+**Parsed Results Table:**
 
-**Group: Account**
-- "My Profile" (chevron)
-- "Subscription & Billing" (chevron, badge: "Complete Care")
-- "Family & Sharing" (chevron)
+Each result row:
+- Test name (bold): e.g., "Hemoglobin A1c"
+- Value: "6.2%"
+- Reference range: "4.0 - 5.6%"
+- Status indicator:
+  - Normal: within range
+  - High: above range (with severity indication)
+  - Low: below range (with severity indication)
+- Edit icon (pencil) — allows manual correction of OCR errors
 
-**Group: CardiMembers**
-- "Manage CardiMembers" (chevron)
-- "Connected Devices" (chevron)
+**AI Medical Insights Card:**
+- Lightbulb icon + "Medical Insights"
+- Disclaimer banner: "These insights are informational only and do not constitute medical advice. Always consult a healthcare professional."
+- AI-generated observations:
+  - "Hemoglobin A1c is slightly elevated, suggesting pre-diabetic range"
+  - "Cholesterol levels are within normal range"
+  - "Consider discussing Vitamin D supplementation with a doctor"
+- Each insight can be expanded for more detail
+- "Learn More" links to relevant health information
 
-**Group: Notifications**
-- "Alert Settings" (chevron)
-- "Notification Preferences" (chevron)
-- "Quiet Hours" (chevron)
+**Trend Comparison (if previous results exist):**
+- Side-by-side comparison with last test
+- Trend arrows (improving / worsening / stable)
+- Mini chart showing value over time
 
-**Group: Security**
-- "Change Password" (chevron)
-- Switch: "Biometric Login" (toggle inline)
-- "Privacy Settings" (chevron)
+**Corrections Section (collapsible):**
+- "Review & Correct Values"
+- Editable fields for each parsed value
+- "Mark as Verified" button
 
-**Group: Support**
-- "Help Center" (chevron)
-- "Contact Support" (chevron)
-- "Terms & Privacy" (chevron)
+**Export & Sharing:**
+- "Export Results" → M1-20 Health Data Export
+- "Share with Doctor" → pre-formatted email/share
+- "Add to Health Record" → saves to CardiMember profile
 
-**Group: About**
-- "App Version" (text: "1.0.0")
-- "Check for Updates"
+**Data Standards (MVP 2 export formats):**
+- Results are encoded using:
+  - **LOINC** — standardized lab test codes (e.g., Hemoglobin A1c = LOINC 4548-4)
+  - **SNOMED CT** — clinical terminology for conditions and findings
+  - **CCD** — Continuity of Care Document for structured clinical summaries
+- These formats are available in M1-20 Health Data Export as additional export options
 
-**Danger Zone:**
-- "Sign Out" (red text)
-- "Delete Account" (red text)
-
-**MAUI Implementation:**
-- CollectionView with IsGrouped=true
-- Mix of navigation cells and switch cells
-- Platform-specific settings UI
-
----
-
-### Screen 5.2: Subscription Management
-**User Story:** 6.1 - Subscription
-
-**Layout:**
-
-**Header:**
-- Back button
-- Title: "Subscription"
-
-**Current Plan Card:**
-- Frame with gradient background
-- Badge: "COMPLETE CARE"
-- Price: "$15/month"
-- Renewal: "Renews Feb 10, 2026"
-- Button: "Manage Subscription"
-
-**Features Included:**
-- List with checkmarks:
-  - ✓ Unlimited CardiMembers
-  - ✓ Advanced ML Alerts
-  - ✓ Family Sharing (5 members)
-  - ✓ 90-day data retention
-  - ✓ Priority support
-
-**Usage Section:**
-- Frame
-- "Your Usage:"
-- Progress bars:
-  - CardiMembers: 2 of ∞
-  - Family Members: 3 of 5
-  - Data: 45 days of 90
-
-**Plan Comparison:**
-- Horizontal scroll (CarouselView)
-- 3 plan cards (swipe to compare):
-
-**Plan Card Structure:**
-- Frame with border (current plan highlighted)
-- Header:
-  - Plan name
-  - Price/month
-  - "Current Plan" badge if active
-- Features list (condensed)
-- Button:
-  - "Current Plan" (disabled) or
-  - "Upgrade" / "Downgrade"
-
-**Annual Discount Banner:**
-- Frame (gold background)
-- "💰 Save 15% with Annual Billing"
-- "Switch to Annual" button
-
-**Billing Section:**
-- Frame
-- "Payment Method:"
-- Visa •••• 1234 (with card icon)
-- "Change" button
-- "Billing History" button
-
-**MAUI Implementation:**
-- CarouselView for plan comparison
-- Platform-specific in-app purchase (StoreKit/Google Billing)
-- WebView for Stripe payment if needed
+**States:**
+- **Default:** Parsed results with insights
+- **Editing:** Inline editing mode for value corrections
+- **No previous results:** Trend section hidden
+- **Loading insights:** Skeleton loading for AI insights section
 
 ---
 
-### Screen 5.3: Device Management
-**User Story:** 6.2 - Devices
+## MVP 3 — Native & Offline (7 screens)
 
-**Layout:**
+Adds platform-native polish: biometric security (setup and login), offline data access with sync queue, rich push notifications with inline actions, home screen widgets for at-a-glance monitoring, and native share sheet for exporting data to doctors or family.
 
-**Header:**
-- Back button
-- Title: "Connected Devices"
-- "+ Add Device" button
-
-**Devices List (Grouped by CardiMember):**
-
-**Group Header:**
-- CardiMember name + photo
-
-**Device Card:**
-- Frame
-- Device logo (left, 48dp)
-- Device info:
-  - Name: "Dad's Fitbit Charge 5"
-  - Status badge:
-    - 🟢 "Active" (synced 10m ago)
-    - 🟡 "Token Expiring Soon"
-    - 🔴 "Disconnected"
-  - Data sources: "Activity, HR, Sleep"
-  - Primary star (if primary device)
-- Menu (⋮)
-
-**Context Menu:**
-- "Refresh Connection"
-- "Set as Primary" (toggle)
-- "View Sync History"
-- "Remove Device" (red)
-
-**Sync Status Detail (Expandable):**
-- Tap device card → Expands
-- Shows:
-  - Last sync: "10 minutes ago"
-  - Next sync: "In 20 minutes"
-  - Data synced today: "4 updates"
-  - Battery: "75%" (if available)
-
-**Add Device Button:**
-- Floating or bottom button
-- Tap → Device selection wizard
-
-**Troubleshooting (Bottom):**
-- Expander: "Device Not Syncing?"
-- Common solutions:
-  - Check Bluetooth
-  - Reconnect OAuth
-  - Contact support
+**Prerequisite:** MVP 2 must be complete.
 
 ---
 
-## CardiMember Management
-
-### Screen 6.1: CardiMember Detail
-**Purpose:** View/edit CardiMember profile
-
-**Layout:**
+### M3-01: Biometric Setup
+**User Story:** 10.2 Biometric Login
+**Entry:** ← M1-13 Settings (Security section)
+**Exit:** ← M1-13 Settings | → Skip ("Set Up Later")
 
 **Header:**
-- Back button
-- Title: "[Name]'s Profile"
-- Edit button (pencil)
+- "Skip" link (top-right)
+- Title: "Secure Your Account"
 
-**Profile Section:**
-- Large photo (centered, 120dp)
-- Name (large, centered)
-- Age & relationship: "78 years old • Dad"
+**Biometric Icon (centered, large):**
+- iOS: Face ID icon
+- Android: Fingerprint icon
 
-**Contact Info:**
-- Frame
-- Emergency contact:
-  - Name
-  - Phone (tappable → call)
-  - Relationship
-
-**Medical Info (Encrypted):**
-- Frame with lock icon
-- Expander: "Medical Notes"
-- Shows encrypted notes
-- "Edit" requires biometric auth
-
-**Monitoring Info:**
-- Frame
-- Connected devices: "2 devices"
-- Monitoring since: "Jan 1, 2026"
-- Baseline status: "Learning (15 days)"
-
-**Actions:**
-- Button: "View Dashboard"
-- Button: "View Alerts"
-- Button: "Manage Devices"
-
-**Danger Zone:**
-- Button: "Pause Monitoring" (yellow)
-- Button: "Remove CardiMember" (red)
-
----
-
-### Screen 6.2: Edit CardiMember
-**Purpose:** Update CardiMember info
-
-**Layout:**
-
-**Header:**
-- Cancel button
-- Title: "Edit [Name]"
-- Save button
-
-**Form (Scrollable):**
-
-**Photo:**
-- Large circular image
-- "Change Photo" button
-
-**Basic Info:**
-- Entry: "Full Name"
-- DatePicker: "Date of Birth"
-- Picker: "Relationship"
-
-**Optional Info:**
-- Editor: "Medical Notes" (encrypted)
-- Entry: "Emergency Contact Name"
-- Entry: "Emergency Contact Phone"
-
-**Monitoring Preferences:**
-- Switch: "Enable Monitoring"
-- Picker: "Alert Sensitivity"
-  - Low / Medium / High
+**Explanation:**
+- Heading: "Enable [Face ID / Fingerprint]"
+- Body: "Quickly and securely access health data"
+- Benefits:
+  - Login in seconds
+  - Extra security layer
+  - Required for sensitive actions
 
 **CTA:**
-- Primary button: "Save Changes"
-- Changes tracked, "Unsaved changes" warning on exit
+- Primary button: "Enable [Biometric]" — triggers device biometric enrollment
+- Text link: "Set Up Later"
 
 ---
 
-## Offline Features
+### M3-02: Biometric Login
+**User Story:** 10.2 Biometric Auth
+**Entry:** ← M1-01 Splash (when biometric enabled via M3-01)
+**Exit:** → M1-09 Dashboard (success) | → Password fallback
 
-### Screen 7.1: Offline Mode Indicator
-**User Story:** 10.1 - Offline Support
+Replaces password entry on app launch when biometric is enabled.
 
-**Offline Banner (Top of Screen):**
-- Frame (yellow background)
-- Icon: 📡 (crossed out)
+- CardiTrack logo + user name/photo
+- Platform biometric prompt (Face ID on iOS, fingerprint on Android)
+- "Scan to unlock" label
+- Fallback: "Use Password" link → password entry field
+- Configurable biometric requirements: app launch, viewing alerts, acknowledging alerts, changing settings
+
+---
+
+### M3-03: Offline Mode Indicator
+**User Story:** 10.1 Offline Support
+**Entry:** Automatic — appears when device loses connectivity
+**Exit:** Automatic — disappears when connection restored
+
+**Offline Banner (top of screen, persistent):**
+- Warning-level background
+- Crossed-out signal icon
 - Text: "Offline Mode"
 - Subtext: "Last updated 2 hours ago"
 - Closable (X) but reappears on navigation
 
-**Dashboard (Offline State):**
-- All data shown is cached
-- Greyed-out sync icons
-- "Syncing disabled" tooltip on refresh
+**Dashboard Modifications (offline state):**
+- All data shown is cached/stale
+- Sync icons greyed out
+- "Syncing disabled" tooltip on refresh attempt
 
-**Alert Queue:**
-- Frame (orange border)
+**Alert Queue Card:**
 - "2 alerts pending sync"
-- List of offline alerts:
-  - Shows alert cards
-  - "Not yet synced" badge
+- Shows queued alert cards with "Not yet synced" badge
 - "Will sync when connected"
 
-**Functionality:**
-- Read-only mode
-- No POST operations
-- Queue actions for sync
+**Behavior:**
+- Read-only mode: no POST operations
+- Actions queued for sync when reconnected
 
 **Connection Restored:**
-- Toast notification: "Back online!"
-- Syncing animation
-- Progress: "Syncing 2 alerts..."
-- Success: "All data synced"
+- Toast: "Back online!"
+- Syncing animation with progress
+- Success message: "All data synced"
 
 ---
 
-### Screen 7.2: Offline Data Cache Settings
-**User Story:** 10.1 - Cache Management
+### M3-04: Offline Data Cache Settings
+**User Story:** 10.1 Cache Management
+**Entry:** ← M1-13 Settings
+**Exit:** ← M1-13 Settings (back)
 
-**Layout:**
-
-**Header:**
-- Title: "Offline Data"
-
-**Cache Info:**
-- Frame
+**Cache Info Card:**
 - "Cached Data Size: 45 MB"
 - "Last synced: 10 minutes ago"
 
 **Settings:**
-- Slider: "Days to cache"
-  - 1 day | 7 days | 30 days
-- Switch: "Auto-download charts"
-- Switch: "Cache photos"
+- Slider: "Days to cache" — 1 day | 7 days | 30 days
+- Toggle: "Auto-download charts"
+- Toggle: "Cache photos"
 
 **Actions:**
-- Button: "Clear Cache"
-  - Confirmation: "You'll need internet to view data"
-- Button: "Sync Now"
+- "Clear Cache" button — confirmation dialog: "You'll need internet to view data"
+- "Sync Now" button
 
 ---
 
-## Native Features
+### M3-05: Push Notifications
+**User Story:** 5.1
 
-### Screen 8.1: Biometric Login
-**User Story:** 10.2 - Biometric Auth
+Designs for system-level notification UI.
 
-**Launch Screen (Biometric Enabled):**
-
-**Layout:**
-- CardiTrack logo (top)
-- User name + photo
-- Biometric prompt (centered):
-  - iOS: Face ID animation
-  - Android: Fingerprint animation
-- Text: "Scan to unlock"
-- Fallback: "Use Password" link
-
-**Biometric Prompt (Platform Native):**
-- iOS: Face ID system dialog
-- Android: Biometric prompt
-
-**Fallback (Password):**
-- Password entry field
-- "Forgot password?" link
-- Login button
-
-**Settings (Security):**
-- Switch: "Require biometric for:"
-  - App launch ✓
-  - Viewing alerts ✓
-  - Acknowledging alerts ✓
-  - Changing settings ✓
+**Lock Screen (compact):** App icon + "[Name] - Critical Alert" + body preview + timestamp
+**Lock Screen (expanded on long press):** Full alert text + action buttons: "Call" / "View" / "Acknowledge"
+**In-App Banner:** Slides from top, shows summary, tap to navigate, swipe up to dismiss
+**Notification Center:** Grouped by CardiMember with expandable lists + app badge count
 
 ---
 
-### Screen 8.2: Push Notifications
-**User Story:** 5.1 - Push Notifications
+### M3-06: Home Screen Widget
+**User Story:** 5.2
 
-**Lock Screen Notification:**
-
-**Compact (iOS/Android System UI):**
-- App icon
-- Title: "[Name] - Critical Alert"
-- Body: "Dad hasn't moved this morning. Tap to view..."
-- Time: "2m ago"
-
-**Expanded (Long press):**
-- Full alert text
-- Image (if applicable)
-- Action buttons:
-  - "Call" (initiates call)
-  - "View" (opens app)
-  - "Acknowledge"
-
-**In-App Notification (When App Open):**
-- Banner slides from top
-- Shows alert summary
-- Tap → Navigate to alert detail
-- Swipe up → Dismiss
-
-**Notification Center:**
-- Grouped by CardiMember:
-  - "3 alerts from Dad"
-  - Expandable list
-- Badge count on app icon
+**Small Widget (2x2):** Logo + CardiMember photo + status indicator + name + last synced
+**Medium Widget (4x2):** 2 CardiMembers side-by-side with photo, name, status, key metric
+**Large Widget (4x4, iOS):** Up to 4 CardiMembers with mini dashboards (photo, name, status, 3 metrics, alert badge)
+**Configuration:** Long-press → select CardiMembers, choose metrics, set update frequency
 
 ---
 
-### Screen 8.3: Home Screen Widget
-**User Story:** 5.2 - Widget
+### M3-07: Share Sheet Integration
 
-**Small Widget (iOS/Android):**
-- Size: 2x2 grid
-- Content:
-  - CardiTrack logo (small)
-  - CardiMember photo (circular)
-  - Status indicator (large)
-  - Name
-  - Last synced time
-- Tap → Opens app to that member
+Native share sheet triggered from charts and alerts.
 
-**Medium Widget:**
-- Size: 4x2 grid
-- Shows 2 CardiMembers side-by-side
-- Each with: Photo, name, status, key metric
-
-**Large Widget (iOS):**
-- Size: 4x4 grid
-- Shows up to 4 CardiMembers
-- Each with mini dashboard:
-  - Photo, name, status
-  - 3 key metrics (icons + values)
-  - Alert badge
-
-**Widget Configuration:**
-- Long-press widget → Edit
-- Select CardiMembers to show
-- Choose metrics to display
-- Update frequency setting
-
-**MAUI Implementation:**
-- iOS: WidgetKit extension
-- Android: AppWidget
-- Shared data via app groups
+**Options:** Export PDF / Export CSV / Share screenshot / Email to self / Share to family member / Save to Files
+**Custom Actions:** "Send to Doctor" (pre-configured email) / "Add to Health App" (iOS HealthKit)
 
 ---
 
-### Screen 8.4: Share Sheet Integration
-**Purpose:** Export data via native sharing
+## Design System (Designer Deliverable)
 
-**Share Options:**
-- Trigger: Tap share icon on charts/alerts
+The design system is **yours to define**. The following are functional requirements and constraints — not visual prescriptions.
 
-**Share Sheet (System):**
-- Export as PDF
-- Export as CSV
-- Share screenshot
-- Email to myself
-- Share to family member
-- Save to Files
+### What You Need to Define
+- Color palette (brand colors, semantic colors, status colors)
+- Typography scale (font family, sizes, weights)
+- Spacing and layout grid
+- Component library (buttons, cards, inputs, badges, etc.)
+- Iconography style
+- Motion and animation language
+- Dark mode (if applicable)
 
-**Custom Actions:**
-- "Send to Doctor" (pre-configured email)
-- "Add to Health App" (iOS HealthKit)
+### Functional Requirements
 
----
+**4 severity levels must be visually distinct from each other:**
 
-## Navigation Patterns
+| Level | Meaning | Must Convey |
+|-------|---------|-------------|
+| Normal | Everything is fine | Calm, reassuring |
+| Caution | Something to be aware of | Mild concern, not urgent |
+| Urgent | Action recommended soon | Clear importance, time-sensitive |
+| Critical | Immediate action needed | Emergency, cannot be missed |
 
-### Bottom Tab Navigation
-**Primary Navigation (Always Visible):**
+**Visual hierarchy needs:**
+- Primary actions must be clearly distinguishable from secondary and tertiary actions
+- Destructive actions (delete, remove) must be visually distinct from standard actions
+- Unread/new states must be clearly differentiated from read/acknowledged states
+- Data comparison (current vs. baseline) needs clear visual treatment
 
-```
-┌────────────────────────────────┐
-│                                │
-│         Content Area           │
-│                                │
-│                                │
-├────────────────────────────────┤
-│  🏠      🔔      👥      ⚙️   │
-│ Home  Alerts  Family Settings │
-└────────────────────────────────┘
-```
+### Constraints
 
-**MAUI Implementation:**
-```xml
-<Shell>
-  <TabBar>
-    <ShellContent Title="Dashboard" Icon="home.png" />
-    <ShellContent Title="Alerts" Icon="bell.png" />
-    <ShellContent Title="Family" Icon="family.png" />
-    <ShellContent Title="Settings" Icon="settings.png" />
-  </TabBar>
-</Shell>
-```
+**Accessibility (non-negotiable):**
+- WCAG AA minimum contrast (4.5:1 for text, 3:1 for large text)
+- Status must never rely on color alone — always pair with icon, text, or pattern
+- Minimum 48x48dp touch targets on all tappable elements
+- Dynamic font sizing support (user system preferences)
+- All interactive elements must have screen reader labels
+- Form labels must be programmatically associated with inputs
 
----
+**Platform:**
+- iOS: Follow Human Interface Guidelines (SF Symbols for icons, safe area insets, native modal drag handles)
+- Android: Follow Material Design 3 conventions (FABs, bottom sheets, system back button)
 
-### Flyout Menu
-**Secondary Navigation (Swipe from left):**
-
-**Menu Items:**
-- User Profile (header)
-- Dashboard
-- CardiMembers (badge: 2)
-- Alerts (badge: 3)
-- Family & Sharing
-- Subscription
-- Settings
-- Help & Support
-- Sign Out
-
-**MAUI Implementation:**
-```xml
-<Shell.FlyoutContent>
-  <CollectionView ItemsSource="{Binding MenuItems}">
-    <!-- Menu template -->
-  </CollectionView>
-</Shell.FlyoutContent>
-```
+**User context:**
+- Primary users are 30-55 year old adults, but they may hand the phone to elderly parents (70+) — consider readability
+- Critical alerts may be viewed in high-stress moments — design for quick scanning and large tap targets
+- The app will be used in varied lighting conditions (bedside at night, outdoors)
 
 ---
 
-### Gesture Navigation
-
-**Swipe Gestures:**
-- Swipe right (from left edge): Open flyout
-- Swipe left on list items: Quick actions
-- Swipe down: Pull to refresh
-- Pinch: Zoom charts
-- Long press: Context menu
-
-**MAUI Gestures:**
-```xml
-<Frame>
-  <Frame.GestureRecognizers>
-    <SwipeGestureRecognizer Direction="Left" />
-    <TapGestureRecognizer />
-    <PanGestureRecognizer />
-  </Frame.GestureRecognizers>
-</Frame>
-```
-
----
-
-## Design System
-
-### Colors (Brand Palette)
-```
-Primary: #2563EB (Blue)
-Secondary: #10B981 (Green)
-Success: #10B981 (Green)
-Warning: #F59E0B (Orange)
-Error: #EF4444 (Red)
-Info: #3B82F6 (Light Blue)
-
-Status Colors:
-Green (Good): #10B981
-Yellow (Caution): #F59E0B
-Orange (Urgent): #F97316
-Red (Critical): #DC2626
-```
-
-### Typography
-```
-Title Large: 32sp, Bold
-Title: 24sp, Bold
-Headline: 20sp, SemiBold
-Body: 16sp, Regular
-Caption: 14sp, Regular
-Micro: 12sp, Regular
-```
-
-### Spacing
-```
-Micro: 4dp
-Small: 8dp
-Medium: 16dp
-Large: 24dp
-XLarge: 32dp
-```
-
-### Component Sizes
-```
-Button Height: 48dp (min touch target)
-Icon Size: 24dp (standard), 32dp (large)
-Avatar: 48dp (small), 64dp (medium), 80dp (large)
-Card Radius: 12dp
-Border Width: 1dp (standard), 2dp (emphasis)
-```
-
----
-
-## Platform-Specific Considerations
-
-### iOS-Specific
-- Use SF Symbols for icons
-- Haptic feedback on interactions
-- Safe area insets for notch
-- Pull-to-refresh with iOS styling
-- Modal sheets with drag handle
-
-### Android-Specific
-- Material Design 3 components
-- Floating Action Buttons
-- Bottom sheets
-- Navigation drawer
-- Back button handling
-
----
-
-## Accessibility Features
-
-### Screen Reader Support
-- All buttons have ContentDescription
-- Images have Alt text
-- Form labels properly associated
-- Dynamic font sizing support
-
-### Color Contrast
-- WCAG AA minimum (4.5:1 for text)
-- Status not solely reliant on color
-- High contrast mode option
-
-### Touch Targets
-- Minimum 48x48 dp
-- Adequate spacing between tappable elements
-
----
-
-## Performance Optimizations
-
-### Image Loading
-- Lazy loading for lists
-- Image caching (FFImageLoading)
-- Thumbnail generation for large images
-
-### List Virtualization
-- CollectionView with recycling
-- Incremental loading
-- Pull-to-refresh
-
-### Data Caching
-- SQLite local database
-- 7-day offline cache
-- Background sync
-
----
-
-**Document Complete**
-**Total Screens:** 40+
-**Next Steps:** Create Blazor Web UI screens document
-
+**Total Screens:** 35
+**MVP 1:** 20 screens — Solo Monitoring (design first)
+**MVP 2:** 8 screens — Family, Multi-Member & Clinical
+**MVP 3:** 7 screens — Native & Offline
