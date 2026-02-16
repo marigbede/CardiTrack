@@ -18,7 +18,7 @@
 | Release | Screens | Theme | User Gets |
 |---------|---------|-------|-----------|
 | **MVP 1** | 20 | Solo Monitoring | Sign up, connect device(s), monitor one parent, view trends, get alerts, configure notifications, manage devices, manage profile and subscription, export health data (HL7, FHIR) |
-| **MVP 2** | 8 | Family & Multi-Member | Invite family, share notes, manage multiple CardiMembers, all alert types, scan test results with AI medical insights, export data in LOINC/CCD/SNOMED CT |
+| **MVP 2** | 8 | Family & Multi-Member | Invite family, share notes, manage multiple CardiMembers, all alert types, scan test results with CardiTrack medical insights, export data in LOINC/CCD/SNOMED CT |
 | **MVP 3** | 7 | Native & Offline | Biometric setup and login, offline support, push notification actions, home screen widget, native sharing |
 
 ---
@@ -169,7 +169,7 @@
                                         │
                               ┌─────────┼──────────┐
                               ▼         ▼          ▼
-                         [AI Insights] [Export]  [Share]
+                         [CardiTrack Insights] [Export]  [Share]
                                         │
                                         ▼
                                   [M1-20 Export]
@@ -243,7 +243,7 @@ A single user can sign up, add one CardiMember, connect one or more devices, mon
 
 **States:**
 - **Default:** Logo + spinner animation
-- **Error:** If initialization fails → "Something went wrong. Tap to retry" with retry button
+- **Error:** If initialization fails → "Hmm, something didn't work. Tap to try again." with retry button
 
 ---
 
@@ -263,9 +263,9 @@ A single user can sign up, add one CardiMember, connect one or more devices, mon
 
 | Slide | Illustration | Headline | Subtext |
 |-------|-------------|----------|---------|
-| 1 | Happy elderly person with smartwatch | "Peace of Mind for Your Family" | "Monitor loved ones' health from anywhere" |
-| 2 | Phone showing health dashboard | "Works with Devices They Own" | "Fitbit, Apple Watch, Garmin & more" |
-| 3 | Family members on phones | "Stay Connected as a Family" | "Share caregiving with siblings" |
+| 1 | Happy elderly person with smartwatch | "Know They're Okay" | "Stay close to the people you love — even from far away" |
+| 2 | Phone showing health dashboard | "Their Watch, Your Peace of Mind" | "Connects with Fitbit, Apple Watch, Garmin & more" |
+| 3 | Family members on phones | "Care Together" | "Share the watch with your siblings — you're not in this alone" |
 
 **CTA Section (bottom 30%):**
 - Primary button (full width, bold): "Start Free 30-Day Trial"
@@ -346,8 +346,8 @@ A single user can sign up, add one CardiMember, connect one or more devices, mon
 
 **Introduction:**
 - Icon: person silhouette
-- Text: "Who would you like to monitor?"
-- Subtext: "We'll help you set up monitoring in just a few steps"
+- Text: "Who would you like to look after?"
+- Subtext: "Tell us about your loved one — we'll take it from there"
 
 **Photo Section:**
 - Circular photo placeholder (large)
@@ -370,7 +370,7 @@ A single user can sign up, add one CardiMember, connect one or more devices, mon
 
 **Privacy Notice:**
 - Info card with lock icon
-- Text: "Your parent will be notified and can provide consent"
+- Text: "[Name] will know you're looking out for them and can give their okay"
 
 **CTA:**
 - Primary button: "Continue"
@@ -394,8 +394,8 @@ A single user can sign up, add one CardiMember, connect one or more devices, mon
 - Progress indicator: "Step 3 of 4"
 
 **Introduction:**
-- Text: "What device does [Name] use?"
-- Subtext: "We support all major fitness trackers"
+- Text: "What does [Name] wear?"
+- Subtext: "We'll connect with their device to keep you in the loop"
 
 **Device Grid (2 columns on phone, 3 on tablet):**
 
@@ -418,7 +418,7 @@ Each device card:
 | Other / Manual Entry | Limited features |
 
 **Bottom:**
-- Link: "Don't see your device? Contact support"
+- Link: "Don't see their device? We can help"
 
 **Interactions:**
 - Single selection — tap to select, tap again to deselect
@@ -442,20 +442,20 @@ Each device card:
 - Large CardiTrack logo
 
 **Permission List:**
-- Label: "CardiTrack needs access to:"
+- Label: "To look after [Name], CardiTrack needs:"
 - Each permission in its own row:
 
 | Icon | Permission | Info Tooltip |
 |------|-----------|-------------|
-| Heart | Heart Rate Data | "Used to detect unusual patterns" |
-| Shoe | Activity & Steps | "To monitor daily movement" |
-| Moon | Sleep Data | "To spot rest pattern changes" |
+| Heart | Heart Rate Data | "So we can spot if something's off" |
+| Shoe | Activity & Steps | "To make sure they're staying active" |
+| Moon | Sleep Data | "To know they're resting well" |
 
 - Each row has an (i) info button that shows the tooltip on tap
 
 **Privacy Notice:**
 - Card with light background
-- Lock icon + text: "We never sell your data. Your information stays private and secure."
+- Lock icon + text: "Your family's health data stays private — always. We never sell or share it."
 
 **CTA:**
 - Primary button: "Authorize [Device Name]"
@@ -464,8 +464,8 @@ Each device card:
 
 **States:**
 - **Default:** Permission list visible
-- **Authorizing:** Loading overlay with "Connecting to [Device]..." message
-- **Error:** "Authorization failed. Please try again." with retry button
+- **Authorizing:** Loading overlay with "Connecting to [Name]'s [Device]..." message
+- **Error:** "We couldn't connect — let's try that again" with retry button
 
 ---
 
@@ -478,9 +478,9 @@ Each device card:
 - Animated checkmark (plays once on entry)
 
 **Success Message:**
-- Heading: "Connected Successfully!"
-- Text: "We're syncing [Name]'s data from [Device]"
-- Subtext: "This may take a few minutes"
+- Heading: "You're all set!"
+- Text: "[Name]'s [Device] is now connected"
+- Subtext: "We're pulling in their latest data — just a moment"
 
 **Data Preview Card:**
 - Title: "Latest Data"
@@ -491,7 +491,7 @@ Each device card:
 
 **Options:**
 - Outlined button: "+ Add Another Device"
-- Helper text: "You can connect multiple devices for [Name]"
+- Helper text: "Does [Name] have another device? The more data, the better we can watch over them"
 
 **CTA:**
 - Primary button: "Continue to Dashboard"
@@ -516,20 +516,20 @@ Each device card:
 - Animated graphic: brain with gears (learning concept)
 
 **Explanation:**
-- Heading: "CardiTrack is Learning [Name]'s Patterns"
-- Body: "Over the next 30 days, our AI will learn what's normal for [Name]:"
+- Heading: "Getting to Know [Name]"
+- Body: "Over the next 30 days, CardiTrack will learn what a normal day looks like for [Name]:"
 - Bullet list:
-  - "Typical wake/sleep times"
-  - "Average daily activity levels"
-  - "Resting heart rate baseline"
+  - "When they usually wake up and go to sleep"
+  - "How active they are day to day"
+  - "What their resting heart rate looks like"
 
 **Progress:**
 - Progress bar: "Day 1 of 30"
 - Label: "3% Complete"
 
 **Options Card:**
-- Toggle switch: "Use basic alerts while learning"
-- Description: "Get simple threshold alerts (e.g., heart rate > 100)"
+- Toggle switch: "Keep me posted while CardiTrack is learning"
+- Description: "You'll get basic alerts right away (like heart rate over 100)"
 
 **CTA:**
 - Primary button: "Go to Dashboard"
@@ -556,10 +556,10 @@ Each device card:
 
 | Status | Label | Icon |
 |--------|-------|------|
-| Normal | "All Good!" | Checkmark |
-| Caution | "Needs Attention" | Warning triangle |
-| Urgent | "Action Recommended" | Lightning bolt |
-| Critical | "Urgent" | Siren |
+| Normal | "[Name] is doing well" | Checkmark |
+| Caution | "Something looks a little different" | Warning triangle |
+| Urgent | "You should check in" | Lightning bolt |
+| Critical | "Reach out to [Name] now" | Siren |
 
 - Last synced: "Updated 10 minutes ago"
 - Tap sync icon for manual refresh
@@ -609,8 +609,8 @@ Each device card:
 **States:**
 - **Loading:** Skeleton/shimmer cards
 - **Normal:** Full data displayed
-- **Stale data:** Banner: "Data is X hours old. Pull to refresh."
-- **No device connected:** Prompt card: "Connect a device to start monitoring" → M1-05
+- **Stale data:** Banner: "Last update was X hours ago — pull down to check in"
+- **No device connected:** Prompt card: "Connect [Name]'s device so CardiTrack can start watching over them" → M1-05
 - **Baseline learning:** Shows progress bar instead of "% of normal" comparisons
 
 **MVP 2 change:** When user has multiple CardiMembers, Home tab shows M2-04 instead
@@ -643,7 +643,7 @@ Section headers: "Today" / "Yesterday" / "This Week" / "Older"
 - Content:
   - CardiMember name + small photo (inline)
   - Alert title (bold): e.g., "Low Activity Detected"
-  - Preview text (2 lines max): "Dad hasn't moved this morning. Typical wake time..."
+  - Preview text (2 lines max): "Dad hasn't moved this morning. He usually wakes up around..."
 - Bottom row:
   - Status label: "New" / "Acknowledged" / "Resolved"
   - Quick action icons: Call (phone) | Acknowledge (checkmark) | Expand (chevron)
@@ -657,7 +657,7 @@ Section headers: "Today" / "Yesterday" / "This Week" / "Older"
 
 **States:**
 - **Default:** Grouped alert list
-- **Empty:** Large bell icon (muted) + "No Alerts" + "We'll notify you if anything needs attention"
+- **Empty:** Large bell icon (muted) + "Nothing to worry about" + "CardiTrack is keeping an eye on things — we'll let you know if anything comes up"
 - **Filtered empty:** "No alerts match this filter"
 - **Loading:** Skeleton cards
 
@@ -684,7 +684,7 @@ Section headers: "Today" / "Yesterday" / "This Week" / "Older"
 
 **Description:**
 - Card with icon
-- Large readable text: "Dad's activity has been lower than usual"
+- Large readable text: "Dad hasn't been as active as usual lately"
 
 **Mini Trend Chart:**
 - 2-week activity trend showing declining line
@@ -701,15 +701,15 @@ Section headers: "Today" / "Yesterday" / "This Week" / "Older"
 
 **Context Card:**
 - Lightbulb icon
-- "This could indicate:"
-  - Illness or fatigue
-  - Pain or discomfort
-  - Low mood or depression
+- "Here's what might be going on:"
+  - They could be feeling under the weather
+  - They might be in pain or uncomfortable
+  - They may be feeling low or tired
 
 **Recommended Actions (full-width button list):**
-1. "Call to Check In" (primary, phone icon)
-2. "Send a Message" (secondary, SMS icon)
-3. "Schedule Doctor Visit" (secondary, calendar icon)
+1. "Give Dad a Call" (primary, phone icon)
+2. "Send a Quick Message" (secondary, SMS icon)
+3. "Book a Doctor Visit" (secondary, calendar icon)
 
 **More Options (collapsible):**
 - "Adjust Baseline" (if this is a new normal)
@@ -735,33 +735,33 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 **Alert Header:**
 - Full-width critical severity banner (pulsing animation)
 - Large siren icon
-- Title: "CRITICAL: No Movement Detected"
+- Title: "We haven't seen Dad move today"
 - CardiMember photo + name
 - Timestamp
 
 **Urgent Message Card (thick border, critical severity):**
-- Large text: "Dad hasn't moved today"
+- Large text: "Dad hasn't moved this morning"
 - Details:
-  - "Typical wake time: 7:00 AM"
-  - "Current time: 11:00 AM"
-  - "No activity for 4 hours"
+  - "He usually wakes up around 7:00 AM"
+  - "It's now 11:00 AM"
+  - "That's 4 hours with no movement"
 
 **Last Known Activity Card:**
-- "Last Movement Detected:"
-- "Yesterday, 10:30 PM"
-- "Location: Bedroom (based on device)"
+- "The last time we saw Dad move:"
+- "Yesterday at 10:30 PM"
+- "Bedroom area (based on his device)"
 
 **Immediate Actions (large, prominent buttons):**
 1. **"CALL NOW"** — critical severity, oversized, phone icon, one-tap to dial, shows phone number
-2. **"I'M CHECKING IN PERSON"** — urgent severity, large — updates status and notifies family immediately
+2. **"I'M ON MY WAY"** — urgent severity, large — updates status and lets your family know
 
 **Dismissal Option:**
-- Button: "He Told Me He'd Sleep In"
+- Button: "It's okay — he told me he'd sleep in"
   - Opens a note field for context
   - Dismisses alert with explanation logged
 
 **Family Notification Card:**
-- "Who else has been notified:"
+- "Your family has been notified too:"
   - Sarah (via SMS) — timestamp
   - John (via Push) — timestamp
 
@@ -936,12 +936,12 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 **Activity Alerts**
 - Toggle: enabled/disabled
 - Sensitivity slider: Low | Medium | High
-- Description: "Alert when activity is 30% below normal"
+- Description: "Let me know if they're moving around less than usual"
 
 **Heart Rate Alerts**
 - Toggle: enabled/disabled
 - Sensitivity slider: Low | Medium | High
-- Description: "Alert when HR exceeds baseline by 20%"
+- Description: "Let me know if their heart rate seems higher than usual"
 
 **Sleep Alerts**
 - Toggle: enabled/disabled
@@ -951,7 +951,7 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 
 **Pattern Break Alerts**
 - Toggle: always on (cannot disable)
-- Label: "Required for emergency detection"
+- Label: "Always on — this is how CardiTrack catches emergencies"
 
 **Notification Channels (per alert type):**
 - Multi-select chips: [Email] [SMS] [Push] [All]
@@ -959,10 +959,10 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 **Quiet Hours (collapsible):**
 - Toggle: "Enable Quiet Hours"
 - Time pickers: From 10:00 PM → To 7:00 AM
-- Exception toggle: "Still alert for Critical events"
+- Exception toggle: "Still wake me for emergencies"
 
 **Family Routing (MVP 2):**
-- "Also notify these family members:"
+- "Also let these family members know:"
 - Checkboxes with severity chips:
   - Sarah Johnson — [High Severity] [Critical]
   - John Doe — [Critical Only]
@@ -1083,10 +1083,10 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 - Battery: "75%" (if available from device)
 
 **Troubleshooting (bottom, collapsible):**
-- "Device Not Syncing?"
-  - Check Bluetooth
-  - Reconnect OAuth
-  - Contact support
+- "Having trouble?"
+  - Make sure Bluetooth is on
+  - Try reconnecting the device
+  - We're here to help — contact support
 
 ---
 
@@ -1146,7 +1146,7 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 - **Default:** Format and date selection
 - **Generating:** Progress bar with cancel option
 - **Complete:** Success message with share/save actions
-- **Error:** "Export failed. Please try again." with retry
+- **Error:** "That didn't work — let's try again" with retry
 
 ---
 
@@ -1170,7 +1170,7 @@ Adds family collaboration: invite siblings to share caregiving, shared notes, ma
 - CardiMember photo + name + timestamp
 
 **Description:**
-- "Mom's resting heart rate has been elevated for 3 consecutive days"
+- "Mom's heart rate has been running higher than usual for the past 3 days"
 
 **Chart:**
 - 7-day heart rate chart
@@ -1184,16 +1184,16 @@ Adds family collaboration: invite siblings to share caregiving, shared notes, ma
 | 88 bpm | 68 bpm | +29% above baseline |
 
 **Context Card:**
-- "Possible causes:"
-  - Infection or illness
-  - Stress or anxiety
-  - Dehydration
-  - Medication side effects
+- "Here's what might be going on:"
+  - She could be fighting off an illness
+  - She might be feeling stressed or anxious
+  - She may not be drinking enough water
+  - It could be a side effect of her medication
 
 **Recommended Actions:**
-1. "Recommend Doctor Visit" (primary, urgent treatment)
-2. "Monitor for 2 More Days" (secondary)
-3. "Call to Check Symptoms" (secondary)
+1. "Suggest a Doctor Visit" (primary, urgent treatment)
+2. "Keep watching for a couple more days" (secondary)
+3. "Call Mom to ask how she's feeling" (secondary)
 
 **Medical History (collapsible):**
 - "Related Health Info"
@@ -1276,7 +1276,7 @@ Each member card:
 **Personal Message (optional):**
 - Label: "Add a message (optional)"
 - Multi-line input
-- Placeholder: "Hi Sarah, I'd like to share Dad's health monitoring with you..."
+- Placeholder: "Hi Sarah, I'm using CardiTrack to keep an eye on Dad — want to help?"
 
 **CTA:**
 - Primary button: "Send Invitation"
@@ -1314,7 +1314,7 @@ Each card:
 
 **States:**
 - **Default:** Member cards listed
-- **Empty:** Illustration + "No CardiMembers Yet" + "Add Your First CardiMember" button
+- **Empty:** Illustration + "No one here yet" + "Add someone you'd like to look after" button
 
 ---
 
@@ -1366,7 +1366,7 @@ Each note card:
 
 **Note Input:**
 - Multi-line text editor (expands with content)
-- Placeholder: "Share an update with family..."
+- Placeholder: "How's Dad doing? Let the family know..."
 - Character counter: "0 / 500"
 - Typing "@" triggers a mention picker overlay listing family members
 
@@ -1431,9 +1431,9 @@ Each note card:
 - Swipe between captured pages
 
 **Error Handling:**
-- Blurry image: "Image is too blurry. Please retake."
-- Unreadable: "Could not read the document. Try better lighting or upload a PDF."
-- Partial read: "Some values couldn't be identified. You can review and correct them."
+- Blurry image: "That came out a bit blurry — try holding steady and retake"
+- Unreadable: "We're having trouble reading this — try better lighting or upload a PDF instead"
+- Partial read: "We got most of it, but a few values need your help — you can fix them on the next screen"
 
 **States:**
 - **Default:** Capture options
@@ -1471,13 +1471,13 @@ Each result row:
   - Low: below range (with severity indication)
 - Edit icon (pencil) — allows manual correction of OCR errors
 
-**AI Medical Insights Card:**
-- Lightbulb icon + "Medical Insights"
-- Disclaimer banner: "These insights are informational only and do not constitute medical advice. Always consult a healthcare professional."
-- AI-generated observations:
-  - "Hemoglobin A1c is slightly elevated, suggesting pre-diabetic range"
-  - "Cholesterol levels are within normal range"
-  - "Consider discussing Vitamin D supplementation with a doctor"
+**CardiTrack Insights Card:**
+- Lightbulb icon + "CardiTrack Insights"
+- Disclaimer banner: "These observations are here to help — but always talk to a doctor before making health decisions."
+- CardiTrack observations:
+  - "Dad's Hemoglobin A1c is a bit high — this sometimes points to pre-diabetes"
+  - "Good news — cholesterol levels look normal"
+  - "His Vitamin D is low — worth mentioning to his doctor"
 - Each insight can be expanded for more detail
 - "Learn More" links to relevant health information
 
@@ -1507,7 +1507,7 @@ Each result row:
 - **Default:** Parsed results with insights
 - **Editing:** Inline editing mode for value corrections
 - **No previous results:** Trend section hidden
-- **Loading insights:** Skeleton loading for AI insights section
+- **Loading insights:** Skeleton loading for CardiTrack insights section
 
 ---
 
@@ -1693,6 +1693,111 @@ The design system is **yours to define**. The following are functional requireme
 - Primary users are 30-55 year old adults, but they may hand the phone to elderly parents (70+) — consider readability
 - Critical alerts may be viewed in high-stress moments — design for quick scanning and large tap targets
 - The app will be used in varied lighting conditions (bedside at night, outdoors)
+
+---
+
+## Asset Inventory
+
+Icons use **SF Symbols** (iOS) and **Material Symbols** (Android) — no custom icon design needed. Third-party logos (Google, Apple, Fitbit, Garmin, Samsung, Withings, Visa) are sourced from vendor brand kits. Items below are the assets that need to be created or sourced.
+
+### MVP 1 — Assets
+
+#### Illustrations (Storyset / Blush or custom)
+
+| # | Asset | Screen | Description |
+|---|-------|--------|-------------|
+| 1 | Onboarding Slide 1 | M1-02 | Happy elderly person wearing a smartwatch — warm, reassuring tone |
+| 2 | Onboarding Slide 2 | M1-02 | Phone showing a health dashboard — conveys "at-a-glance monitoring" |
+| 3 | Onboarding Slide 3 | M1-02 | Family members on their phones — conveys shared caregiving |
+| 4 | Learning Phase | M1-08 | Brain with gears concept — "getting to know your loved one." Animated (Lottie). Source from LottieFiles marketplace or simplify to static illustration + platform progress animation |
+| 5 | Empty Alerts | M1-10 | Muted bell or peaceful scene — "nothing to worry about" feeling |
+| 6 | No Device Connected | M1-09 | Prompt to connect a device — friendly nudge, not an error |
+
+**Style guidance:** All 6 illustrations must use the same art style and brand color palette. Choose one Storyset or Blush collection and customize colors for consistency. Tone: warm, caring, approachable — not clinical.
+
+#### Brand Assets (custom — must be unique)
+
+| # | Asset | Used On | Notes |
+|---|-------|---------|-------|
+| 1 | CardiTrack logo | M1-01 Splash, M1-02 Welcome, M1-06 OAuth, M3-02 Login | Export at multiple sizes: large (splash), small (header), favicon. SVG master. |
+| 2 | App icon | Home screen, app stores | Must work at all OS-required sizes. Follow Apple and Google icon guidelines. |
+
+#### Animations
+
+| # | Animation | Screen | Source |
+|---|-----------|--------|--------|
+| 1 | Success checkmark | M1-07 | LottieFiles — search "success checkmark" (free options available) |
+| 2 | Shimmer / skeleton loading | M1-09, M1-10, M1-15 | Open-source library (e.g., Shimmer.Maui). Reusable across all screens. |
+| 3 | Critical alert pulse | M1-12 | XAML/CSS animation — opacity + scale loop on severity banner |
+| 4 | Learning phase brain/gears | M1-08 | LottieFiles — search "machine learning" or "brain processing." Or use static illustration (#4 above) + platform `ActivityIndicator`. |
+
+#### Third-Party Logos (vendor-provided, no design needed)
+
+| # | Logo | Screen | Source |
+|---|------|--------|--------|
+| 1 | Google | M1-03 | Google Identity branding guidelines (SVG provided) |
+| 2 | Apple | M1-03 | Apple Sign In SDK (renders automatically) |
+| 3 | Fitbit | M1-05, M1-06, M1-19 | Fitbit/Google developer brand assets |
+| 4 | Apple Watch | M1-05, M1-06, M1-19 | Apple marketing assets (MFi partners) |
+| 5 | Garmin | M1-05, M1-06, M1-19 | Garmin Connect developer program |
+| 6 | Samsung | M1-05, M1-06, M1-19 | Samsung developer brand kit |
+| 7 | Withings | M1-05, M1-06, M1-19 | Withings Health API partner assets |
+| 8 | Visa / card brands | M1-14 | Payment SDK (Stripe, etc.) includes card icons |
+
+---
+
+### MVP 2 — Assets
+
+#### Illustrations
+
+| # | Asset | Screen | Description |
+|---|-------|--------|-------------|
+| 7 | Empty Members | M2-04 | "No one here yet" — friendly empty state, same art style as MVP 1 illustrations |
+
+#### Animations
+
+| # | Animation | Screen | Source |
+|---|-----------|--------|--------|
+| 5 | OCR processing steps | M2-07 | Custom step indicator animation (3 steps with progress). Can be built with XAML or sourced from LottieFiles — search "document scanning" |
+
+#### Icons (platform — no custom design)
+
+All icons in MVP 2 reuse platform icon sets. No new custom icons needed.
+
+---
+
+### MVP 3 — Assets
+
+#### Icons (platform-provided)
+
+| # | Icon | Screen | Source |
+|---|------|--------|--------|
+| 1 | Face ID | M3-01, M3-02 | iOS: SF Symbol `faceid` (system-provided) |
+| 2 | Fingerprint | M3-01, M3-02 | Android: Material Symbol `fingerprint` (system-provided) |
+| 3 | Crossed-out signal | M3-03 | SF Symbol `wifi.slash` / Material `signal_wifi_off` |
+
+#### Widget Assets
+
+| # | Asset | Screen | Notes |
+|---|-------|--------|-------|
+| 1 | Widget backgrounds | M3-06 | Defined by design system. Small (2x2), medium (4x2), large (4x4, iOS only). Must adapt to system light/dark mode. |
+
+No new custom illustrations or animations needed for MVP 3.
+
+---
+
+### Asset Summary
+
+| Category | MVP 1 | MVP 2 | MVP 3 | Total |
+|----------|-------|-------|-------|-------|
+| Custom illustrations | 6 | 1 | 0 | **7** |
+| Brand assets (logo + icon) | 2 | 0 | 0 | **2** |
+| Animations (Lottie / XAML) | 4 | 1 | 0 | **5** |
+| Third-party logos | 8 | 0 | 0 | **8** |
+| Widget assets | 0 | 0 | 1 | **1** |
+| **Subtotal** | **20** | **2** | **1** | **23** |
+
+**Truly custom** (must be designed): **2** — CardiTrack logo and app icon. Everything else can be sourced from Storyset/Blush (illustrations), LottieFiles (animations), vendor brand kits (logos), and platform icon sets (SF Symbols / Material Symbols).
 
 ---
 
