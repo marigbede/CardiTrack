@@ -1801,6 +1801,82 @@ No new custom illustrations or animations needed for MVP 3.
 
 ---
 
+## Figma Delivery Requirements
+
+This project uses **Cursor + Figma MCP** to build the UI directly from Figma designs. The following requirements ensure the designs translate accurately into code.
+
+### File Structure
+
+- Organise screens into **named Pages** per MVP: `MVP 1 — Solo Monitoring`, `MVP 2 — Family & Multi-Member`, `MVP 3 — Native & Offline`
+- Each screen must live in its own **named Frame**, using the Screen IDs from this document (e.g. `M1-09 Main Dashboard`)
+- Group all reusable UI into a dedicated **`Components`** page
+
+### Layout
+
+- Use **Auto Layout** on every frame, section, and component — this is critical for accurate code generation
+- Set explicit **spacing tokens** via Auto Layout gap/padding values (do not use manual nudging)
+- Define a consistent **8pt grid** for all spacing and sizing
+
+### Design Tokens (Figma Variables)
+
+Set up the following as **Figma Variables** (not hardcoded values):
+
+| Token Type | Examples |
+|------------|---------|
+| Colors | `color/status/normal`, `color/status/caution`, `color/status/urgent`, `color/status/critical`, `color/brand/primary`, `color/text/primary`, `color/background/card` |
+| Typography | `text/heading/large`, `text/body/default`, `text/label/small` |
+| Spacing | `space/xs` (4), `space/sm` (8), `space/md` (16), `space/lg` (24), `space/xl` (32) |
+| Radius | `radius/card`, `radius/button`, `radius/chip` |
+
+### Components
+
+- Publish all reusable UI as **Figma Components** with variants (e.g. Button: Primary / Secondary / Destructive / Disabled)
+- Name components using the pattern: `ComponentName/Variant` (e.g. `AlertCard/Critical`, `Button/Primary`)
+- Use **component properties** (text, boolean, instance swap) so variants are machine-readable
+- All interactive states must be defined as variants: Default, Hover, Pressed, Disabled, Loading, Error
+
+### Naming Conventions
+
+- All layers must be **named meaningfully** — no `Frame 42`, `Rectangle 7`, or `Group 3`
+- Use camelCase or kebab-case consistently (e.g. `statusHeroCard` or `status-hero-card`)
+- Hidden layers that are not part of the design must be deleted, not just hidden
+
+### Handoff Checklist (per screen)
+
+Before marking a screen as ready:
+- [ ] Screen is in a named frame with the correct Screen ID
+- [ ] All layers are named
+- [ ] Auto Layout is applied throughout
+- [ ] All colors and text styles reference Figma Variables (no hardcoded hex values)
+- [ ] Interactive states are defined as component variants
+- [ ] Responsive behaviour is defined (iPhone 14 base, with notes for larger screens)
+- [ ] All four severity levels (Normal / Caution / Urgent / Critical) are visually tested in context
+
+### Figma Access
+
+- Share the file with **Edit access** so the MCP server can read all component and variable data
+- Provide a **personal access token** (Figma → Settings → Security → Personal Access Tokens) for MCP authentication
+- Alternatively, use **OAuth login** if using the official Figma remote MCP server
+
+### MCP Configuration (Cursor)
+
+The developer will connect Cursor to Figma using the following MCP config (`~/.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--figma-api-key", "YOUR_TOKEN_HERE", "--stdio"]
+    }
+  }
+}
+```
+
+Once connected, screen designs can be referenced directly by Figma frame URL during development — no manual redlines or spec exports needed.
+
+---
+
 **Total Screens:** 35
 **MVP 1:** 20 screens — Solo Monitoring (design first)
 **MVP 2:** 8 screens — Family, Multi-Member & Clinical

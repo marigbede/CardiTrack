@@ -28,6 +28,14 @@ Welcome to the CardiTrack documentation. This directory contains comprehensive d
 
 **Read this** to understand the competitive landscape and CardiTrack's market position.
 
+#### [LLM_DESIGN.md](./LLM_DESIGN.md)
+**MedGemma 1.5 4B inference design and Azure Container Apps deployment.**
+- Model selection rationale (4B vs 27B, T4 vs A100)
+- vLLM serving configuration and flags
+- Fitbit data ingestion pipeline (Event Hubs + 5-min batching)
+- Prompt structure and prefix caching strategy
+- Cost estimates and important caveats
+
 #### [INFRASTRUCTURE.md](./INFRASTRUCTURE.md)
 **Complete infrastructure and database documentation.**
 - Database schema and entity relationships
