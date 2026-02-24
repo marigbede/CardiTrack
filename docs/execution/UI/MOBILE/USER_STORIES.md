@@ -2,12 +2,12 @@
 
 Based on the solution manifest, market analysis, and README, here are comprehensive user stories organized by user persona and platform:
 
-## 👨‍👩‍👧 Primary Persona: Adult Child Caregiver (Ages 45-65)
+## 👨‍👩‍👧 Primary Persona: Family Caregiver (Ages 45-65)
 
 ### Onboarding & Setup
 
 **Story 1.1: First-Time User Registration**
-- **As a** concerned adult child
+- **As a** concerned family caregiver
 - **I want to** quickly create an account and understand what CardiTrack does
 - **So that** I can start monitoring my elderly parent's health within minutes
 - **Acceptance Criteria:**
@@ -43,7 +43,7 @@ Based on the solution manifest, market analysis, and README, here are comprehens
 ### Dashboard & Monitoring
 
 **Story 2.1: Daily Health Overview**
-- **As a** busy adult child checking in daily
+- **As a** busy family caregiver checking in daily
 - **I want to** see a quick visual summary of my parent's health status
 - **So that** I know if everything is okay without reading detailed reports
 - **Acceptance Criteria:**
@@ -116,7 +116,7 @@ Based on the solution manifest, market analysis, and README, here are comprehens
 - **I want to** invite my siblings to view our parent's health data
 - **So that** we can share caregiving responsibilities
 - **Acceptance Criteria:**
-  - Email invitation with role selection (Admin, Staff, Member/Viewer)
+  - Email invitation with role selection (Admin, Staff, Viewer)
   - Permission matrix clearly explained (who can see/do what)
   - Pending invitations list with resend/revoke options
   - Activity log showing who accessed what and when (HIPAA compliance)
@@ -161,12 +161,13 @@ Based on the solution manifest, market analysis, and README, here are comprehens
 - **I want to** easily understand my current plan and upgrade/downgrade options
 - **So that** I can make informed decisions about features vs cost
 - **Acceptance Criteria:**
-  - Current tier highlighted (Basic $8, Complete Care $15, Guardian Plus $30)
+  - Current tier highlighted (Basic $8, Complete Care $15)
   - Feature comparison table (what I get with each tier)
-  - Usage metrics ("You're monitoring 2 CardiMembers, upgrade to add unlimited")
+  - Usage metrics ("You're monitoring 2 CardiMembers, upgrade to add more")
   - One-click upgrade/downgrade
   - Annual discount option (15% savings)
   - Clear billing date and payment method
+  - _Note: Guardian Plus (business tier) is out of scope for MVP — handled via a dedicated business account flow_
 
 **Story 6.2: Device Management**
 - **As a** caregiver whose parent switched devices
@@ -501,7 +502,7 @@ Based on the solution manifest, market analysis, and README, here are comprehens
 ---
 
 **Document Version:** 1.0
-**Last Updated:** January 10, 2026
+**Last Updated:** February 24, 2026
 **Next Review:** February 2026 (post-MVP beta feedback)
 **Owner:** Product & UX Team
 

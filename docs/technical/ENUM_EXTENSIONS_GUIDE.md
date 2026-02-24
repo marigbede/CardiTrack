@@ -44,7 +44,7 @@ var device = DeviceType.AppleWatch;
 var displayName = device.GetDisplayName(); // Returns: "Apple Watch"
 
 var severity = AlertSeverity.Red;
-var severityName = severity.GetDisplayName(); // Returns: "Urgent"
+var severityName = severity.GetDisplayName(); // Returns: "Critical"
 ```
 
 ### 2. ToList<TEnum>()
@@ -253,7 +253,7 @@ public class AlertViewModel
         {
             Id = alert.Id,
             Title = alert.Title,
-            SeverityDisplay = alert.Severity.GetDisplayName(), // "Urgent", "Minor Concern", etc.
+            SeverityDisplay = alert.Severity.GetDisplayName(), // "Critical", "Urgent", "Caution", "Normal"
             AlertTypeDisplay = alert.AlertType.GetDisplayName() // "Heart Rate Alert", etc.
         };
     }
@@ -310,7 +310,7 @@ public static class EnumCache
 
 ### Core Enums
 - **OrganizationType** - Family Account, Business Account
-- **UserRole** - Member, Administrator, Staff Member
+- **UserRole** - Viewer, Administrator, Staff Member
 - **Gender** - Male, Female, Other, Prefer Not to Say
 
 ### Relationship & Monitoring
@@ -322,7 +322,7 @@ public static class EnumCache
 
 ### Alerts
 - **AlertType** - Inactivity Alert, Heart Rate Alert, Sleep Quality Alert, Pattern Break Alert, Trend Alert
-- **AlertSeverity** - Informational (Green), Minor Concern (Yellow), Moderate Concern (Orange), Urgent (Red)
+- **AlertSeverity** - Normal (Green), Caution (Yellow), Urgent (Orange), Critical (Red)
 
 ### Billing
 - **SubscriptionTier** - Basic Care, Complete Care, Guardian Plus

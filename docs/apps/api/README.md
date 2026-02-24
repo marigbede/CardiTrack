@@ -2,12 +2,12 @@
 
 ## Overview
 
-The CardiTrack API is a RESTful ASP.NET Core 8 Web API that serves as the backend for the CardiTrack platform. It handles authentication, device integrations, health data processing, alert management, and family member coordination.
+The CardiTrack API is a RESTful ASP.NET Core 10 Web API that serves as the backend for the CardiTrack platform. It handles authentication, device integrations, health data processing, alert management, and family member coordination.
 
 ## Technology Stack
 
-- **.NET 8**: Core framework
-- **ASP.NET Core 8**: Web API framework
+- **.NET 10**: Core framework
+- **ASP.NET Core 10**: Web API framework
 - **Entity Framework Core**: ORM for database access
 - **Auth0/JWT**: Authentication & authorization
 - **Swagger/OpenAPI**: API documentation

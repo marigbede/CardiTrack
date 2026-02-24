@@ -4,7 +4,7 @@
 
 The elderly health monitoring market is experiencing rapid growth driven by aging populations, increased healthcare costs, and technological advancement in wearable devices. CardiTrack enters this market with a unique value proposition: **affordable, preventive health monitoring using existing consumer wearables with AI-powered pattern analysis**.
 
-**Market Opportunity**: $3.8B+ addressable market (50M+ elderly Americans × $6-30/month average spend)
+**Market Opportunity**: $9B+ addressable market (150M+ elderly aged 65+ across the US & EU × $6-30/month average spend)
 
 **Key Competitive Advantage**: 50-70% cheaper than medical alert systems while providing preventive (not just reactive) monitoring across multiple device brands.
 
@@ -27,14 +27,21 @@ The elderly health monitoring market is experiencing rapid growth driven by agin
 ### Market Size & Growth
 
 **Total Addressable Market (TAM):**
-- **United States**:
-  - 55.8 million Americans aged 65+ (2023)
-  - Growing to 73+ million by 2030 (10,000/day turning 65)
-  - 70% live independently (38.6 million potential users)
+- **United States** *(ACL, [2023 Profile of Older Americans](https://acl.gov/sites/default/files/Profile%20of%20OA/ACL_ProfileOlderAmericans2023_508.pdf))*:
+  - 59M adults aged 65+ (18% of US population)
+  - Growing to 73M+ by 2030 (10,000/day turning 65)
+  - ~28% live alone (~16.5M potential direct users)
+  - 53M Americans act as family caregivers *(AARP/NAC, [Caregiving in the U.S. 2020](https://www.aarp.org/ppi/info-2020/caregiving-in-the-united-states.html))*
 
-- **Global Market**:
-  - 962 million people aged 65+ worldwide (2023)
-  - Expected to reach 1.4 billion by 2030
+- **European Union** *(Eurostat, [Population Structure and Ageing, 2024](https://ec.europa.eu/eurostat/statistics-explained/index.php/Population_structure_and_ageing))*:
+  - 90M+ adults aged 65+ (20%+ of EU population of 449.3M)
+  - Projected to reach ~30% of EU population by 2050
+  - 44M Europeans provide unpaid informal care for elderly relatives *(Eurocarers, [About Carers](https://eurocarers.org/about-carers/))*
+  - 80% of all EU care is delivered informally by family members
+
+- **Combined US + EU**:
+  - 150M+ elderly aged 65+
+  - ~97M family caregivers (53M US + 44M EU)
 
 **Market Value:**
 - **Medical Alert Systems**: $1.8B (US, 2024)
@@ -46,13 +53,13 @@ The elderly health monitoring market is experiencing rapid growth driven by agin
 - Fitbit: 32 million active users (18% are 60+) = ~5.8M elderly
 - Apple Watch: 140 million active users (12% are 60+) = ~16.8M elderly
 - Garmin: 18 million active users (25% are 60+) = ~4.5M elderly
-- **Total**: ~27M elderly Americans already own compatible wearables
+- **Total (US)**: ~27M elderly Americans already own compatible wearables; EU adoption is growing in parallel with similar device penetration trends
 
 ### Market Drivers
 
-1. **Aging Population**: 10,000 Americans turn 65 every day
+1. **Aging Population**: 10,000 Americans turn 65 every day; EU 65+ population exceeds 90M and is projected to reach 30% of EU population by 2050
 2. **Healthcare Cost Reduction**: Preventive care cheaper than emergency care
-3. **Family Caregiver Burden**: 41M+ unpaid family caregivers in US
+3. **Family Caregiver Burden**: 53M unpaid family caregivers in the US *(AARP/NAC 2020)*; 44M informal carers in the EU *(Eurocarers)*; 80% of all EU long-term care is delivered by unpaid family members
 4. **Wearable Proliferation**: Elderly adoption of Fitbit/Apple Watch increasing
 5. **Technology Acceptance**: 67% of older adults say wearables add value to their lives
 6. **COVID-19 Impact**: Accelerated remote health monitoring adoption
@@ -83,7 +90,7 @@ The elderly health monitoring market is experiencing rapid growth driven by agin
 
 ## Target Customer Segments
 
-### Primary Segment: Adult Children Caregivers
+### Primary Segment: Family Caregivers
 
 **Demographics:**
 - Age: 45-65 years old
@@ -546,7 +553,7 @@ The elderly health monitoring market is experiencing rapid growth driven by agin
 - Consumer wearable apps focused on individual use
 
 **Business Advantage:**
-- ✅ Higher revenue per family ($30 tier: unlimited members)
+- ✅ Higher revenue per family ($29.99 tier: unlimited members)
 - ✅ Lower churn (monitoring multiple people = higher switching cost)
 - ✅ Network effects (add more family members over time)
 
@@ -556,7 +563,7 @@ The elderly health monitoring market is experiencing rapid growth driven by agin
 
 ### Positioning Statement
 
-**For** adult children caring for elderly parents **who** need peace of mind about their parents' health and safety, **CardiTrack** is a **preventive health monitoring service** that **uses AI to detect health issues early using existing wearable devices**. Unlike **medical alert systems** that only react to emergencies, **CardiTrack** provides affordable, proactive insights that help families intervene before problems become serious.
+**For** family caregivers of elderly parents **who** need peace of mind about their parents' health and safety, **CardiTrack** is a **preventive health monitoring service** that **uses AI to detect health issues early using existing wearable devices**. Unlike **medical alert systems** that only react to emergencies, **CardiTrack** provides affordable, proactive insights that help families intervene before problems become serious.
 
 ### Competitive Positioning Map
 
@@ -693,7 +700,7 @@ The elderly health monitoring market is experiencing rapid growth driven by agin
    - Staff training and onboarding support
 
 **Pricing:**
-- Guardian Plus: $30/month (unlimited members, API access)
+- Guardian Plus: $29.99/month (unlimited members, API access)
 - Device Bundle: +$100 upfront (Fitbit Charge 6)
 - Annual discount: 15% off
 
@@ -788,16 +795,16 @@ The elderly health monitoring market is experiencing rapid growth driven by agin
 
 ---
 
-**Opportunity 2: International Expansion**
+**Opportunity 2: English-Speaking Market Expansion**
 
-**Markets:** UK, Canada, Australia (English-speaking, similar healthcare systems)
+**Markets:** UK, Canada, Australia (English-speaking, comparable healthcare systems and wearable device penetration)
 
-**Potential:** 50M+ elderly (combined) × $10/month = $500M TAM
+**Potential:** 20M+ elderly (combined) × $10/month = $200M+ additional TAM
 
 **Approach:**
-- Localize for healthcare systems
+- Localize for each country's healthcare terminology and regulations
 - Partner with local device retailers
-- Adapt to privacy regulations (GDPR, etc.)
+- GDPR compliance already addressed through EU core market
 
 **Timeline:** 2027
 
@@ -855,5 +862,5 @@ CardiTrack enters a growing $3.8B+ market with a unique value proposition: **aff
 ---
 
 **Document Version:** 1.0
-**Last Updated:** January 8, 2026
+**Last Updated:** February 24, 2026
 **Next Review:** April 2026 (post-beta)

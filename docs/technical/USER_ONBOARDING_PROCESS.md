@@ -38,7 +38,7 @@ Users authenticate before selecting account type:
 
 **Family Account:**
 - Individual or family monitoring elderly relatives
-- Single "Member" role by default
+- Single "Viewer" role by default (display name for the Member role in family accounts)
 - Simplified caregiver relationship structure
 - Consumer-focused pricing
 
@@ -90,11 +90,11 @@ Automatically triggered upon organization creation:
 
 **Trial Setup:**
 - **Status**: Trial (default)
-- **Duration**: 30-90 days (configurable)
+- **Duration**: 30 days default (configurable up to 90 days)
 - **Tier Options**:
-  - **Basic**: Limited features, restricted CardiMembers and Users
-  - **Complete**: Full feature set
-  - **Plus**: Premium features, highest limits
+  - **Basic Care**: Limited features, restricted CardiMembers and Users
+  - **Complete Care**: Full feature set
+  - **Guardian Plus**: Premium features, highest limits
 
 **Configuration:**
 - `StartDate`: Automatic (UTC)
@@ -729,7 +729,7 @@ Configure alert system:
 System begins learning normal patterns:
 
 **Learning Period:**
-- **Duration**: 30-90 days (configurable)
+- **Duration**: 30 days default (configurable up to 90 days)
 - **Frequency**: Recalculated weekly after initial baseline
 
 **Pattern Baseline Calculation:**
@@ -796,9 +796,9 @@ Day 31: "Baseline established!"
 **Conversion Flow:**
 ```
 1. User selects subscription tier
-   ├── Basic: $8/month
-   ├── Complete: $19.99/month
-   └── Plus: $29.99/month
+   ├── Basic Care: $8/month
+   ├── Complete Care: $15/month
+   └── Guardian Plus: $29.99/month
 
 2. Payment information collection
    ├── Credit card via Stripe/PayPal
