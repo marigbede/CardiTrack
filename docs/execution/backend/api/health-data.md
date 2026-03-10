@@ -2,7 +2,7 @@
 
 Provides health metrics, daily summaries, trend charts, baselines, and multi-member dashboard data for caregivers. Also supports offline caching via timestamped data and data export.
 
-**User Stories:** 2.1 (Daily Health Overview), 2.2 (Multi-Member Dashboard), 2.3 (Trend Charts), 5.2 (Mobile Widget), 10.1 (Offline Support)
+**User Stories:** 2.1 (Daily Health Overview), 2.2 (Multi-Member Dashboard), 2.3 (Trend Charts), 5.2 (Mobile Widget), 6.3 (Health Data Export), 10.1 (Offline Support)
 
 ---
 
@@ -232,28 +232,51 @@ Get the current calculated baseline values and learning progress for a CardiMemb
 
 ## GET `/api/v1/cardimembers/{id}/health/export`
 
-Export health data as a PDF or CSV file. Used for doctor visit preparation.
+Export health data for a CardiMember. Supports human-readable formats (PDF, CSV) and interoperable medical formats (FHIR R4, HL7 v2). Used for doctor visit preparation and EHR integration.
 
-**Priority:** P1 | **Auth Required:** Yes
+**Priority:** P0 (PDF, CSV, FHIR R4 in MVP 1) | P1 (HL7 v2 added in MVP 2) | **Auth Required:** Yes
 
 ### Query Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `format` | string | Yes | `pdf` or `csv` |
+| `format` | string | Yes | `pdf`, `csv`, `fhir_r4` (**MVP 1**), or `hl7_v2` (MVP 2) |
 | `range` | string | Yes | `7d`, `30d`, `90d`, or `custom` |
 | `from` | string (ISO 8601) | If `range=custom` | Start date |
 | `to` | string (ISO 8601) | If `range=custom` | End date |
-| `sections` | string | No | Comma-separated: `metrics,alerts,notes` (default: all) |
+| `sections` | string | No | Comma-separated: `metrics,alerts,notes` (default: all). Ignored for `fhir_r4` and `hl7_v2` — full dataset always exported in medical formats. |
+| `fhir_profile` | string | No | FHIR R4 profile to validate against. Default: `us-core`. Only valid when `format=fhir_r4`. |
+| `fhir_resources` | string | No | Comma-separated FHIR resource types to include. Default: `Patient,Observation,Device`. Only valid when `format=fhir_r4`. |
 
 ### Response `200 OK`
 
+**PDF / CSV:**
 ```
 Content-Type: application/pdf  (or text/csv)
 Content-Disposition: attachment; filename="carditrack-margaret-doe-2026-03-09.pdf"
 ```
 
-Binary file stream.
+**FHIR R4:**
+```
+Content-Type: application/fhir+json
+Content-Disposition: attachment; filename="carditrack-margaret-doe-fhir-r4-2026-03-09.json"
+```
+
+Returns a FHIR R4 Bundle (type: `document`) containing:
+- `Patient` — CardiMember demographics
+- `Observation` — activity, heart rate, and sleep measurements (LOINC-coded)
+- `Device` — connected wearable device(s)
+- `Condition` — any logged conditions from medical notes (if consented)
+
+**HL7 v2 (MVP 2):**
+```
+Content-Type: application/hl7-v2+er7
+Content-Disposition: attachment; filename="carditrack-margaret-doe-hl7-v2-2026-03-09.hl7"
+```
+
+Returns an HL7 v2.5.1 ORU^R01 message containing observation results.
+
+All responses: binary file stream.
 
 ### Errors
 
@@ -261,6 +284,8 @@ Binary file stream.
 |------|--------|-------------|
 | `EXPORT_RANGE_TOO_LARGE` | 400 | Range exceeds 365 days |
 | `NO_DATA_IN_RANGE` | 404 | No health data in the specified range |
+| `FORMAT_NOT_AVAILABLE` | 403 | Requested format not available in current MVP (e.g., `hl7_v2` before MVP 2 release) |
+| `INVALID_FHIR_PROFILE` | 400 | Specified `fhir_profile` is not supported |
 
 ---
 

@@ -40,6 +40,19 @@ Based on the solution manifest, market analysis, and README, here are comprehens
   - Troubleshooting tips if connection fails
   - Support for multiple devices per CardiMember
 
+**Story 1.4: CardiMember Profile Management**
+- **As a** caregiver
+- **I want to** view and edit a CardiMember's profile (photo, medical notes, emergency contact, monitoring settings)
+- **So that** their information stays accurate and I can quickly act in an emergency
+- **Acceptance Criteria:**
+  - View profile summary: name, DOB, relationship, photo, emergency contact
+  - Encrypted medical notes (require biometric auth to view/edit)
+  - Enable/disable monitoring toggle with confirmation
+  - Alert sensitivity control (Low / Medium / High)
+  - Quick-action buttons: View Dashboard, View Alerts, Manage Devices
+  - Danger-zone actions: Pause Monitoring, Remove CardiMember (with confirmation dialogs)
+  - Screens: M1-13 (CardiMember Detail), M1-14 (Edit CardiMember)
+
 ### Dashboard & Monitoring
 
 **Story 2.1: Daily Health Overview**
@@ -154,6 +167,17 @@ Based on the solution manifest, market analysis, and README, here are comprehens
   - Last sync time
   - Tap to open full app
 
+**Story 5.3: Native Sharing**
+- **As a** caregiver who wants to share health data with a sibling, doctor, or save it locally
+- **I want to** use the device's native share sheet from any relevant screen
+- **So that** I can send information through any app already on my phone without extra steps
+- **Acceptance Criteria:**
+  - Native OS share sheet triggered from export, chart, and test results screens
+  - Share targets: email, messages, AirDrop, health apps, save to Files
+  - Screenshot capture for sharing individual charts or alert summaries
+  - PDF/CSV output formats available
+  - Screen: M4-07 (Share Sheet Integration)
+
 ### Settings & Preferences
 
 **Story 6.1: Subscription Management**
@@ -168,6 +192,18 @@ Based on the solution manifest, market analysis, and README, here are comprehens
   - Annual discount option (15% savings)
   - Clear billing date and payment method
   - _Note: Guardian Plus (business tier) is out of scope for MVP — handled via a dedicated business account flow_
+
+**Story 6.3: Health Data Export**
+- **As a** caregiver preparing for a doctor's visit or needing records
+- **I want to** export a CardiMember's health data in standard medical formats
+- **So that** I can share it with healthcare providers or keep it for my records
+- **Acceptance Criteria:**
+  - Date range selector for the export window
+  - Format options: PDF, CSV, FHIR R4 (**MVP 1**); HL7 v2 (MVP 2); LOINC/CCD (MVP 3); SNOMED CT (MVP 4)
+  - Delivery options: save to device, share via system share sheet, email to self
+  - Clear format explanations ("FHIR R4 is accepted by most US patient portals and EHR systems")
+  - Export confirmation with file size estimate
+  - Screen: M1-17 (Health Data Export)
 
 **Story 6.2: Device Management**
 - **As a** caregiver whose parent switched devices
@@ -216,6 +252,35 @@ Based on the solution manifest, market analysis, and README, here are comprehens
   - Family notification when paused ("Dad paused monitoring for 24 hours")
   - Auto-resume with reminder
   - Easy reactivation
+
+---
+
+## 🧪 Test Results & Medical Documents (MVP 3)
+
+**Story 12.1: Lab Results Capture**
+- **As a** caregiver who received physical lab results or a discharge summary for my parent
+- **I want to** scan or upload the document into CardiTrack
+- **So that** all health records are in one place and can be analysed alongside wearable data
+- **Acceptance Criteria:**
+  - Camera scan with auto-crop and quality guidance (blur/lighting feedback)
+  - File upload fallback (PDF, JPG, PNG)
+  - Multi-page document support
+  - OCR processing with progress indicator
+  - Clear error state if document is unreadable with retry / manual entry option
+  - Screen: M3-06 (Test Results Scanner)
+
+**Story 12.2: Medical Insights from Lab Results**
+- **As a** caregiver viewing parsed lab results
+- **I want to** see AI-generated insights that explain values in plain language and correlate them with wearable trends
+- **So that** I understand what the results mean and can decide if a doctor follow-up is needed
+- **Acceptance Criteria:**
+  - Parsed results table with reference ranges and out-of-range highlights
+  - CardiTrack Insights section with plain-language explanation
+  - Trend comparison: current result vs. previous results (if available)
+  - Ability to correct/verify OCR-extracted values before saving
+  - Export options (LOINC/CCD in MVP 3, SNOMED CT in MVP 4)
+  - Share via native share sheet (Story 5.3)
+  - Screen: M3-07 (Test Results Detail)
 
 ---
 
@@ -451,19 +516,25 @@ Based on the solution manifest, market analysis, and README, here are comprehens
 
 ### Must Have (P0)
 - [ ] Story 1.1-1.3: Onboarding flow
+- [ ] Story 1.4: CardiMember profile management
 - [ ] Story 2.1: Daily health overview
 - [ ] Story 3.1: Critical alert display
 - [ ] Story 6.1: Subscription management
+- [ ] Story 6.3: Health data export (PDF, CSV, FHIR R4)
 
 ### Should Have (P1)
 - [ ] Story 2.3: Trend charts
 - [ ] Story 3.2: Alert notification preferences
+- [ ] Story 3.3: Alert acknowledgment & notes
 - [ ] Story 4.1: Family member invitations
 - [ ] Story 10.1: Mobile offline support
+- [ ] Story 12.1: Lab results capture
+- [ ] Story 12.2: Medical insights from lab results
 
 ### Nice to Have (P2)
 - [ ] Story 2.2: Multi-member dashboard
 - [ ] Story 5.2: Mobile widget
+- [ ] Story 5.3: Native sharing
 - [ ] Story 9.2: Printable reports
 - [ ] Story 7.2: CardiMember self-view
 
@@ -478,16 +549,17 @@ Based on the solution manifest, market analysis, and README, here are comprehens
 
 | Category | Total Stories | Must Have (P0) | Should Have (P1) | Nice to Have (P2) | Future |
 |----------|---------------|----------------|------------------|-------------------|---------|
-| Onboarding & Setup | 3 | 3 | 0 | 0 | 0 |
+| Onboarding & Setup | 4 | 4 | 0 | 0 | 0 |
 | Dashboard & Monitoring | 3 | 1 | 1 | 1 | 0 |
-| Alert Management | 6 | 1 | 1 | 0 | 0 |
+| Alert Management | 6 | 1 | 2 | 0 | 0 |
 | Family Collaboration | 2 | 0 | 1 | 0 | 1 |
-| Mobile Experience | 2 | 0 | 0 | 1 | 1 |
-| Settings & Preferences | 2 | 1 | 0 | 0 | 1 |
+| Mobile Experience | 3 | 0 | 0 | 2 | 1 |
+| Settings & Preferences | 3 | 2 | 0 | 0 | 1 |
 | Elderly CardiMember | 3 | 0 | 0 | 1 | 2 |
 | Enterprise Features | 3 | 0 | 0 | 0 | 3 |
 | Platform-Specific | 4 | 0 | 1 | 1 | 2 |
-| **TOTAL** | **28** | **6** | **5** | **5** | **12** |
+| Test Results & Medical Documents | 2 | 0 | 2 | 0 | 0 |
+| **TOTAL** | **33** | **8** | **7** | **6** | **10** |
 
 ---
 

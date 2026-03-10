@@ -17,8 +17,8 @@
 
 | Release | Screens | Theme | User Gets |
 |---------|---------|-------|-----------|
-| **MVP 1** | 33 | Core Monitoring | Sign up, connect and manage device (fitbit), monitor one to n parent(s), CardiMember profile, device management, view dashboard, receive and manage all alert types |
-| **MVP 2** | 8 | Management & Settings | Trend charts, notification preferences, personal subscription (Basic & Complete Care), health data export (HL7, FHIR), connect and manage device (garmin) |
+| **MVP 1** | 37 | Core Monitoring | Sign up, connect and manage device (fitbit), monitor one to n parent(s), CardiMember profile, device management, view dashboard, receive and manage all alert types, health data export (PDF, CSV, FHIR R4) |
+| **MVP 2** | 4 | Management & Settings | Trend charts, notification preferences, personal subscription (Basic & Complete Care), health data export adds HL7, connect and manage device (garmin) |
 | **MVP 3** | 14 | Family & Multi-Member | Invite family, share notes, scan test results with CardiTrack medical insights, export data in LOINC/CCD |
 | **MVP 4** | 13 | Native & Offline | Biometric setup and login, offline support, push notification actions, home screen widget, native sharing, export data in SNOMED CT |
 
@@ -48,7 +48,7 @@
 | M2-02 | Subscription Management | MVP 2 | 1 |
 | M2-03 | Trend Charts | MVP 2 | 1 |
 | M2-04 | Notification Settings | MVP 2 | 1 |
-| M2-05 | Health Data Export | MVP 2 | 4 (a–d) |
+| M1-17 | Health Data Export | MVP 1 | 4 (a–d) |
 | M3-01 | Family Members List | MVP 3 | 1 |
 | M3-02 | Invite Family Modal | MVP 3 | 1 |
 | M3-03 | Multi-Member Dashboard | MVP 3 | 2 (a–b) |
@@ -129,12 +129,12 @@
                                    [M1-14 Edit]
 ```
 
-### Flow 3b: Data Export (MVP 2)
+### Flow 3b: Data Export (MVP 1)
 
 ```
-[M2-03 Trends] → Export icon → [M2-05 Health Data Export]
-[M2-01 Settings] → "Export Health Data" → [M2-05 Health Data Export]
-[M1-13 Detail] → "Export Data" → [M2-05 Health Data Export]
+[M2-03 Trends] → Export icon → [M1-17 Health Data Export]
+[M2-01 Settings] → "Export Health Data" → [M1-17 Health Data Export]
+[M1-13 Detail] → "Export Data" → [M1-17 Health Data Export]
                                         │
                                    ┌────┴────┐
                                    ▼         ▼
@@ -173,7 +173,7 @@
                          [CardiTrack Insights] [Export]  [Share]
                                         │
                                         ▼
-                                  [M2-05 Export]
+                                  [M1-17 Export]
 ```
 
 ---
@@ -222,9 +222,9 @@
 
 ---
 
-## MVP 1 — Core Monitoring (33 screens)
+## MVP 1 — Core Monitoring (37 screens)
 
-A single user can sign up, add one or more CardiMembers, connect devices, manage CardiMember profiles, view the health dashboard, and receive and manage all alert types. This is the essential monitoring loop — everything needed for the app to be useful from day one.
+A single user can sign up, add one or more CardiMembers, connect devices, manage CardiMember profiles, view the health dashboard, receive and manage all alert types, and export health data in PDF, CSV, or FHIR R4 format. This is the essential monitoring loop — everything needed for the app to be useful from day one.
 
 ---
 
@@ -621,7 +621,7 @@ Each device card:
 ---
 
 ### M1-10: Alerts List
-**User Story:** 3.1 Alert Management
+**User Story:** 3.1 Alert Management | 3.3 Alert Acknowledgment & Notes
 **Entry:** Tab bar (Alerts) | ← M1-09 Dashboard (Recent Alerts)
 **Exit:** → M1-11 Alert Detail (Activity) | → M1-12 Alert Detail (Critical) | → Phone call
 
@@ -669,7 +669,7 @@ Heart rate alerts tap → M1-16
 ---
 
 ### M1-11: Alert Detail - Activity
-**User Story:** 11.1 Activity Decline
+**User Story:** 11.1 Activity Decline | 3.3 Alert Acknowledgment & Notes
 **Entry:** ← M1-10 Alerts List (tap alert card)
 **Exit:** ← M1-10 Alerts List (back) | → Phone call | → SMS | → M2-03 Trend Charts
 
@@ -729,7 +729,7 @@ Heart rate alerts tap → M1-16
 ---
 
 ### M1-12: Alert Detail - Critical (No Movement)
-**User Story:** 11.3 No Morning Activity
+**User Story:** 11.3 No Morning Activity | 3.3 Alert Acknowledgment & Notes
 **Entry:** ← M1-10 Alerts List | Push notification (direct)
 **Exit:** ← M1-10 Alerts List (back) | → Phone call | → Note input
 
@@ -778,6 +778,7 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 ---
 
 ### M1-13: CardiMember Detail
+**User Story:** 1.4 CardiMember Profile Management
 **Entry:** ← M1-09 Dashboard ("View Details") | ← M2-01 Settings ("Manage CardiMembers")
 **Exit:** ← Previous screen (back) | → M1-14 Edit CardiMember | → M1-09 Dashboard | → M1-10 Alerts
 
@@ -812,6 +813,7 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 ---
 
 ### M1-14: Edit CardiMember
+**User Story:** 1.4 CardiMember Profile Management
 **Entry:** ← M1-13 CardiMember Detail (edit button)
 **Exit:** ← M1-13 CardiMember Detail (cancel or save)
 
@@ -936,18 +938,84 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 
 ---
 
-## MVP 2 — Management & Settings (8 screens)
+### M1-17: Health Data Export
+**User Story:** 6.3 Health Data Export
+**Entry:** ← M2-03 Trend Charts (Export icon) | ← M2-01 Settings ("Export Health Data") | ← M1-13 CardiMember Detail ("Export Data")
+**Exit:** ← Previous screen (back) | → Share sheet / email
 
-Extends MVP 1 with account management: view trends and historical data, configure notification preferences, handle personal subscription (Basic & Complete Care), and export health data in HL7 and FHIR formats.
+**Header:**
+- Back button
+- Title: "Export Health Data"
+
+**CardiMember Selector:**
+- Dropdown: "Export data for: [Dad]"
+
+**Date Range:**
+- "From" date picker
+- "To" date picker
+- Quick presets: [Last 7 Days] [Last 30 Days] [Last 90 Days] [All Data]
+
+**Data Selection (checkboxes):**
+- Activity & Steps
+- Heart Rate
+- Sleep Data
+- Alerts & Events
+- Notes (if any)
+
+**Export Format (radio buttons):**
+
+| Format | Description | Use Case | Available |
+|--------|-------------|----------|-----------|
+| PDF Report | Human-readable summary with charts | Sharing with family or personal records | **MVP 1** |
+| CSV | Raw data spreadsheet | Personal analysis | **MVP 1** |
+| FHIR (R4) | Fast Healthcare Interoperability Resources | Modern EHR integration, patient portals | **MVP 1** |
+| HL7 v2 | Health Level Seven messaging format | Hospital system integration | MVP 2 |
+
+**MVP 2 addition:** HL7 v2 format added to this screen — no new screen created
+
+**MVP 3 addition:** LOINC and CCD formats added (see M3-07)
+
+**MVP 4 addition:** SNOMED CT format added (see M3-07)
+
+**Format Info (expandable per format):**
+- Tap info icon next to FHIR/HL7 → explains format, typical recipients (hospitals, clinics, patient portals)
+
+**Delivery Method:**
+- "Save to Device" (default)
+- "Email to..." — email input with autocomplete (self, doctor, family)
+- "Share via..." — opens native share sheet
+
+**Preview Section:**
+- "Preview Export" button — shows first page / sample of export
+- Estimated file size: "~2.4 MB"
+
+**CTA:**
+- Primary button: "Export Data"
+- Progress: "Generating export..." with progress bar
+- Success: "Export complete!" with option to share or save
+
+**States:**
+- **M1-17a — Default:** Format and date selection
+- **M1-17b — Generating:** Progress bar with cancel option
+- **M1-17c — Complete:** Success message with share/save actions
+- **M1-17d — Error:** "That didn't work — let's try again" with retry
+
+---
+
+## MVP 2 — Management & Settings (4 screens)
+
+Extends MVP 1 with account management: view trends and historical data, configure notification preferences, handle personal subscription (Basic & Complete Care), and add HL7 v2 as an additional export format in M1-17. Garmin device support added.
 
 **Prerequisite:** MVP 1 must be complete. MVP 2 adds settings and management screens that supplement the core monitoring loop.
+
+> **Export note:** M1-17 (Health Data Export) ships in MVP 1 with PDF, CSV, and FHIR R4. MVP 2 updates M1-17 to add HL7 v2 to the format picker — no new screen is created.
 
 ---
 
 ### M2-01: Settings Main
 **User Story:** 6.1, 6.2 Settings
 **Entry:** Tab bar (Settings) | Flyout menu
-**Exit:** → M2-02 Subscription | → M2-04 Notification Settings | → M1-13 CardiMember Detail | → M1-15 Device Management | → M2-05 Health Data Export
+**Exit:** → M2-02 Subscription | → M2-04 Notification Settings | → M1-13 CardiMember Detail | → M1-15 Device Management | → M1-17 Health Data Export
 
 **User Profile Section (top card):**
 - Profile photo (large, tappable to edit)
@@ -965,7 +1033,7 @@ Extends MVP 1 with account management: view trends and historical data, configur
 **CardiMembers**
 - Manage CardiMembers →
 - Connected Devices → M1-15
-- Export Health Data → M2-05
+- Export Health Data → M1-17
 
 **Health Records (MVP 3)**
 - Scan Test Results → M3-06
@@ -1044,7 +1112,7 @@ Extends MVP 1 with account management: view trends and historical data, configur
 ### M2-03: Trend Charts
 **User Story:** 2.3 Historical Data
 **Entry:** ← M1-09 Dashboard ("View Trends") | ← M1-11 Alert Detail ("View Detailed Data")
-**Exit:** ← Previous screen (back) | → M2-05 Health Data Export
+**Exit:** ← Previous screen (back) | → M1-17 Health Data Export
 
 **Header:**
 - Back button
@@ -1142,68 +1210,6 @@ Extends MVP 1 with account management: view trends and historical data, configur
 - "Send Test Push Notification" button
 - "Send Test Email" button
 - "Send Test SMS" button
-
----
-
-### M2-05: Health Data Export
-**User Story:** 6.3 Data Export
-**Entry:** ← M2-03 Trend Charts (Export icon) | ← M2-01 Settings ("Export Health Data") | ← M1-13 CardiMember Detail ("Export Data")
-**Exit:** ← Previous screen (back) | → Share sheet / email
-
-**Header:**
-- Back button
-- Title: "Export Health Data"
-
-**CardiMember Selector:**
-- Dropdown: "Export data for: [Dad]"
-
-**Date Range:**
-- "From" date picker
-- "To" date picker
-- Quick presets: [Last 7 Days] [Last 30 Days] [Last 90 Days] [All Data]
-
-**Data Selection (checkboxes):**
-- Activity & Steps
-- Heart Rate
-- Sleep Data
-- Alerts & Events
-- Notes (if any)
-
-**Export Format (radio buttons):**
-
-| Format | Description | Use Case |
-|--------|-------------|----------|
-| PDF Report | Human-readable summary with charts | Sharing with family or personal records |
-| CSV | Raw data spreadsheet | Personal analysis |
-| HL7 v2 | Health Level Seven messaging format | Hospital system integration |
-| FHIR (R4) | Fast Healthcare Interoperability Resources | Modern EHR integration, patient portals |
-
-**MVP 3 addition:** LOINC and CCD formats added (see M3-07)
-
-**MVP 4 addition:** SNOMED CT format added (see M3-07)
-
-**Format Info (expandable per format):**
-- Tap info icon next to HL7/FHIR → explains format, typical recipients (hospitals, clinics, patient portals)
-
-**Delivery Method:**
-- "Save to Device" (default)
-- "Email to..." — email input with autocomplete (self, doctor, family)
-- "Share via..." — opens native share sheet
-
-**Preview Section:**
-- "Preview Export" button — shows first page / sample of export
-- Estimated file size: "~2.4 MB"
-
-**CTA:**
-- Primary button: "Export Data"
-- Progress: "Generating export..." with progress bar
-- Success: "Export complete!" with option to share or save
-
-**States:**
-- **M2-05a — Default:** Format and date selection
-- **M2-05b — Generating:** Progress bar with cancel option
-- **M2-05c — Complete:** Success message with share/save actions
-- **M2-05d — Error:** "That didn't work — let's try again" with retry
 
 ---
 
@@ -1404,7 +1410,7 @@ Each note card:
 ---
 
 ### M3-06: Test Results Scanner
-**User Story:** 7.1 Lab Results Capture
+**User Story:** 12.1 Lab Results Capture
 **Entry:** ← M2-01 Settings ("Scan Test Results") | ← M1-13 CardiMember Detail ("Add Test Results") | Tab bar (dedicated entry point)
 **Exit:** → M3-07 Test Results Detail (scan complete) | ← Previous screen (cancel)
 
@@ -1458,9 +1464,9 @@ Each note card:
 ---
 
 ### M3-07: Test Results Detail
-**User Story:** 7.2 Results Analysis
+**User Story:** 12.2 Medical Insights from Lab Results
 **Entry:** ← M3-06 Test Results Scanner (analysis complete) | ← M1-13 CardiMember Detail ("View Test Results")
-**Exit:** ← Previous screen (back) | → M2-05 Health Data Export | → Share
+**Exit:** ← Previous screen (back) | → M1-17 Health Data Export | → Share
 
 **Header:**
 - Back button
@@ -1506,7 +1512,7 @@ Each result row:
 - "Mark as Verified" button
 
 **Export & Sharing:**
-- "Export Results" → M2-05 Health Data Export
+- "Export Results" → M1-17 Health Data Export
 - "Share with Doctor" → pre-formatted email/share
 - "Add to Health Record" → saves to CardiMember profile
 
@@ -1515,7 +1521,7 @@ Each result row:
   - **LOINC** — standardized lab test codes (e.g., Hemoglobin A1c = LOINC 4548-4) *(MVP 3)*
   - **CCD** — Continuity of Care Document for structured clinical summaries *(MVP 3)*
   - **SNOMED CT** — clinical terminology for conditions and findings *(MVP 4 addition)*
-- These formats are available in M2-05 Health Data Export as additional export options
+- These formats are available in M1-17 Health Data Export as additional export options
 
 **States:**
 - **M3-07a — Default:** Parsed results with insights
@@ -1660,6 +1666,7 @@ Designs for system-level notification UI.
 ---
 
 ### M4-07: Share Sheet Integration
+**User Story:** 5.3 Native Sharing
 
 Native share sheet triggered from charts and alerts.
 
@@ -1771,7 +1778,7 @@ Icons use **SF Symbols** (iOS) and **Material Symbols** (Android) — no custom 
 
 ### MVP 2 — Assets
 
-No new custom assets required. Management & Settings screens (M2-01–M2-05) use platform components, existing brand assets, and third-party logos already sourced in MVP 1.
+No new custom assets required. Management & Settings screens (M2-01–M2-04) use platform components, existing brand assets, and third-party logos already sourced in MVP 1.
 
 ---
 
@@ -1907,7 +1914,7 @@ Once connected, screen designs can be referenced directly by Figma frame URL dur
 ---
 
 **Total Screens:** 68 (counting each state as a screen)
-**MVP 1:** 33 screens — Core Monitoring (design first)
-**MVP 2:** 8 screens — Management & Settings
+**MVP 1:** 37 screens — Core Monitoring (design first)
+**MVP 2:** 4 screens — Management & Settings
 **MVP 3:** 14 screens — Family & Multi-Member
 **MVP 4:** 13 screens — Native & Offline

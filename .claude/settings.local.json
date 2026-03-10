@@ -15,7 +15,10 @@
       "Bash(python3:*)",
       "Bash(dotnet package search \"Microsoft.Azure.Functions.Worker.Sdk\" --take 5)",
       "Bash(dotnet package search \"Microsoft.Azure.Functions.Worker.Extensions.Timer\" --take 3)",
-      "Bash(dotnet test tests/CardiTrack.UnitTests)"
+      "Bash(dotnet test tests/CardiTrack.UnitTests)",
+      "Bash(xargs grep:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet test:*)"
     ]
   }
 }
