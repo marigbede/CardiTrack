@@ -384,6 +384,12 @@ Based on the solution manifest, market analysis, and README, here are comprehens
 
 ### .NET MAUI Mobile App
 
+**Platform Requirements**
+- **Minimum iOS:** 16.0 — covers ~90%+ of active iPhones; required for modern SwiftUI APIs and background push delivery
+- **Minimum Android:** 10 (API 29) — covers ~85–90% of active Android devices; required for scoped storage and modern permission model
+- **Target iOS:** 18 (latest stable)
+- **Target Android:** 15 / API 35 (latest stable)
+
 **Story 10.1: Offline Support**
 - **As a** mobile user with spotty connectivity
 - **I want to** view recent health data even when offline

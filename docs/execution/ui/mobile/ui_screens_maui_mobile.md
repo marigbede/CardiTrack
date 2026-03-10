@@ -3,7 +3,9 @@
 ## Project Overview
 
 **Product:** CardiTrack - Remote health monitoring for elderly family members
-**Platform:** iOS (iPhone 12+) & Android (10+)
+**Platform:** iOS 16+ (iPhone 12+) & Android 10+ (API 29)
+**Minimum OS:** iOS 16.0 · Android 10 (API level 29)
+**Target OS:** iOS 18 · Android 15 (API level 35)
 **Orientation:** Portrait primary, landscape supported
 **Target Users:** Family caregivers across the US & EU monitoring elderly relatives' wearable health data
 **Document Version:** 3.0
@@ -13,14 +15,13 @@
 
 ## Release Strategy
 
-68 screens across 4 MVPs (counting each state as a screen). Each MVP is a fully functional, shippable release.
+68 screens across 3 releases (counting each state as a screen). Each release is a fully functional, shippable increment.
 
 | Release | Screens | Theme | User Gets |
 |---------|---------|-------|-----------|
 | **MVP 1** | 37 | Core Monitoring | Sign up, connect and manage device (fitbit), monitor one to n parent(s), CardiMember profile, device management, view dashboard, receive and manage all alert types, health data export (PDF, CSV, FHIR R4) |
-| **MVP 2** | 4 | Management & Settings | Trend charts, notification preferences, personal subscription (Basic & Complete Care), health data export adds HL7, connect and manage device (garmin) |
-| **MVP 3** | 14 | Family & Multi-Member | Invite family, share notes, scan test results with CardiTrack medical insights, export data in LOINC/CCD |
-| **MVP 4** | 13 | Native & Offline | Biometric setup and login, offline support, push notification actions, home screen widget, native sharing, export data in SNOMED CT |
+| **MVP 2** | 18 | Management, Settings & Family Collaboration | Trend charts, notification preferences, personal subscription (Basic & Complete Care), health data export adds HL7/LOINC/CCD, connect and manage device (garmin), invite family, share notes, scan test results with CardiTrack medical insights |
+| **MVP 3** | 13 | Native & Offline | Biometric setup and login, offline support, push notification actions, home screen widget, native sharing, export data in SNOMED CT |
 
 ---
 
@@ -49,20 +50,20 @@
 | M2-03 | Trend Charts | MVP 2 | 1 |
 | M2-04 | Notification Settings | MVP 2 | 1 |
 | M1-17 | Health Data Export | MVP 1 | 4 (a–d) |
-| M3-01 | Family Members List | MVP 3 | 1 |
-| M3-02 | Invite Family Modal | MVP 3 | 1 |
-| M3-03 | Multi-Member Dashboard | MVP 3 | 2 (a–b) |
-| M3-04 | Shared Notes Feed | MVP 3 | 1 |
-| M3-05 | Add / Edit Note | MVP 3 | 1 |
-| M3-06 | Test Results Scanner | MVP 3 | 4 (a–d) |
-| M3-07 | Test Results Detail | MVP 3 | 4 (a–d) |
-| M4-01 | Biometric Setup | MVP 4 | 1 |
-| M4-02 | Biometric Login | MVP 4 | 1 |
-| M4-03 | Offline Mode Indicator | MVP 4 | 2 (a–b) |
-| M4-04 | Offline Data Cache Settings | MVP 4 | 1 |
-| M4-05 | Push Notifications | MVP 4 | 4 (a–d) |
-| M4-06 | Home Screen Widget | MVP 4 | 3 (a–c) |
-| M4-07 | Share Sheet Integration | MVP 4 | 1 |
+| M3-01 | Family Members List | MVP 2 | 1 |
+| M3-02 | Invite Family Modal | MVP 2 | 1 |
+| M3-03 | Multi-Member Dashboard | MVP 2 | 2 (a–b) |
+| M3-04 | Shared Notes Feed | MVP 2 | 1 |
+| M3-05 | Add / Edit Note | MVP 2 | 1 |
+| M3-06 | Test Results Scanner | MVP 2 | 4 (a–d) |
+| M3-07 | Test Results Detail | MVP 2 | 4 (a–d) |
+| M4-01 | Biometric Setup | MVP 3 | 1 |
+| M4-02 | Biometric Login | MVP 3 | 1 |
+| M4-03 | Offline Mode Indicator | MVP 3 | 2 (a–b) |
+| M4-04 | Offline Data Cache Settings | MVP 3 | 1 |
+| M4-05 | Push Notifications | MVP 3 | 4 (a–d) |
+| M4-06 | Home Screen Widget | MVP 3 | 3 (a–c) |
+| M4-07 | Share Sheet Integration | MVP 3 | 1 |
 
 ---
 
@@ -71,109 +72,193 @@
 ### Flow 1: First-Time Onboarding (MVP 1)
 
 ```
-[M1-01 Splash] → [M1-02 Welcome] → [M1-03 Sign Up] → [M1-04 Add CardiMember]
-                       │                                        │
-                       │ "Sign In"                              │ "Skip"
-                       ▼                                        ▼
-                 (Login screen)                           [M1-09 Dashboard]
-                                                          (empty state)
-
-                       [M1-04 Add CardiMember]
-                               │
-                               ▼
-                       [M1-05 Device Selection]
-                               │
-                               ▼
-                       [M1-06 OAuth Permission]
-                               │
-                          ┌────┴────┐
-                          │ Success │ Failure
-                          ▼         ▼
-                       [M1-07 Success] → Retry / Help
-                          │
-                          ▼
-                       [M1-08 Baseline Info]
-                          │
-                          ▼
-                       [M1-09 Dashboard]
+[M1-01 Splash] ──────────────────────────────────────────> [M1-09 Dashboard]
+      │                                                      (returning user)
+      ▼
+[M1-02 Welcome]
+      │              │
+   "Get Started"  "Sign In"
+      │              ▼
+      │         [Login screen] ──────────────────────────> [M1-09 Dashboard]
+      ▼
+[M1-03 Sign Up]
+      │
+      ▼
+[M1-04 Add CardiMember]
+      │                  │
+   "Continue"         "Skip"
+      │                  └──────────────────────────────> [M1-09 Dashboard]
+      ▼                                                     (empty state)
+[M1-05 Device Selection]
+      │
+      ▼
+[M1-06 OAuth Permission]
+      │
+   ┌──┴──────────────┐
+Success             Failure
+   │                   │
+   ▼                   └──> Back to M1-05 | Help
+[M1-07 Connection Success]
+   │                   │
+"Continue"    "+ Add Another Device"
+   │                   └──> [M1-05 Device Selection]
+   ▼
+[M1-08 Baseline Learning Info]
+   │                   │
+"Go to Dashboard"   "Invite Family First" (MVP 2)
+   │                   └──> [M3-02 Invite Family Modal]
+   ▼
+[M1-09 Dashboard]
 ```
 
 ### Flow 2: Daily Monitoring (MVP 1)
 
 ```
-[App Launch] → [M1-09 Dashboard]
-                     │
-           ┌─────────┼───────────┐
-           ▼         ▼           ▼
-      [Call/SMS] [M1-10 Alerts] [M2-03 Trends]
-                     │
-                ┌────┴────┐
-                ▼         ▼
-           [M1-11]    [M1-12]
-           Activity   Critical
-                │         │
-                ▼         ▼
-           [Acknowledge] [Call Now]
+[App Launch / Tab: Home] → [M1-09 Dashboard]
+                                  │
+              ┌───────────────────┼─────────────────────┐
+              ▼                   ▼                     ▼
+         [Call/SMS]         [M1-10 Alerts]         [M1-13 CardiMember Detail]
+                                  │                     │
+                       ┌──────────┼──────────┐     [M1-14 Edit CardiMember]
+                       ▼          ▼          ▼
+                   [M1-11       [M1-12     [M1-16
+                   Activity]    Critical]  Heart Rate]
+                       │          │          │
+                  Acknowledge  "Call Now"  "Suggest
+                  / Add Note   "On My Way"  Doctor Visit"
+                       │          │          │
+                       └──────────┴──────────┘
+                                  │
+                             Back to M1-10
+                                  │
+                         "View Trends" ──> [M2-03 Trend Charts]
 ```
 
 ### Flow 3: Settings & Management (MVP 2)
 
 ```
-[Tab: Settings] → [M2-01 Settings Main]
-                         │
-               ┌─────────┼──────────┬──────────┐
-               ▼         ▼          ▼          ▼
-         [M2-02 Sub] [M2-04 Notif] [M1-13 Detail] [M1-15 Devices]
-                                        │
-                                        ▼
-                                   [M1-14 Edit]
+[Tab: Settings / Flyout] → [M2-01 Settings Main]
+                                    │
+            ┌───────────────────────┼──────────────────────┐
+            ▼                       ▼                      ▼
+     [M2-02 Subscription]    [M2-04 Notification     [M1-15 Device
+                                   Settings]          Management]
+                                                           │
+                            ┌──────┴──────┐        "+ Add Device"
+                            ▼             ▼               ▼
+                    [M1-13 CardiMember  [M1-17      [M1-05 Device
+                       Detail]          Export]      Selection]
+                            │
+                       [M1-14 Edit]
 ```
 
-### Flow 3b: Data Export (MVP 1)
+### Flow 4: Data Export (MVP 1+)
 
 ```
-[M2-03 Trends] → Export icon → [M1-17 Health Data Export]
-[M2-01 Settings] → "Export Health Data" → [M1-17 Health Data Export]
-[M1-13 Detail] → "Export Data" → [M1-17 Health Data Export]
-                                        │
-                                   ┌────┴────┐
-                                   ▼         ▼
-                              [Save/Share] [Email]
+Entry points:
+  [M2-03 Trend Charts] → Export icon ──────────┐
+  [M2-01 Settings] → "Export Health Data" ──────┤──> [M1-17 Health Data Export]
+  [M1-13 CardiMember Detail] → "Export Data" ───┘
+  [M3-07 Test Results Detail] → "Export Results"
+
+                                  [M1-17 Health Data Export]
+                                            │
+                           ┌────────────────┼────────────────┐
+                           ▼                ▼                ▼
+                      [Save to Device]   [Email to...]  [Share via...]
 ```
 
-### Flow 4: Family Collaboration (MVP 3)
+### Flow 5: Family Collaboration (MVP 2)
 
 ```
-[Tab: Family] → [M3-01 Family List]
-                       │
-                 ┌─────┴─────┐
-                 ▼           ▼
-           [M3-02 Invite] [M3-04 Notes]
-                               │
-                               ▼
-                          [M3-05 Add Note]
+[M1-08 Baseline] → "Invite Family First" ─────────────┐
+[Tab: Family] → [M3-01 Family Members List]            │
+                         │                             │
+              ┌──────────┴──────────┐                  │
+              ▼                     ▼                  │
+      [Active Members]       [Pending Invites]         │
+              │                     │                  │
+        "Change Role"           "Resend" / "Revoke"    │
+        "Remove Access"                                │
+                                                       ▼
+                                             [M3-02 Invite Modal]
+                                                       │
+                                               Success confirmation
+
+[Tab: Family → Notes] → [M3-04 Shared Notes Feed]
+                                  │
+                     ┌────────────┴────────────┐
+                     ▼                         ▼
+              [M3-05 Add / Edit Note]    Tap note → View thread
+                     │
+               "Post" → back to M3-04
 ```
 
-### Flow 5: Multi-Member (MVP 3)
+### Flow 6: Multi-Member Dashboard (MVP 2)
 
 ```
-[M3-03 Multi-Dashboard] → tap member → [M1-09 Single Dashboard]
+[Tab: Home — when 2+ CardiMembers] → [M3-03 Multi-Member Dashboard]
+                                                │
+                          ┌─────────────────────┼──────────────────┐
+                          ▼                     ▼                  ▼
+                   Tap CardiMember       "+ Add" button       Filter / Sort
+                          │                     │
+                          ▼                     ▼
+                   [M1-09 Single          [M1-04 Add First
+                    Dashboard]             CardiMember]
+                          │
+              ┌───────────┴────────────┐
+              ▼                        ▼
+       [M1-10 Alerts]          [M1-13 CardiMember
+                                    Detail]
 ```
 
-### Flow 6: Test Results (MVP 3)
+### Flow 7: Test Results Scanning (MVP 2)
 
 ```
-[M3-06 Scanner] → Camera/Upload → OCR Processing
-                                        │
-                                        ▼
-                                  [M3-07 Results Detail]
-                                        │
-                              ┌─────────┼──────────┐
-                              ▼         ▼          ▼
-                         [CardiTrack Insights] [Export]  [Share]
-                                        │
-                                        ▼
-                                  [M1-17 Export]
+Entry points:
+  [M2-01 Settings] → "Scan Test Results" ──┐
+  [M1-13 CardiMember Detail] ──────────────┤──> [M3-06 Test Results Scanner]
+  [Tab: dedicated entry] ──────────────────┘
+                                                          │
+                                              ┌───────────┼────────────┐
+                                           Camera       Upload       Error
+                                              │           │             │
+                                              └─────┬─────┘         Retry / Help
+                                                    ▼
+                                               OCR Processing
+                                                    │
+                                         ┌──────────┴──────────┐
+                                      Success              Partial read
+                                         │                  (fix on next screen)
+                                         ▼
+                                 [M3-07 Test Results Detail]
+                                         │
+                          ┌──────────────┼────────────────┐
+                          ▼              ▼                ▼
+                   [M1-17 Export]   "Share with      "Add to Health
+                                     Doctor"           Record"
+
+```
+
+### Flow 8: Critical Alert Response (MVP 1)
+
+```
+Push notification (any time) ────────────────────────────────> [M1-12 Alert Detail - Critical]
+                                                                          │
+                                                             ┌────────────┴────────────────┐
+                                                             ▼                             ▼
+                                                       "CALL NOW"                   "I'M ON MY WAY"
+                                                       (one tap dial)               (notifies family,
+                                                                                     updates status)
+                                                                    │
+                                                           "It's okay — explain"
+                                                                    │
+                                                              [Note field]
+                                                                    │
+                                                             Alert dismissed
+                                                             (explanation logged)
 ```
 
 ---
@@ -222,6 +307,22 @@
 
 ---
 
+## POC Screens
+
+Five MVP 1 screens selected to validate the core design language — covering branding, the primary monitoring experience, the alert management system, and critical safety interactions.
+
+| # | Screen | Why It's Here |
+|---|--------|---------------|
+| 1 | **M1-02 — Welcome / Landing** | Entry point; showcases brand identity, hero carousel, and marketing tone |
+| 2 | **M1-04 — Add First CardiMember** | Onboarding form; demonstrates photo picker, progressive disclosure, and inline privacy messaging |
+| 3 | **M1-09 — Main Dashboard** | Core monitoring screen; shows status hero card, 3-metric layout, severity color system, and sparklines |
+| 4 | **M1-10 — Alerts List** | Alert management; demonstrates severity badges, grouped list design, filter chips, and swipe actions |
+| 5 | **M1-12 — Alert Detail - Critical** | Highest-stakes screen; validates urgency design, pulsing severity treatment, and primary CTA hierarchy |
+
+These five screens span onboarding → daily use → emergency response and collectively exercise the full design system: typography, color severity levels, card components, form patterns, and navigation affordances.
+
+---
+
 ## MVP 1 — Core Monitoring (37 screens)
 
 A single user can sign up, add one or more CardiMembers, connect devices, manage CardiMember profiles, view the health dashboard, receive and manage all alert types, and export health data in PDF, CSV, or FHIR R4 format. This is the essential monitoring loop — everything needed for the app to be useful from day one.
@@ -231,7 +332,7 @@ A single user can sign up, add one or more CardiMembers, connect devices, manage
 ### M1-01: Splash Screen
 **User Story:** 1.1-1.3 Onboarding
 **Entry:** App launch
-**Exit:** → M1-02 Welcome (first launch) | → M1-09 Dashboard (returning user) | → M4-02 Biometric Login (MVP 4, if enabled)
+**Exit:** → M1-02 Welcome (first launch) | → M1-09 Dashboard (returning user) | → M4-02 Biometric Login (MVP 3, if enabled)
 
 **Duration:** 2-3 seconds while app initializes
 
@@ -537,7 +638,7 @@ Each device card:
 **CTA:**
 - Primary button: "Go to Dashboard"
 
-**MVP 3 addition:** Text link "Invite Family Members First" → M3-02
+**MVP 2 addition:** Text link "Invite Family Members First" → M3-02
 
 ---
 
@@ -616,7 +717,7 @@ Each device card:
 - **M1-09d — No device connected:** Prompt card: "Connect [Name]'s device so CardiTrack can start watching over them" → M1-05
 - **M1-09e — Baseline learning:** Shows progress bar instead of "% of normal" comparisons
 
-**MVP 3 change:** When user has multiple CardiMembers, Home tab shows M3-03 instead
+**MVP 2 change:** When user has multiple CardiMembers, Home tab shows M3-03 instead
 
 ---
 
@@ -973,9 +1074,9 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 
 **MVP 2 addition:** HL7 v2 format added to this screen — no new screen created
 
-**MVP 3 addition:** LOINC and CCD formats added (see M3-07)
+**MVP 2 addition:** LOINC and CCD formats added (see M3-07)
 
-**MVP 4 addition:** SNOMED CT format added (see M3-07)
+**MVP 3 addition:** SNOMED CT format added (see M3-07)
 
 **Format Info (expandable per format):**
 - Tap info icon next to FHIR/HL7 → explains format, typical recipients (hospitals, clinics, patient portals)
@@ -1002,13 +1103,13 @@ This is the most safety-critical screen in the app. Design for urgency and immed
 
 ---
 
-## MVP 2 — Management & Settings (4 screens)
+## MVP 2 — Management, Settings & Family Collaboration (18 screens)
 
-Extends MVP 1 with account management: view trends and historical data, configure notification preferences, handle personal subscription (Basic & Complete Care), and add HL7 v2 as an additional export format in M1-17. Garmin device support added.
+Extends MVP 1 with account management, trend history, notification preferences, subscription billing, Garmin device support, and HL7 v2 export; plus family collaboration — invite siblings, shared notes, multi-member dashboard, test results scanning with CardiTrack medical insights, and LOINC/CCD export formats.
 
-**Prerequisite:** MVP 1 must be complete. MVP 2 adds settings and management screens that supplement the core monitoring loop.
+**Prerequisite:** MVP 1 must be complete.
 
-> **Export note:** M1-17 (Health Data Export) ships in MVP 1 with PDF, CSV, and FHIR R4. MVP 2 updates M1-17 to add HL7 v2 to the format picker — no new screen is created.
+> **Export note:** M1-17 (Health Data Export) ships in MVP 1 with PDF, CSV, and FHIR R4. This release updates M1-17 to add HL7 v2, LOINC, and CCD to the format picker — no new screen is created for these additions.
 
 ---
 
@@ -1028,14 +1129,14 @@ Extends MVP 1 with account management: view trends and historical data, configur
 **Account**
 - My Profile →
 - Subscription & Billing → (badge: current plan name)
-- Family & Sharing → (MVP 3)
+- Family & Sharing → (MVP 2)
 
 **CardiMembers**
 - Manage CardiMembers →
 - Connected Devices → M1-15
 - Export Health Data → M1-17
 
-**Health Records (MVP 3)**
+**Health Records (MVP 2)**
 - Scan Test Results → M3-06
 
 **Notifications**
@@ -1061,7 +1162,7 @@ Extends MVP 1 with account management: view trends and historical data, configur
 - "Sign Out" (destructive text)
 - "Delete Account" (destructive text)
 
-**MVP 3 addition:** Family & Sharing → M3-01
+**MVP 2 addition:** Family & Sharing → M3-01
 
 ---
 
@@ -1200,7 +1301,7 @@ Extends MVP 1 with account management: view trends and historical data, configur
 - Time pickers: From 10:00 PM → To 7:00 AM
 - Exception toggle: "Still wake me for emergencies"
 
-**Family Routing (MVP 3):**
+**Family Routing (MVP 2):**
 - "Also let these family members know:"
 - Checkboxes with severity chips:
   - Sarah Johnson — [High Severity] [Critical]
@@ -1210,14 +1311,6 @@ Extends MVP 1 with account management: view trends and historical data, configur
 - "Send Test Push Notification" button
 - "Send Test Email" button
 - "Send Test SMS" button
-
----
-
-## MVP 3 — Family & Multi-Member (14 screens)
-
-Adds family collaboration: invite siblings to share caregiving, shared notes, manage multiple CardiMembers from a dedicated dashboard, test results scanning with CardiTrack medical insights, and expanded data export formats (LOINC, CCD).
-
-**Prerequisite:** MVP 2 must be complete. MVP 3 extends existing screens (noted as "MVP 3 addition/change" in MVP 1–2 specs).
 
 ---
 
@@ -1518,9 +1611,9 @@ Each result row:
 
 **Data Standards:**
 - Results are encoded using:
-  - **LOINC** — standardized lab test codes (e.g., Hemoglobin A1c = LOINC 4548-4) *(MVP 3)*
-  - **CCD** — Continuity of Care Document for structured clinical summaries *(MVP 3)*
-  - **SNOMED CT** — clinical terminology for conditions and findings *(MVP 4 addition)*
+  - **LOINC** — standardized lab test codes (e.g., Hemoglobin A1c = LOINC 4548-4) *(MVP 2)*
+  - **CCD** — Continuity of Care Document for structured clinical summaries *(MVP 2)*
+  - **SNOMED CT** — clinical terminology for conditions and findings *(MVP 3 addition)*
 - These formats are available in M1-17 Health Data Export as additional export options
 
 **States:**
@@ -1531,11 +1624,11 @@ Each result row:
 
 ---
 
-## MVP 4 — Native & Offline (13 screens)
+## MVP 3 — Native & Offline (13 screens)
 
 Adds platform-native polish: biometric security (setup and login), offline data access with sync queue, rich push notifications with inline actions, home screen widgets for at-a-glance monitoring, native share sheet for exporting data to doctors or family, and SNOMED CT health data export.
 
-**Prerequisite:** MVP 3 must be complete.
+**Prerequisite:** MVP 2 must be complete.
 
 ---
 
@@ -1782,7 +1875,7 @@ No new custom assets required. Management & Settings screens (M2-01–M2-04) use
 
 ---
 
-### MVP 3 — Assets
+### MVP 2 — Assets
 
 #### Illustrations
 
@@ -1798,11 +1891,11 @@ No new custom assets required. Management & Settings screens (M2-01–M2-04) use
 
 #### Icons (platform — no custom design)
 
-All icons in MVP 3 reuse platform icon sets. No new custom icons needed.
+All icons in MVP 2 reuse platform icon sets. No new custom icons needed.
 
 ---
 
-### MVP 4 — Assets
+### MVP 3 — Assets
 
 #### Icons (platform-provided)
 
@@ -1824,14 +1917,14 @@ No new custom illustrations or animations needed for MVP 3.
 
 ### Asset Summary
 
-| Category | MVP 1 | MVP 2 | MVP 3 | MVP 4 | Total |
-|----------|-------|-------|-------|-------|-------|
-| Custom illustrations | 6 | 0 | 1 | 0 | **7** |
-| Brand assets (logo + icon) | 2 | 0 | 0 | 0 | **2** |
-| Animations (Lottie / XAML) | 4 | 0 | 1 | 0 | **5** |
-| Third-party logos | 8 | 0 | 0 | 0 | **8** |
-| Widget assets | 0 | 0 | 0 | 1 | **1** |
-| **Subtotal** | **20** | **0** | **2** | **1** | **23** |
+| Category | MVP 1 | MVP 2 | MVP 3 | Total |
+|----------|-------|-------|-------|-------|
+| Custom illustrations | 6 | 1 | 0 | **7** |
+| Brand assets (logo + icon) | 2 | 0 | 0 | **2** |
+| Animations (Lottie / XAML) | 4 | 1 | 0 | **5** |
+| Third-party logos | 8 | 0 | 0 | **8** |
+| Widget assets | 0 | 0 | 1 | **1** |
+| **Subtotal** | **20** | **2** | **1** | **23** |
 
 **Truly custom** (must be designed): **2** — CardiTrack logo and app icon. Everything else can be sourced from Storyset/Blush (illustrations), LottieFiles (animations), vendor brand kits (logos), and platform icon sets (SF Symbols / Material Symbols).
 
@@ -1843,7 +1936,7 @@ This project uses **Cursor + Figma MCP** to build the UI directly from Figma des
 
 ### File Structure
 
-- Organise screens into **named Pages** per MVP: `MVP 1 — Core Monitoring`, `MVP 2 — Management & Settings`, `MVP 3 — Family & Multi-Member`, `MVP 4 — Native & Offline`
+- Organise screens into **named Pages** per MVP: `MVP 1 — Core Monitoring`, `MVP 2 — Management, Settings & Family Collaboration`, `MVP 3 — Native & Offline`
 - Each screen must live in its own **named Frame**, using the Screen IDs from this document (e.g. `M1-09 Main Dashboard`)
 - Group all reusable UI into a dedicated **`Components`** page
 
@@ -1915,6 +2008,5 @@ Once connected, screen designs can be referenced directly by Figma frame URL dur
 
 **Total Screens:** 68 (counting each state as a screen)
 **MVP 1:** 37 screens — Core Monitoring (design first)
-**MVP 2:** 4 screens — Management & Settings
-**MVP 3:** 14 screens — Family & Multi-Member
-**MVP 4:** 13 screens — Native & Offline
+**MVP 2:** 18 screens — Management, Settings & Family Collaboration
+**MVP 3:** 13 screens — Native & Offline
