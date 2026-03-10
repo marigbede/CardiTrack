@@ -1,0 +1,185 @@
+using CardiTrack.Application.Interfaces.Repositories;
+using CardiTrack.Domain.Enums;
+using CardiTrack.UnitTests.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace CardiTrack.UnitTests.Repositories;
+
+[Collection("DatabaseCollection")]
+public class DeviceConnectionRepositoryTests(TestDatabaseFixture fixture)
+{
+    // ── GetActiveByCardiMemberIdAsync ────────────────────────────────────────────
+
+    [Fact]
+    public async Task GetActiveByCardiMemberIdAsync_ReturnsConnections_ForGivenMember()
+    {
+        using var scope = fixture.CreateScope();
+        var repo = scope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+
+        var org = await TestDataSeeder.SeedOrganizationAsync(scope);
+        var member = await TestDataSeeder.SeedCardiMemberAsync(scope, org.Id);
+        var connection = await TestDataSeeder.SeedDeviceConnectionAsync(scope, member.Id);
+
+        var result = await repo.GetActiveByCardiMemberIdAsync(member.Id);
+
+        Assert.Contains(result, c => c.Id == connection.Id);
+    }
+
+    [Fact]
+    public async Task GetActiveByCardiMemberIdAsync_ExcludesDisconnectedConnections()
+    {
+        using var scope = fixture.CreateScope();
+        var repo = scope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+
+        var org = await TestDataSeeder.SeedOrganizationAsync(scope);
+        var member = await TestDataSeeder.SeedCardiMemberAsync(scope, org.Id);
+        var disconnected = await TestDataSeeder.SeedDeviceConnectionAsync(
+            scope, member.Id, status: ConnectionStatus.Disconnected);
+
+        var result = await repo.GetActiveByCardiMemberIdAsync(member.Id);
+
+        Assert.DoesNotContain(result, c => c.Id == disconnected.Id);
+    }
+
+    [Fact]
+    public async Task GetActiveByCardiMemberIdAsync_ExcludesInactiveConnections()
+    {
+        using var scope = fixture.CreateScope();
+        var repo = scope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+
+        var org = await TestDataSeeder.SeedOrganizationAsync(scope);
+        var member = await TestDataSeeder.SeedCardiMemberAsync(scope, org.Id);
+        var inactive = await TestDataSeeder.SeedDeviceConnectionAsync(
+            scope, member.Id, isActive: false);
+
+        var result = await repo.GetActiveByCardiMemberIdAsync(member.Id);
+
+        Assert.DoesNotContain(result, c => c.Id == inactive.Id);
+    }
+
+    // ── GetDueForSyncAsync ───────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task GetDueForSyncAsync_ReturnsConnection_WhenNeverSynced()
+    {
+        using var scope = fixture.CreateScope();
+        var repo = scope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+
+        var org = await TestDataSeeder.SeedOrganizationAsync(scope);
+        var member = await TestDataSeeder.SeedCardiMemberAsync(scope, org.Id);
+        var connection = await TestDataSeeder.SeedDeviceConnectionAsync(
+            scope, member.Id, lastSyncDate: null);
+
+        var result = await repo.GetDueForSyncAsync(30);
+
+        Assert.Contains(result, c => c.Id == connection.Id);
+    }
+
+    [Fact]
+    public async Task GetDueForSyncAsync_ReturnsConnection_WhenLastSyncExceedsThreshold()
+    {
+        using var scope = fixture.CreateScope();
+        var repo = scope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+
+        var org = await TestDataSeeder.SeedOrganizationAsync(scope);
+        var member = await TestDataSeeder.SeedCardiMemberAsync(scope, org.Id);
+        var connection = await TestDataSeeder.SeedDeviceConnectionAsync(
+            scope, member.Id, lastSyncDate: DateTime.UtcNow.AddMinutes(-45));
+
+        var result = await repo.GetDueForSyncAsync(30);
+
+        Assert.Contains(result, c => c.Id == connection.Id);
+    }
+
+    [Fact]
+    public async Task GetDueForSyncAsync_ExcludesConnection_WhenRecentlySynced()
+    {
+        using var scope = fixture.CreateScope();
+        var repo = scope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+
+        var org = await TestDataSeeder.SeedOrganizationAsync(scope);
+        var member = await TestDataSeeder.SeedCardiMemberAsync(scope, org.Id);
+        var connection = await TestDataSeeder.SeedDeviceConnectionAsync(
+            scope, member.Id, lastSyncDate: DateTime.UtcNow.AddMinutes(-5));
+
+        var result = await repo.GetDueForSyncAsync(30);
+
+        Assert.DoesNotContain(result, c => c.Id == connection.Id);
+    }
+
+    // ── UpdateTokenAsync ─────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task UpdateTokenAsync_PersistsNewTokensAndExpiry()
+    {
+        Guid connectionId;
+        var newExpiry = DateTime.UtcNow.AddHours(24);
+
+        // Arrange + Act
+        using (var scope = fixture.CreateScope())
+        {
+            var repo = scope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+            var org = await TestDataSeeder.SeedOrganizationAsync(scope);
+            var member = await TestDataSeeder.SeedCardiMemberAsync(scope, org.Id);
+            var connection = await TestDataSeeder.SeedDeviceConnectionAsync(scope, member.Id);
+            connectionId = connection.Id;
+            await repo.UpdateTokenAsync(connectionId, "new_access_enc", "new_refresh_enc", newExpiry);
+        }
+
+        // Assert — fresh scope bypasses EF change-tracking cache
+        using var readScope = fixture.CreateScope();
+        var readRepo = readScope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+        var updated = await readRepo.GetByIdAsync(connectionId);
+        Assert.Equal("new_access_enc", updated!.AccessToken);
+        Assert.Equal("new_refresh_enc", updated.RefreshToken);
+        Assert.Equal(newExpiry.Date, updated.TokenExpiry!.Value.Date);
+    }
+
+    // ── UpdateStatusAsync ────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task UpdateStatusAsync_PersistsNewStatus()
+    {
+        Guid connectionId;
+
+        using (var scope = fixture.CreateScope())
+        {
+            var repo = scope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+            var org = await TestDataSeeder.SeedOrganizationAsync(scope);
+            var member = await TestDataSeeder.SeedCardiMemberAsync(scope, org.Id);
+            var connection = await TestDataSeeder.SeedDeviceConnectionAsync(scope, member.Id);
+            connectionId = connection.Id;
+            await repo.UpdateStatusAsync(connectionId, ConnectionStatus.TokenExpired);
+        }
+
+        using var readScope = fixture.CreateScope();
+        var readRepo = readScope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+        var updated = await readRepo.GetByIdAsync(connectionId);
+        Assert.Equal(ConnectionStatus.TokenExpired, updated!.ConnectionStatus);
+    }
+
+    // ── UpdateLastSyncDateAsync ──────────────────────────────────────────────────
+
+    [Fact]
+    public async Task UpdateLastSyncDateAsync_PersistsNewSyncDate()
+    {
+        Guid connectionId;
+        var syncDate = DateTime.UtcNow;
+
+        using (var scope = fixture.CreateScope())
+        {
+            var repo = scope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+            var org = await TestDataSeeder.SeedOrganizationAsync(scope);
+            var member = await TestDataSeeder.SeedCardiMemberAsync(scope, org.Id);
+            var connection = await TestDataSeeder.SeedDeviceConnectionAsync(scope, member.Id);
+            connectionId = connection.Id;
+            await repo.UpdateLastSyncDateAsync(connectionId, syncDate);
+        }
+
+        using var readScope = fixture.CreateScope();
+        var readRepo = readScope.ServiceProvider.GetRequiredService<IDeviceConnectionRepository>();
+        var updated = await readRepo.GetByIdAsync(connectionId);
+        Assert.NotNull(updated!.LastSyncDate);
+        Assert.Equal(syncDate.Date, updated.LastSyncDate!.Value.Date);
+    }
+}
