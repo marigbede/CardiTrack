@@ -18,7 +18,11 @@
       "Bash(dotnet test tests/CardiTrack.UnitTests)",
       "Bash(xargs grep:*)",
       "Bash(dotnet clean:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(C:/Utilities/Python314/python.exe -c \"import markdown; print\\(''''markdown ok''''\\)\")",
+      "Bash(C:/Utilities/Python314/python.exe -c \"import weasyprint; print\\(''''weasyprint ok''''\\)\")",
+      "Bash(C:/Utilities/Python314/python.exe -c \"from reportlab.lib.pagesizes import A4; print\\(''''reportlab ok''''\\)\")",
+      "Bash(C:/Utilities/Python314/python.exe -m pip list)"
     ]
   }
 }
