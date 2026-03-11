@@ -13,6 +13,8 @@ out/
 # Visual Studio
 .vs/
 .vscode/
+.venv/
+.claude/
 *.userprefs
 *.pidb
 *.DotSettings.user

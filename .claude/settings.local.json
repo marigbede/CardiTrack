@@ -22,7 +22,8 @@
       "Bash(C:/Utilities/Python314/python.exe -c \"import markdown; print\\(''''markdown ok''''\\)\")",
       "Bash(C:/Utilities/Python314/python.exe -c \"import weasyprint; print\\(''''weasyprint ok''''\\)\")",
       "Bash(C:/Utilities/Python314/python.exe -c \"from reportlab.lib.pagesizes import A4; print\\(''''reportlab ok''''\\)\")",
-      "Bash(C:/Utilities/Python314/python.exe -m pip list)"
+      "Bash(C:/Utilities/Python314/python.exe -m pip list)",
+      "Bash(bash rename_cs_files.sh)"
     ]
   }
 }
