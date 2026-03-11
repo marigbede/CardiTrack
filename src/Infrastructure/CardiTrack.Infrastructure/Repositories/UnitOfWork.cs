@@ -16,6 +16,7 @@ public class UnitOfWork : IUnitOfWork
     public IUserCardiMemberRepository UserCardiMembers { get; }
     public IDeviceConnectionRepository DeviceConnections { get; }
     public IActivityLogRepository ActivityLogs { get; }
+    public IDeviceRepository Devices { get; }
 
     public UnitOfWork(
         CardiTrackDbContext context,
@@ -25,7 +26,8 @@ public class UnitOfWork : IUnitOfWork
         ISubscriptionRepository subscriptions,
         IUserCardiMemberRepository userCardiMembers,
         IDeviceConnectionRepository deviceConnections,
-        IActivityLogRepository activityLogs)
+        IActivityLogRepository activityLogs,
+        IDeviceRepository devices)
     {
         _context = context;
         Organizations = organizations;
@@ -35,6 +37,7 @@ public class UnitOfWork : IUnitOfWork
         UserCardiMembers = userCardiMembers;
         DeviceConnections = deviceConnections;
         ActivityLogs = activityLogs;
+        Devices = devices;
     }
 
     public async Task<int> SaveChangesAsync()

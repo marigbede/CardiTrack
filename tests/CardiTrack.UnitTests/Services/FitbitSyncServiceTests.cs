@@ -10,10 +10,10 @@ using NSubstitute.ExceptionExtensions;
 
 namespace CardiTrack.UnitTests.Services;
 
-public class FitbitSyncServiceTests
+public class DeviceSyncServiceTests
 {
     private readonly IOAuthTokenRefreshService _tokenRefresh = Substitute.For<IOAuthTokenRefreshService>();
-    private readonly IFitbitApiClient _fitbitApi = Substitute.For<IFitbitApiClient>();
+    private readonly IDeviceApiClient _deviceApi = Substitute.For<IDeviceApiClient>();
     private readonly IDeviceConnectionRepository _deviceConnections = Substitute.For<IDeviceConnectionRepository>();
     private readonly IActivityLogRepository _activityLogs = Substitute.For<IActivityLogRepository>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
@@ -36,22 +36,24 @@ public class FitbitSyncServiceTests
         TokenLifetimeHours = 8
     };
 
-    private FitbitSyncService CreateSut()
+    private DeviceSyncService CreateSut()
     {
         var options = Options.Create(new List<DeviceProviderSettings> { _fitbitConfig });
-        return new FitbitSyncService(
-            _tokenRefresh, _fitbitApi, _deviceConnections, _activityLogs, _unitOfWork, options);
+        return new DeviceSyncService(
+            _tokenRefresh, _deviceApi, _deviceConnections, _activityLogs, _unitOfWork, options);
     }
 
-    private void SetupDefaultApiResponses()
+    private void SetupDefaultApiResponse()
     {
         var yesterday = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-        _fitbitApi.GetActivitiesAsync(Arg.Any<string>(), yesterday)
-            .Returns(new FitbitActivitiesResult(8000, 5.2m, 45, 600, 10, 2100));
-        _fitbitApi.GetHeartRateAsync(Arg.Any<string>(), yesterday)
-            .Returns(new FitbitHeartRateResult(65, 72, 120, 55));
-        _fitbitApi.GetSleepAsync(Arg.Any<string>(), yesterday)
-            .Returns(new FitbitSleepResult(450, 87, null, null, 90, 240, 90, 30));
+        _deviceApi.GetHealthSnapshotAsync(Arg.Any<string>(), yesterday)
+            .Returns(new DeviceHealthSnapshot(
+                Steps: 8000, DistanceKm: 5.2m, ActiveMinutes: 45, SedentaryMinutes: 600,
+                Floors: 10, CaloriesBurned: 2100,
+                RestingHeartRate: 65, AvgHeartRate: 72, MaxHeartRate: 120, MinHeartRate: 55,
+                TotalSleepMinutes: 450, SleepEfficiency: 87,
+                SleepStartTime: null, SleepEndTime: null,
+                DeepSleepMinutes: 90, LightSleepMinutes: 240, RemSleepMinutes: 90, AwakeMinutes: 30));
     }
 
     [Fact]
@@ -59,20 +61,20 @@ public class FitbitSyncServiceTests
     {
         _tokenRefresh.RefreshIfExpiredAsync(Arg.Any<DeviceConnection>(), Arg.Any<DeviceProviderSettings>())
             .Returns("access_token");
-        SetupDefaultApiResponses();
+        SetupDefaultApiResponse();
 
         await CreateSut().SyncCardiMemberAsync(_fitbitConnection);
 
         await _tokenRefresh.Received(1).RefreshIfExpiredAsync(_fitbitConnection, _fitbitConfig);
-        await _fitbitApi.Received(1).GetActivitiesAsync(Arg.Any<string>(), Arg.Any<DateOnly>());
+        await _deviceApi.Received(1).GetHealthSnapshotAsync(Arg.Any<string>(), Arg.Any<DateOnly>());
     }
 
     [Fact]
-    public async Task SyncCardiMemberAsync_MapsApiResponseToActivityLog_Correctly()
+    public async Task SyncCardiMemberAsync_MapsSnapshotToActivityLog_Correctly()
     {
         _tokenRefresh.RefreshIfExpiredAsync(Arg.Any<DeviceConnection>(), Arg.Any<DeviceProviderSettings>())
             .Returns("access_token");
-        SetupDefaultApiResponses();
+        SetupDefaultApiResponse();
 
         await CreateSut().SyncCardiMemberAsync(_fitbitConnection);
 
@@ -89,7 +91,7 @@ public class FitbitSyncServiceTests
     {
         _tokenRefresh.RefreshIfExpiredAsync(Arg.Any<DeviceConnection>(), Arg.Any<DeviceProviderSettings>())
             .Returns("access_token");
-        SetupDefaultApiResponses();
+        SetupDefaultApiResponse();
 
         var expectedDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
         await CreateSut().SyncCardiMemberAsync(_fitbitConnection);
@@ -102,7 +104,7 @@ public class FitbitSyncServiceTests
     {
         _tokenRefresh.RefreshIfExpiredAsync(Arg.Any<DeviceConnection>(), Arg.Any<DeviceProviderSettings>())
             .Returns("access_token");
-        SetupDefaultApiResponses();
+        SetupDefaultApiResponse();
 
         await CreateSut().SyncCardiMemberAsync(_fitbitConnection);
 
@@ -116,7 +118,7 @@ public class FitbitSyncServiceTests
         _tokenRefresh.RefreshIfExpiredAsync(Arg.Any<DeviceConnection>(), Arg.Any<DeviceProviderSettings>())
             .Returns("access_token");
         var yesterday = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-        _fitbitApi.GetActivitiesAsync(Arg.Any<string>(), yesterday)
+        _deviceApi.GetHealthSnapshotAsync(Arg.Any<string>(), yesterday)
             .ThrowsAsync(new FitbitApiException(500, "Internal Server Error"));
 
         await Assert.ThrowsAsync<FitbitApiException>(() =>
@@ -135,8 +137,6 @@ public class FitbitSyncServiceTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             CreateSut().SyncCardiMemberAsync(_fitbitConnection));
 
-        await _fitbitApi.DidNotReceive().GetActivitiesAsync(Arg.Any<string>(), Arg.Any<DateOnly>());
-        await _fitbitApi.DidNotReceive().GetHeartRateAsync(Arg.Any<string>(), Arg.Any<DateOnly>());
-        await _fitbitApi.DidNotReceive().GetSleepAsync(Arg.Any<string>(), Arg.Any<DateOnly>());
+        await _deviceApi.DidNotReceive().GetHealthSnapshotAsync(Arg.Any<string>(), Arg.Any<DateOnly>());
     }
 }

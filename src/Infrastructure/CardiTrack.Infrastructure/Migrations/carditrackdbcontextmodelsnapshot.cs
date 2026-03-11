@@ -447,6 +447,98 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.HasIndex("SortOrder");
 
                     b.ToTable("Devices", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a1b2c3d4-0001-0000-0000-000000000001"),
+                            ApiEndpoint = "https://api.fitbit.com",
+                            Capabilities = "{\"hasHeartRate\":true,\"hasSleep\":true,\"hasActivity\":true,\"hasSpO2\":true,\"hasStress\":false}",
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeviceType = "Fitbit",
+                            DisplayName = "Fitbit",
+                            IsActive = true,
+                            Manufacturer = "Fitbit / Google",
+                            ModelName = "All Models",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("a1b2c3d4-0002-0000-0000-000000000002"),
+                            Capabilities = "{\"hasHeartRate\":true,\"hasSleep\":true,\"hasActivity\":true,\"hasSpO2\":true,\"hasECG\":true}",
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeviceType = "AppleWatch",
+                            DisplayName = "Apple Watch",
+                            IsActive = false,
+                            Manufacturer = "Apple",
+                            ModelName = "All Models",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("a1b2c3d4-0003-0000-0000-000000000003"),
+                            ApiEndpoint = "https://healthapi.garmin.com",
+                            Capabilities = "{\"hasHeartRate\":true,\"hasSleep\":true,\"hasActivity\":true,\"hasSpO2\":true,\"hasStress\":true}",
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeviceType = "Garmin",
+                            DisplayName = "Garmin",
+                            IsActive = false,
+                            Manufacturer = "Garmin",
+                            ModelName = "All Models",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("a1b2c3d4-0004-0000-0000-000000000004"),
+                            ApiEndpoint = "https://api.shealth.samsung.com",
+                            Capabilities = "{\"hasHeartRate\":true,\"hasSleep\":true,\"hasActivity\":true,\"hasSpO2\":true}",
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeviceType = "Samsung",
+                            DisplayName = "Samsung Galaxy Watch",
+                            IsActive = false,
+                            Manufacturer = "Samsung",
+                            ModelName = "Galaxy Watch",
+                            SortOrder = 4
+                        },
+                        new
+                        {
+                            Id = new Guid("a1b2c3d4-0005-0000-0000-000000000005"),
+                            ApiEndpoint = "https://wbsapi.withings.net",
+                            Capabilities = "{\"hasHeartRate\":true,\"hasSleep\":true,\"hasActivity\":true,\"hasSpO2\":true,\"hasTemperature\":true}",
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeviceType = "Withings",
+                            DisplayName = "Withings",
+                            IsActive = false,
+                            Manufacturer = "Withings",
+                            ModelName = "All Models",
+                            SortOrder = 5
+                        },
+                        new
+                        {
+                            Id = new Guid("a1b2c3d4-0006-0000-0000-000000000006"),
+                            ApiEndpoint = "https://api.ouraring.com",
+                            Capabilities = "{\"hasHeartRate\":true,\"hasSleep\":true,\"hasActivity\":true,\"hasSpO2\":true,\"hasTemperature\":true,\"hasHRV\":true}",
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeviceType = "Oura",
+                            DisplayName = "Oura Ring",
+                            IsActive = false,
+                            Manufacturer = "Oura",
+                            ModelName = "Oura Ring",
+                            SortOrder = 6
+                        },
+                        new
+                        {
+                            Id = new Guid("a1b2c3d4-0007-0000-0000-000000000007"),
+                            ApiEndpoint = "https://api.prod.whoop.com",
+                            Capabilities = "{\"hasHeartRate\":true,\"hasSleep\":true,\"hasActivity\":true,\"hasHRV\":true,\"hasStress\":true}",
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeviceType = "Whoop",
+                            DisplayName = "WHOOP",
+                            IsActive = false,
+                            Manufacturer = "WHOOP",
+                            ModelName = "WHOOP Strap",
+                            SortOrder = 7
+                        });
                 });
 
             modelBuilder.Entity("CardiTrack.Domain.Entities.DeviceConnection", b =>

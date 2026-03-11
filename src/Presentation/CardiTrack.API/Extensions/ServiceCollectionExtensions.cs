@@ -1,7 +1,11 @@
 using CardiTrack.API.Infrastructure.UserContext;
-using CardiTrack.Infrastructure.ExternalClients;
-using CardiTrack.Infrastructure.Settings;
 using CardiTrack.Application.Interfaces.Services;
+using CardiTrack.Infrastructure.Extensions;
+using CardiTrack.Infrastructure.ExternalClients;
+using CardiTrack.Infrastructure.Repositories;
+using CardiTrack.Infrastructure.Security;
+using CardiTrack.Infrastructure.Settings;
+using CardiTrack.Application.Interfaces.Repositories;
 using AspNetCoreRateLimit;
 
 namespace CardiTrack.API.Extensions;
@@ -10,12 +14,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // Register application services
         services.AddScoped<CardiTrack.Application.Interfaces.Services.IOrganizationService, CardiTrack.Application.Services.OrganizationService>();
         services.AddScoped<CardiTrack.Application.Interfaces.Services.IUserService, CardiTrack.Application.Services.UserService>();
         services.AddScoped<CardiTrack.Application.Interfaces.Services.ICardiMemberService, CardiTrack.Application.Services.CardiMemberService>();
         services.AddScoped<CardiTrack.Application.Interfaces.Services.ISubscriptionService, CardiTrack.Application.Services.SubscriptionService>();
-        services.AddScoped<IFitbitSyncService, CardiTrack.Infrastructure.Services.FitbitSyncService>();
 
         return services;
     }
@@ -28,21 +30,31 @@ public static class ServiceCollectionExtensions
         services.Configure<List<DeviceProviderSettings>>(
             configuration.GetSection(DeviceProviderSettings.SectionName));
 
-        // Register repositories
-        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.IOrganizationRepository, CardiTrack.Infrastructure.Repositories.OrganizationRepository>();
-        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.IUserRepository, CardiTrack.Infrastructure.Repositories.UserRepository>();
-        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.ICardiMemberRepository, CardiTrack.Infrastructure.Repositories.CardiMemberRepository>();
-        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.ISubscriptionRepository, CardiTrack.Infrastructure.Repositories.SubscriptionRepository>();
-        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.IUserCardiMemberRepository, CardiTrack.Infrastructure.Repositories.UserCardiMemberRepository>();
-        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.IDeviceConnectionRepository, CardiTrack.Infrastructure.Repositories.DeviceConnectionRepository>();
-        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.IActivityLogRepository, CardiTrack.Infrastructure.Repositories.ActivityLogRepository>();
+        // Encryption — key must be a base64-encoded 256-bit value stored in config/Key Vault
+        services.AddScoped<IEncryptionService>(sp =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            var key = config["Encryption:Key"]
+                ?? throw new InvalidOperationException(
+                    "Encryption:Key is not configured. Provide a base64-encoded 256-bit key.");
+            return new AesEncryptionService(key);
+        });
 
-        // Register Unit of Work
-        services.AddScoped<CardiTrack.Application.Interfaces.Repositories.IUnitOfWork, CardiTrack.Infrastructure.Repositories.UnitOfWork>();
+        // Repositories
+        services.AddScoped<IOrganizationRepository, CardiTrack.Infrastructure.Repositories.OrganizationRepository>();
+        services.AddScoped<IUserRepository, CardiTrack.Infrastructure.Repositories.UserRepository>();
+        services.AddScoped<ICardiMemberRepository, CardiTrack.Infrastructure.Repositories.CardiMemberRepository>();
+        services.AddScoped<ISubscriptionRepository, CardiTrack.Infrastructure.Repositories.SubscriptionRepository>();
+        services.AddScoped<IUserCardiMemberRepository, CardiTrack.Infrastructure.Repositories.UserCardiMemberRepository>();
+        services.AddScoped<IDeviceConnectionRepository, CardiTrack.Infrastructure.Repositories.DeviceConnectionRepository>();
+        services.AddScoped<IActivityLogRepository, CardiTrack.Infrastructure.Repositories.ActivityLogRepository>();
+        services.AddScoped<IDeviceRepository, DeviceRepository>();
+
+        // Unit of Work
+        services.AddScoped<IUnitOfWork, CardiTrack.Infrastructure.Repositories.UnitOfWork>();
 
         // External clients
         services.AddScoped<IOAuthTokenRefreshService, OAuthTokenRefreshService>();
-        services.AddScoped<IFitbitApiClient, FitbitApiClient>();
 
         // HTTP Client for Auth0 service
         services.AddHttpClient("Auth0Client", client =>
@@ -52,12 +64,8 @@ public static class ServiceCollectionExtensions
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
 
-        // HTTP Client for Fitbit API
-        services.AddHttpClient("FitbitClient", client =>
-        {
-            client.BaseAddress = new Uri("https://api.fitbit.com");
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-        });
+        // Fitbit provider (keyed IDeviceApiClient + keyed IDeviceSyncService)
+        services.AddFitbitProvider();
 
         return services;
     }
@@ -66,7 +74,6 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Redis distributed cache
         var redisConnection = configuration.GetConnectionString("Redis");
         if (!string.IsNullOrEmpty(redisConnection))
         {
@@ -78,7 +85,6 @@ public static class ServiceCollectionExtensions
         }
         else
         {
-            // Fallback to in-memory cache if Redis not configured
             services.AddDistributedMemoryCache();
         }
 
@@ -91,7 +97,6 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Rate limiting configuration
         services.AddMemoryCache();
         services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
         services.AddInMemoryRateLimiting();

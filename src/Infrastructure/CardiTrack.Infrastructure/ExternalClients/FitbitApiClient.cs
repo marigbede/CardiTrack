@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace CardiTrack.Infrastructure.ExternalClients;
 
-public class FitbitApiClient : IFitbitApiClient
+public class FitbitApiClient : IFitbitApiClient, IDeviceApiClient
 {
     private readonly HttpClient _httpClient;
 
@@ -144,6 +144,33 @@ public class FitbitApiClient : IFitbitApiClient
         }
 
         return new FitbitSleepResult(totalMinutes, efficiency, startTime, endTime, deep, light, rem, awake);
+    }
+
+    public async Task<DeviceHealthSnapshot> GetHealthSnapshotAsync(string accessToken, DateOnly date)
+    {
+        var activities = await GetActivitiesAsync(accessToken, date);
+        var heartRate = await GetHeartRateAsync(accessToken, date);
+        var sleep = await GetSleepAsync(accessToken, date);
+
+        return new DeviceHealthSnapshot(
+            activities.Steps,
+            activities.DistanceKm,
+            activities.ActiveMinutes,
+            activities.SedentaryMinutes,
+            activities.Floors,
+            activities.CaloriesBurned,
+            heartRate.RestingHeartRate,
+            heartRate.AvgHeartRate,
+            heartRate.MaxHeartRate,
+            heartRate.MinHeartRate,
+            sleep.TotalSleepMinutes,
+            sleep.SleepEfficiency,
+            sleep.SleepStartTime,
+            sleep.SleepEndTime,
+            sleep.DeepSleepMinutes,
+            sleep.LightSleepMinutes,
+            sleep.RemSleepMinutes,
+            sleep.AwakeMinutes);
     }
 
     private static async Task EnsureSuccessAsync(HttpResponseMessage response)

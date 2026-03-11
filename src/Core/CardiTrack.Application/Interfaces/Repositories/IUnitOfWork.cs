@@ -9,6 +9,7 @@ public interface IUnitOfWork : IDisposable
     IUserCardiMemberRepository UserCardiMembers { get; }
     IDeviceConnectionRepository DeviceConnections { get; }
     IActivityLogRepository ActivityLogs { get; }
+    IDeviceRepository Devices { get; }
 
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();
