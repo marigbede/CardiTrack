@@ -176,6 +176,12 @@ resource "google_compute_backend_service" "web" {
     max_ttl           = 86400
     negative_caching  = true
     serve_while_stale = 86400
+
+    cache_key_policy {
+      include_host         = true
+      include_protocol     = true
+      include_query_string = true
+    }
   }
 
   backend {
