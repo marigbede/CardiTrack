@@ -17,6 +17,10 @@ on:
         type: choice
         options: [dev]
         default: dev
+      force_apply:
+        description: 'Apply even if plan shows no changes'
+        type: boolean
+        default: false
 
 concurrency:
   group: terraform-${{ github.ref }}
@@ -141,8 +145,8 @@ jobs:
     name: Apply (Dev)
     needs: [env, plan-dev]
     if: |
-      github.ref == 'refs/heads/main' &&
-      needs.plan-dev.outputs.exitcode == '2'
+      (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
+      (needs.plan-dev.outputs.exitcode == '2' || inputs.force_apply == true)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
