@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CardiTrack.Infrastructure.Migrations
 {
     [DbContext(typeof(CardiTrackDbContext))]
-    [Migration("20260312180945_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260314183314_AddUserLocale")]
+    partial class AddUserLocale
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -855,6 +855,13 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime?>("LastLoginDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Locale")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("en-US");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -876,6 +883,13 @@ namespace CardiTrack.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("UTC");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");

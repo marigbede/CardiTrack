@@ -28,10 +28,12 @@ public class UserContextMiddleware
 
                 if (!string.IsNullOrEmpty(auth0UserId))
                 {
+                    var locale = ParseLocale(httpContext.Request.Headers.AcceptLanguage.ToString());
+
                     // Set basic claims from JWT
                     if (userContext is UserContext concreteContext)
                     {
-                        concreteContext.SetAuthenticatedUser(auth0UserId, email);
+                        concreteContext.SetAuthenticatedUser(auth0UserId, email, locale);
                     }
 
                     // Add user context to logs
@@ -48,5 +50,15 @@ public class UserContextMiddleware
         }
 
         await _next(httpContext);
+    }
+
+    // Parses the first language tag from Accept-Language (e.g. "en-GB,en;q=0.9" → "en-GB")
+    private static string ParseLocale(string acceptLanguage)
+    {
+        if (string.IsNullOrWhiteSpace(acceptLanguage))
+            return "en-US";
+
+        var first = acceptLanguage.Split(',')[0].Split(';')[0].Trim();
+        return string.IsNullOrEmpty(first) ? "en-US" : first;
     }
 }

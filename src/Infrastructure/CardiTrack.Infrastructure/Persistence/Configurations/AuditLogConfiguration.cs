@@ -29,7 +29,7 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 
         builder.Property(a => a.Timestamp)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(a => a.IpAddress)
             .HasMaxLength(50)
@@ -59,7 +59,7 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 
         builder.Property(a => a.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(a => a.UpdatedDate);
 

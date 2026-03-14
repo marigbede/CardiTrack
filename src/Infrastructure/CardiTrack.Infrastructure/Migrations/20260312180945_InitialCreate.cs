@@ -47,7 +47,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     StressScore = table.Column<int>(type: "integer", nullable: true),
                     BreathingRate = table.Column<decimal>(type: "numeric(5,2)", nullable: true),
                     Temperature = table.Column<decimal>(type: "numeric(5,2)", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -65,13 +65,13 @@ namespace CardiTrack.Infrastructure.Migrations
                     Severity = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Message = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
-                    TriggeredDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    TriggeredDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     AcknowledgedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     AcknowledgedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
                     IsResolved = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     MetricValues = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -89,7 +89,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     Action = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     EntityType = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     EntityId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     IpAddress = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     UserAgent = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     RequestPath = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
@@ -97,7 +97,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     ResponseStatus = table.Column<int>(type: "integer", nullable: false),
                     DataAccessed = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     ChangedFields = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -121,7 +121,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     MedicalNotes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     LastSyncDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -148,7 +148,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     SyncFrequencyMinutes = table.Column<int>(type: "integer", nullable: false, defaultValue: 30),
                     Metadata = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -171,7 +171,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
                     SortOrder = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     IconUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -187,7 +187,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -201,7 +201,7 @@ namespace CardiTrack.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CardiMemberId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CalculatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CalculatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     PeriodDays = table.Column<int>(type: "integer", nullable: false),
                     AvgSteps = table.Column<int>(type: "integer", nullable: true),
                     StdDevSteps = table.Column<decimal>(type: "numeric(10,2)", nullable: true),
@@ -214,7 +214,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     TypicalWakeTime = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
                     AvgSleepEfficiency = table.Column<int>(type: "integer", nullable: true),
                     StepsByDayOfWeek = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -230,7 +230,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     OrganizationId = table.Column<Guid>(type: "uuid", nullable: false),
                     Tier = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     TrialEndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     BillingCycle = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
@@ -240,7 +240,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     MaxUsers = table.Column<int>(type: "integer", nullable: false),
                     Features = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false, defaultValue: "{}"),
                     PaymentMethod = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -263,7 +263,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     EmailVerified = table.Column<bool>(type: "boolean", nullable: false),
                     LastLoginDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -283,9 +283,9 @@ namespace CardiTrack.Infrastructure.Migrations
                     CanViewHealthData = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
                     ReceiveAlerts = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
                     NotificationPreferences = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false, defaultValue: "{}"),
-                    AssignedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    AssignedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>

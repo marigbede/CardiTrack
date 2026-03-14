@@ -27,7 +27,7 @@ public class SubscriptionConfiguration : IEntityTypeConfiguration<Subscription>
 
         builder.Property(s => s.StartDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(s => s.EndDate);
 
@@ -63,7 +63,7 @@ public class SubscriptionConfiguration : IEntityTypeConfiguration<Subscription>
 
         builder.Property(s => s.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(s => s.UpdatedDate);
 

@@ -22,4 +22,10 @@ public class CreateUserRequest
     public Guid OrganizationId { get; set; }
 
     public UserRole Role { get; set; } = UserRole.Member;
+
+    [StringLength(10)]
+    public string Locale { get; set; } = "en-US";
+
+    [StringLength(50)]
+    public string TimeZoneId { get; set; } = "UTC";
 }

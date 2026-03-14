@@ -73,23 +73,31 @@ jobs:
         with:
           filters: |
             api:
+              - '.github/workflows/deploy-apps-dev.yml'
+              - '.github/workflows/deploy-apps-prod.yml'
               - 'src/Presentation/CardiTrack.API/**'
               - 'src/Core/**'
               - 'src/Infrastructure/**'
               - 'tests/**'
               - 'CardiTrack.sln'
             web:
+              - '.github/workflows/deploy-apps-dev.yml'
+              - '.github/workflows/deploy-apps-prod.yml'
               - 'src/Presentation/CardiTrack.Web/**'
               - 'src/Core/**'
               - 'src/Infrastructure/**'
               - 'CardiTrack.sln'
             worker:
+              - '.github/workflows/deploy-apps-dev.yml'
+              - '.github/workflows/deploy-apps-prod.yml'
               - 'src/Worker/**'
               - 'src/Core/**'
               - 'src/Infrastructure/**'
               - 'tests/**'
               - 'CardiTrack.sln'
             mobile:
+              - '.github/workflows/deploy-apps-dev.yml'
+              - '.github/workflows/deploy-apps-prod.yml'
               - 'src/Presentation/CardiTrack.Mobile/**'
               - 'src/Core/CardiTrack.Domain/**'
               - 'src/Core/CardiTrack.Application/**'
@@ -212,6 +220,7 @@ jobs:
     if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       security-events: write
     steps:
       - uses: actions/checkout@v6
@@ -252,6 +261,7 @@ jobs:
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       security-events: write
     steps:
       - uses: actions/checkout@v6
@@ -312,6 +322,7 @@ jobs:
     if: needs.changes.outputs.worker == 'true'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       security-events: write
     steps:
       - uses: actions/checkout@v6
@@ -399,6 +410,7 @@ jobs:
     if: needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       security-events: write
     steps:
       - uses: actions/checkout@v6

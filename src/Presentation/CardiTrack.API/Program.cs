@@ -6,6 +6,9 @@ using Serilog;
 using AspNetCoreRateLimit;
 using FluentValidation.AspNetCore;
 
+// Enforce UTC for all DateTime values read from PostgreSQL timestamptz columns
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
+
 // Configure Serilog
 var builder = WebApplication.CreateBuilder(args);
 builder.AddSerilogLogging();

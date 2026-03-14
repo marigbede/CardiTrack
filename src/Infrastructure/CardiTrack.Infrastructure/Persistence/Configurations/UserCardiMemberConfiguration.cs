@@ -42,7 +42,7 @@ public class UserCardiMemberConfiguration : IEntityTypeConfiguration<UserCardiMe
 
         builder.Property(uc => uc.AssignedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(uc => uc.IsActive)
             .IsRequired()
@@ -50,7 +50,7 @@ public class UserCardiMemberConfiguration : IEntityTypeConfiguration<UserCardiMe
 
         builder.Property(uc => uc.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(uc => uc.UpdatedDate);
 

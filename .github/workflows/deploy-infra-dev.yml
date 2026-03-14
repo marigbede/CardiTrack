@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths:
+      - '.github/workflows/deploy-infra-dev.yml'
+      - '.github/workflows/deploy-infra-prod.yml'
       - 'infrastructure/**'
   pull_request:
     types: [opened, synchronize, reopened]
@@ -122,10 +124,8 @@ jobs:
             -detailed-exitcode \
             -no-color 2>&1 | tee plan.txt
           TF_EXIT=${PIPESTATUS[0]}
-          set -e
           echo "exitcode=${TF_EXIT}" >> $GITHUB_OUTPUT
-          exit ${TF_EXIT}
-        continue-on-error: true
+          [ $TF_EXIT -eq 1 ] && exit 1 || exit 0
       - name: Save plan artifact
         uses: actions/upload-artifact@v7
         with:
@@ -147,9 +147,6 @@ jobs:
               repo: context.repo.repo,
               body
             });
-      - name: Fail on plan error
-        if: steps.plan.outputs.exitcode == '1'
-        run: exit 1
 
   apply-dev:
     name: Apply (Dev)

@@ -17,7 +17,7 @@ public class PatternBaselineConfiguration : IEntityTypeConfiguration<PatternBase
 
         builder.Property(p => p.CalculatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(p => p.PeriodDays)
             .IsRequired();
@@ -44,7 +44,7 @@ public class PatternBaselineConfiguration : IEntityTypeConfiguration<PatternBase
 
         builder.Property(p => p.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(p => p.UpdatedDate);
 

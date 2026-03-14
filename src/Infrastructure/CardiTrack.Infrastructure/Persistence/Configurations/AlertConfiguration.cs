@@ -35,7 +35,7 @@ public class AlertConfiguration : IEntityTypeConfiguration<Alert>
 
         builder.Property(a => a.TriggeredDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(a => a.AcknowledgedDate);
 
@@ -55,7 +55,7 @@ public class AlertConfiguration : IEntityTypeConfiguration<Alert>
 
         builder.Property(a => a.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(a => a.UpdatedDate);
 

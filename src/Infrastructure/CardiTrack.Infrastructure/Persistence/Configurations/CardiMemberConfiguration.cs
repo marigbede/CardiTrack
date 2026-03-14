@@ -51,7 +51,7 @@ public class CardiMemberConfiguration : IEntityTypeConfiguration<CardiMember>
 
         builder.Property(c => c.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(c => c.UpdatedDate);
 

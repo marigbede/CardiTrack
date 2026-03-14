@@ -54,7 +54,7 @@ public class DeviceConfiguration : IEntityTypeConfiguration<Device>
 
         builder.Property(d => d.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(d => d.UpdatedDate);
 

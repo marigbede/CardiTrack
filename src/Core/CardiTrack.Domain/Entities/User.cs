@@ -17,6 +17,10 @@ public class User : BaseEntity, ISoftDeletable
     public DateTime? LastLoginDate { get; set; }
     public bool IsActive { get; set; } = true;
 
+    // Locale preferences
+    public string Locale { get; set; } = "en-US";
+    public string TimeZoneId { get; set; } = "UTC";
+
     // Navigation properties
     public ICollection<UserCardiMember> UserCardiMembers { get; set; } = new List<UserCardiMember>();
 }

@@ -41,9 +41,19 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasDefaultValue(true);
 
+        builder.Property(u => u.Locale)
+            .IsRequired()
+            .HasMaxLength(10)
+            .HasDefaultValue("en-US");
+
+        builder.Property(u => u.TimeZoneId)
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue("UTC");
+
         builder.Property(u => u.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(u => u.UpdatedDate);
 

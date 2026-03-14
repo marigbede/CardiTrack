@@ -1,3 +1,6 @@
+// Enforce UTC for all DateTime values read from PostgreSQL timestamptz columns
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
+
 using CardiTrack.Application.Interfaces.Repositories;
 using CardiTrack.Infrastructure.Extensions;
 using CardiTrack.Infrastructure.ExternalClients;

@@ -61,7 +61,7 @@ public class ActivityLogConfiguration : IEntityTypeConfiguration<ActivityLog>
 
         builder.Property(a => a.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(a => a.UpdatedDate);
 

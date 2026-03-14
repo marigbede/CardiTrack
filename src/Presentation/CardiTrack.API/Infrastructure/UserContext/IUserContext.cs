@@ -10,4 +10,5 @@ public interface IUserContext
     string Email { get; }
     UserRole Role { get; }
     bool IsAuthenticated { get; }
+    string Locale { get; }
 }

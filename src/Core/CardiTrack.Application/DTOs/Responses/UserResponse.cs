@@ -11,5 +11,7 @@ public class UserResponse
     public UserRole Role { get; set; }
     public Guid OrganizationId { get; set; }
     public bool IsActive { get; set; }
+    public string Locale { get; set; } = string.Empty;
+    public string TimeZoneId { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; }
 }

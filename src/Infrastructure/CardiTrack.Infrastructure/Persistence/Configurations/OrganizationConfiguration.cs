@@ -27,7 +27,7 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
 
         builder.Property(o => o.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(o => o.UpdatedDate);
 

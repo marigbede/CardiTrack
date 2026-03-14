@@ -49,7 +49,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("DataSource")
                         .IsRequired()
@@ -164,7 +164,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -198,7 +198,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("TriggeredDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -241,7 +241,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("DataAccessed")
                         .HasMaxLength(2000)
@@ -276,7 +276,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("Timestamp")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -315,7 +315,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
@@ -395,7 +395,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("DeviceType")
                         .IsRequired()
@@ -565,7 +565,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("DeviceName")
                         .IsRequired()
@@ -640,7 +640,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -693,7 +693,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CalculatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<Guid>("CardiMemberId")
                         .HasColumnType("uuid");
@@ -701,7 +701,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<int?>("MaxHeartRateObserved")
                         .HasColumnType("integer");
@@ -753,7 +753,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -791,7 +791,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("StartDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -834,7 +834,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -851,6 +851,13 @@ namespace CardiTrack.Infrastructure.Migrations
 
                     b.Property<DateTime?>("LastLoginDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Locale")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("en-US");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -873,6 +880,13 @@ namespace CardiTrack.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("UTC");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -898,7 +912,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("AssignedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<bool>("CanViewHealthData")
                         .ValueGeneratedOnAdd()
@@ -911,7 +925,7 @@ namespace CardiTrack.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
