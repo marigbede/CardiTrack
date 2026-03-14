@@ -42,8 +42,9 @@ for ROLE in \
   roles/run.admin \
   roles/artifactregistry.writer \
   roles/storage.admin \
-  roles/secretmanager.secretAccessor \
-  roles/cloudsql.client \
+  roles/secretmanager.admin \
+  roles/cloudsql.admin \
+  roles/iam.serviceAccountUser \
   roles/iam.serviceAccountTokenCreator \
   roles/compute.loadBalancerAdmin \
   roles/compute.securityAdmin; do

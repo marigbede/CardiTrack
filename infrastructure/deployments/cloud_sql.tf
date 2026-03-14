@@ -8,6 +8,7 @@ resource "google_sql_database_instance" "main" {
 
   settings {
     tier              = var.cloud_sql_tier
+    edition           = var.cloud_sql_edition
     availability_type = var.cloud_sql_ha_enabled ? "REGIONAL" : "ZONAL"
     disk_size         = var.cloud_sql_disk_size_gb
     disk_type         = "PD_SSD"
@@ -53,7 +54,7 @@ resource "google_sql_database" "main" {
 resource "google_sql_user" "main" {
   name     = var.db_admin_username
   instance = google_sql_database_instance.main.name
-  password = data.google_secret_manager_secret_version.db_password.secret_data
+  password = random_password.db_password.result
 }
 
 # Variables
@@ -81,6 +82,12 @@ variable "cloud_sql_tier" {
   description = "Cloud SQL machine tier"
   type        = string
   default     = "db-f1-micro"
+}
+
+variable "cloud_sql_edition" {
+  description = "Cloud SQL edition (ENTERPRISE or ENTERPRISE_PLUS)"
+  type        = string
+  default     = "ENTERPRISE"
 }
 
 variable "cloud_sql_disk_size_gb" {
