@@ -477,6 +477,40 @@ jobs:
           docker push $IMAGE:$TAG
           echo "image=$IMAGE:$TAG" >> $GITHUB_OUTPUT
 
+  push-migrator-image:
+    name: Push Migrator Image
+    needs:
+      - changes
+      - compute-version
+      - build-api
+      - test-unit
+      - test-integration
+      - security-api
+      - check-migrations
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.push.outputs.image }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.changes.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - run: gcloud auth configure-docker ${{ needs.changes.outputs.gcp_region }}-docker.pkg.dev --quiet
+      - name: Build and push
+        id: push
+        env:
+          IMAGE: ${{ needs.changes.outputs.registry }}/migrator
+          TAG: ${{ needs.compute-version.outputs.version }}
+        run: |
+          docker build -f src/Presentation/CardiTrack.API/Dockerfile.migrate \
+            -t $IMAGE:$TAG \
+            .
+          docker push $IMAGE:$TAG
+          echo "image=$IMAGE:$TAG" >> $GITHUB_OUTPUT
+
   push-web-image:
     name: Push Web Image
     needs:
@@ -581,33 +615,37 @@ jobs:
   # ── Main only: DB Migrations + Deploy Dev ───────────────────────────────────
   run-db-migrations:
     name: DB Migrations (Dev)
-    needs: [changes, push-api-image]
+    needs: [changes, push-migrator-image]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
           service_account: ${{ needs.changes.outputs.gcp_service_account }}
-      - uses: google-github-actions/get-secretmanager-secrets@v2
-        id: secrets
-        with:
-          secrets: |
-            db_conn:${{ needs.changes.outputs.gcp_project_id }}/carditrack-dev-db-connection-string
-      - run: dotnet tool install --global dotnet-ef
-      - run: dotnet restore src/Presentation/CardiTrack.API/CardiTrack.API.csproj
-      - run: dotnet build src/Presentation/CardiTrack.API/CardiTrack.API.csproj -c Release --no-restore
-      - run: |
-          dotnet ef database update \
-            --project src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj \
-            --startup-project src/Presentation/CardiTrack.API/CardiTrack.API.csproj \
-            --configuration Release \
-            --no-build \
-            --connection "${{ steps.secrets.outputs.db_conn }}"
+      - uses: google-github-actions/setup-gcloud@v3
+      - name: Update migrator job image
+        env:
+          JOB: carditrack-dev-api-migrator
+          IMAGE: ${{ needs.push-migrator-image.outputs.image }}
+          REGION: ${{ needs.changes.outputs.gcp_region }}
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
+        run: |
+          gcloud run jobs update $JOB \
+            --image $IMAGE \
+            --region $REGION \
+            --project $PROJECT \
+            --quiet
+      - name: Execute migrations
+        env:
+          JOB: carditrack-dev-api-migrator
+          REGION: ${{ needs.changes.outputs.gcp_region }}
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
+        run: |
+          gcloud run jobs execute $JOB \
+            --wait \
+            --region $REGION \
+            --project $PROJECT
 
   deploy-api-dev:
     name: Deploy API → Dev
@@ -666,6 +704,7 @@ jobs:
             --image ${{ needs.push-worker-image.outputs.image }} \
             --region ${{ needs.changes.outputs.gcp_region }} \
             --project ${{ needs.changes.outputs.gcp_project_id }} \
+            --add-cloudsql-instances carditrack-490120:europe-west2:carditrack-dev-sql \
             --quiet
 
   # ── Main only: Create patch tag ──────────────────────────────────────────────

@@ -8,6 +8,13 @@ resource "google_cloud_run_v2_service" "api" {
   client   = "terraform"
 
   template {
+    volumes {
+      name = "cloudsql"
+      cloud_sql_instance {
+        instances = [google_sql_database_instance.main.connection_name]
+      }
+    }
+
     containers {
       image = var.api_container_image
 
@@ -32,6 +39,11 @@ resource "google_cloud_run_v2_service" "api" {
             }
           }
         }
+      }
+
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
       }
 
       resources {
@@ -63,6 +75,13 @@ resource "google_cloud_run_v2_service" "web" {
   client   = "terraform"
 
   template {
+    volumes {
+      name = "cloudsql"
+      cloud_sql_instance {
+        instances = [google_sql_database_instance.main.connection_name]
+      }
+    }
+
     containers {
       image = var.web_container_image
 
@@ -89,6 +108,11 @@ resource "google_cloud_run_v2_service" "web" {
         }
       }
 
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
+      }
+
       resources {
         limits = {
           cpu    = var.cloud_run_cpu
@@ -107,6 +131,59 @@ resource "google_cloud_run_v2_service" "web" {
   depends_on = [
     google_project_service.run,
     google_secret_manager_secret_version.app_secrets,
+    google_secret_manager_secret_version.db_connection_string,
+  ]
+}
+
+# ── DB Migrator Job ──────────────────────────────────────────────────────────
+# Runs EF Core migrations against the private DB via Cloud SQL Auth Proxy socket.
+# Executed once per deploy by the CI pipeline; exits when migrations are complete.
+resource "google_cloud_run_v2_job" "migrator" {
+  name     = "${var.api_service_name}-migrator"
+  location = var.cloud_run_location
+  client   = "terraform"
+
+  template {
+    template {
+      max_retries = 1
+
+      volumes {
+        name = "cloudsql"
+        cloud_sql_instance {
+          instances = [google_sql_database_instance.main.connection_name]
+        }
+      }
+
+      containers {
+        image = var.migrator_container_image
+
+        env {
+          name = "ConnectionStrings__DefaultConnection"
+          value_source {
+            secret_key_ref {
+              secret  = google_secret_manager_secret.db_connection_string.secret_id
+              version = "latest"
+            }
+          }
+        }
+
+        volume_mounts {
+          name       = "cloudsql"
+          mount_path = "/cloudsql"
+        }
+
+        resources {
+          limits = {
+            cpu    = "1"
+            memory = "512Mi"
+          }
+        }
+      }
+    }
+  }
+
+  depends_on = [
+    google_project_service.run,
     google_secret_manager_secret_version.db_connection_string,
   ]
 }
@@ -218,4 +295,10 @@ variable "web_custom_domain" {
   description = "Custom domain for the Web service (e.g. app.carditrack.com)"
   type        = string
   default     = ""
+}
+
+variable "migrator_container_image" {
+  description = "Container image for the DB migrator Cloud Run Job"
+  type        = string
+  default     = "us-docker.pkg.dev/cloudrun/container/hello"
 }

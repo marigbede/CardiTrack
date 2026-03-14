@@ -1,0 +1,29 @@
+# Migrator image — runs EF Core migrations against the private DB.
+# Deployed as a Cloud Run Job; exits after applying all pending migrations.
+# The Cloud SQL Auth Proxy Unix socket is mounted at /cloudsql by Cloud Run.
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Copy solution and project files for restore
+COPY ["CardiTrack.sln", "./"]
+COPY ["src/Presentation/CardiTrack.API/CardiTrack.API.csproj", "src/Presentation/CardiTrack.API/"]
+COPY ["src/Core/CardiTrack.Application/CardiTrack.Application.csproj", "src/Core/CardiTrack.Application/"]
+COPY ["src/Core/CardiTrack.Domain/CardiTrack.Domain.csproj", "src/Core/CardiTrack.Domain/"]
+COPY ["src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj", "src/Infrastructure/CardiTrack.Infrastructure/"]
+COPY ["src/Infrastructure/CardiTrack.Shared/CardiTrack.Shared.csproj", "src/Infrastructure/CardiTrack.Shared/"]
+
+RUN dotnet restore "src/Presentation/CardiTrack.API/CardiTrack.API.csproj"
+
+COPY . .
+
+RUN dotnet build "src/Presentation/CardiTrack.API/CardiTrack.API.csproj" -c Release --no-restore
+
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+ENTRYPOINT ["dotnet", "ef", "database", "update", \
+  "--project", "src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj", \
+  "--startup-project", "src/Presentation/CardiTrack.API/CardiTrack.API.csproj", \
+  "--configuration", "Release", \
+  "--no-build"]

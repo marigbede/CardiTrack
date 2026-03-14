@@ -83,6 +83,18 @@ variable "cloud_sql_deletion_protection" {
   default     = false
 }
 
+variable "cloud_sql_public_ip_enabled" {
+  description = "Enable public IP for Cloud SQL (should be false; use Cloud SQL Auth Proxy)"
+  type        = bool
+  default     = false
+}
+
+variable "migrator_container_image" {
+  description = "Container image for the DB migrator Cloud Run Job"
+  type        = string
+  default     = "us-docker.pkg.dev/cloudrun/container/hello"
+}
+
 # Storage Configuration
 variable "storage_location" {
   description = "GCS bucket location (US, EU, ASIA, or specific region)"

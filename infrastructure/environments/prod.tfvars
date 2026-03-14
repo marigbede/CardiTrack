@@ -28,6 +28,7 @@ cloud_sql_tier                = "db-custom-2-7680"
 cloud_sql_disk_size_gb        = 100
 cloud_sql_ha_enabled          = true
 cloud_sql_deletion_protection = true
+cloud_sql_public_ip_enabled   = false # Private only; Cloud Run connects via Auth Proxy socket
 
 # Storage
 storage_location = "EU"

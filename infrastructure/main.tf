@@ -82,8 +82,10 @@ module "deployments" {
   cloud_sql_disk_size_gb        = var.cloud_sql_disk_size_gb
   cloud_sql_ha_enabled          = var.cloud_sql_ha_enabled
   cloud_sql_deletion_protection = var.cloud_sql_deletion_protection
+  cloud_sql_public_ip_enabled   = var.cloud_sql_public_ip_enabled
   cloud_sql_enable_audit        = var.enable_hipaa_compliance
   cloud_sql_labels              = local.common_labels
+  migrator_container_image      = var.migrator_container_image
 
   # Cloud Storage
   storage_bucket_name   = local.storage_bucket_name

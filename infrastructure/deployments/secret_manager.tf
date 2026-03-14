@@ -2,13 +2,14 @@
 # Manages Google Cloud Secret Manager secrets
 
 locals {
+  # Cloud Run connects via the Cloud SQL Auth Proxy Unix socket — no public IP needed.
+  # The proxy handles TLS; SSL Mode=Disable applies to the local socket only.
   db_connection_string = join(";", [
-    "Host=${google_sql_database_instance.main.public_ip_address}",
-    "Port=5432",
+    "Host=/cloudsql/${google_sql_database_instance.main.connection_name}",
     "Database=${google_sql_database.main.name}",
     "Username=${var.db_admin_username}",
     "Password=${random_password.db_password.result}",
-    "SSL Mode=Require",
+    "SSL Mode=Disable",
   ])
 
   # Secrets whose values Terraform sets with a placeholder.
