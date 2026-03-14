@@ -204,7 +204,7 @@ jobs:
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet tool install --global dotnet-ef
-      - run: dotnet restore src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj
+      - run: dotnet restore src/Presentation/CardiTrack.API/CardiTrack.API.csproj
       - name: Check for pending model changes
         run: |
           dotnet ef migrations has-pending-model-changes \
@@ -230,7 +230,7 @@ jobs:
       - uses: github/codeql-action/init@v3
         with:
           languages: csharp
-      - run: dotnet build CardiTrack.sln -c Release
+      - run: dotnet build src/Presentation/CardiTrack.API/CardiTrack.API.csproj -c Release
       - uses: github/codeql-action/analyze@v3
       - name: Dependency vulnerability audit
         run: |
@@ -353,8 +353,8 @@ jobs:
       - run: dotnet workload install maui-android
       - run: |
           dotnet publish src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
-            -f net10.0-android \
-            -c Release
+            -c Release \
+            -p:TargetFrameworks=net10.0-android
       - uses: actions/upload-artifact@v7
         with:
           name: mobile-android
@@ -374,8 +374,8 @@ jobs:
       - run: dotnet workload install maui-ios
       - run: |
           dotnet build src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
-            -f net10.0-ios \
             -c Release \
+            -p:TargetFrameworks=net10.0-ios \
             /p:ArchiveOnBuild=false
       - uses: actions/upload-artifact@v7
         with:
@@ -396,8 +396,8 @@ jobs:
       - run: dotnet workload install maui-windows
       - run: |
           dotnet publish src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj `
-            -f net10.0-windows10.0.19041.0 `
-            -c Release
+            -c Release `
+            -p:TargetFrameworks=net10.0-windows10.0.19041.0
       - uses: actions/upload-artifact@v7
         with:
           name: mobile-windows
@@ -419,7 +419,8 @@ jobs:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - name: Dependency vulnerability audit
         run: |
-          dotnet restore src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj
+          dotnet workload install maui-android
+          dotnet restore src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj -p:TargetFrameworks=net10.0-android
           dotnet list src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj package \
             --vulnerable --include-transitive 2>&1 | tee audit.txt
           if grep -q "has the following vulnerable packages" audit.txt; then

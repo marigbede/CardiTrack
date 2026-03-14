@@ -20,6 +20,20 @@ resource "google_cloud_run_v2_service" "api" {
         }
       }
 
+      dynamic "env" {
+        for_each = var.api_secret_env_vars
+        iterator = item
+        content {
+          name = item.key
+          value_source {
+            secret_key_ref {
+              secret  = item.value
+              version = "latest"
+            }
+          }
+        }
+      }
+
       resources {
         limits = {
           cpu    = var.cloud_run_cpu
@@ -54,6 +68,20 @@ resource "google_cloud_run_v2_service" "web" {
         content {
           name  = item.key
           value = item.value
+        }
+      }
+
+      dynamic "env" {
+        for_each = var.web_secret_env_vars
+        iterator = item
+        content {
+          name = item.key
+          value_source {
+            secret_key_ref {
+              secret  = item.value
+              version = "latest"
+            }
+          }
         }
       }
 
@@ -124,8 +152,20 @@ variable "api_env_vars" {
   default     = {}
 }
 
+variable "api_secret_env_vars" {
+  description = "Secret Manager-backed env vars for API service (key=env var name, value=secret ID)"
+  type        = map(string)
+  default     = {}
+}
+
 variable "web_env_vars" {
   description = "Environment variables for Web service"
+  type        = map(string)
+  default     = {}
+}
+
+variable "web_secret_env_vars" {
+  description = "Secret Manager-backed env vars for Web service (key=env var name, value=secret ID)"
   type        = map(string)
   default     = {}
 }

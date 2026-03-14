@@ -26,6 +26,8 @@ RUN dotnet publish "CardiTrack.Worker.csproj" -c Release -o /app/publish \
     /p:UseAppHost=false \
     /p:PublishTrimmed=false \
     /p:PublishSingleFile=false
+# Create logs directory in publish stage (chiseled final stage has no shell)
+RUN mkdir -p /app/publish/logs
 
 # Stage 3: Runtime - Chiseled Ubuntu (Ultra-minimal, non-root, distroless-like)
 # Uses aspnet chiseled (not runtime) — Cloud Run requires an HTTP listener for health probes.
@@ -39,13 +41,8 @@ WORKDIR /app
 # - Security-hardened (minimal attack surface)
 # - Small size
 
-# Copy published files
-COPY --from=publish /app/publish .
-
-# Create logs directory with proper ownership
-USER root
-RUN mkdir -p /app/logs && chown -R 1654:1654 /app/logs
-USER 1654
+# Copy published files (including pre-created logs dir) with correct ownership
+COPY --chown=1654:1654 --from=publish /app/publish .
 
 # Expose health check port only (no public traffic)
 EXPOSE 8080

@@ -97,7 +97,7 @@ public class DatabaseStartupTests : IAsyncLifetime
             SELECT COUNT(1) FROM information_schema.tables
             WHERE table_schema = 'public' AND table_name = @name
             """;
-        cmd.Parameters.AddWithValue("name", tableName.ToLower());
+        cmd.Parameters.AddWithValue("name", tableName);
 
         var count = (long)(await cmd.ExecuteScalarAsync())!;
         Assert.True(count == 1, $"Table '{tableName}' was not found in the database after migration.");

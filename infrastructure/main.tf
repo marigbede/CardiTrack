@@ -40,10 +40,18 @@ module "deployments" {
   web_custom_domain   = var.web_custom_domain
   api_service_name    = local.api_service_name
   api_container_image = var.api_container_image
-  api_env_vars = merge(
-    { "ASPNETCORE_ENVIRONMENT" = title(var.environment) },
-    { "GCP_PROJECT_ID" = var.project_id }
-  )
+  api_env_vars = {
+    "ASPNETCORE_ENVIRONMENT" = title(var.environment)
+    "GCP_PROJECT_ID"         = var.project_id
+  }
+  api_secret_env_vars = {
+    "ConnectionStrings__DefaultConnection" = "${var.project_name}-${local.environment}-db-connection-string"
+    "Auth0__Domain"                        = "${var.project_name}-${local.environment}-auth0-domain"
+    "Auth0__Audience"                      = "${var.project_name}-${local.environment}-auth0-audience"
+    "Auth0__ClientId"                      = "${var.project_name}-${local.environment}-auth0-client-id"
+    "Auth0__ClientSecret"                  = "${var.project_name}-${local.environment}-auth0-client-secret"
+    "Encryption__Key"                      = "${var.project_name}-${local.environment}-encryption-key"
+  }
   cloud_run_location      = local.region
   cloud_run_min_instances = local.is_prod ? 1 : 0
   cloud_run_max_instances = local.is_prod ? 3 : 1
@@ -52,6 +60,14 @@ module "deployments" {
   web_service_name    = local.web_service_name
   web_container_image = var.web_container_image
   web_env_vars        = { "ASPNETCORE_ENVIRONMENT" = title(var.environment) }
+  web_secret_env_vars = {
+    "ConnectionStrings__DefaultConnection" = "${var.project_name}-${local.environment}-db-connection-string"
+    "Auth0__Domain"                        = "${var.project_name}-${local.environment}-auth0-domain"
+    "Auth0__Audience"                      = "${var.project_name}-${local.environment}-auth0-audience"
+    "Auth0__ClientId"                      = "${var.project_name}-${local.environment}-auth0-client-id"
+    "Auth0__ClientSecret"                  = "${var.project_name}-${local.environment}-auth0-client-secret"
+    "Encryption__Key"                      = "${var.project_name}-${local.environment}-encryption-key"
+  }
 
   cloud_run_cpu    = var.cloud_run_cpu
   cloud_run_memory = var.cloud_run_memory
@@ -78,6 +94,7 @@ module "deployments" {
 
   # Secret Manager
   db_password_secret_id = "${var.project_name}-${local.environment}-db-password"
+  secret_id_prefix      = "${var.project_name}-${local.environment}"
   secret_labels         = local.common_labels
 
   # Cloud Pub/Sub (real-time messaging)

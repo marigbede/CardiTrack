@@ -26,6 +26,8 @@ RUN dotnet publish "CardiTrack.API.csproj" -c Release -o /app/publish \
     /p:UseAppHost=false \
     /p:PublishTrimmed=false \
     /p:PublishSingleFile=false
+# Create logs directory in publish stage (chiseled final stage has no shell)
+RUN mkdir -p /app/publish/logs
 
 # Stage 3: Runtime - Chiseled Ubuntu (Ultra-minimal, non-root, distroless-like)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS final
@@ -37,14 +39,8 @@ WORKDIR /app
 # - Security-hardened (minimal attack surface)
 # - Small size (~110MB vs ~220MB for standard aspnet image)
 
-# Copy published files
-COPY --from=publish /app/publish .
-
-# Create logs directory with proper ownership
-# Note: Chiseled images run as user 'app' (UID 1654) by default
-USER root
-RUN mkdir -p /app/logs && chown -R 1654:1654 /app/logs
-USER 1654
+# Copy published files (including pre-created logs dir) with correct ownership
+COPY --chown=1654:1654 --from=publish /app/publish .
 
 # Expose ports (non-privileged ports since running as non-root)
 EXPOSE 8080
