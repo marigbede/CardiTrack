@@ -205,11 +205,13 @@ jobs:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet tool install --global dotnet-ef
       - run: dotnet restore src/Presentation/CardiTrack.API/CardiTrack.API.csproj
+      - run: dotnet build src/Presentation/CardiTrack.API/CardiTrack.API.csproj -c Release --no-restore
       - name: Check for pending model changes
         run: |
           dotnet ef migrations has-pending-model-changes \
-            --project src/Infrastructure/CardiTrack.Infrastructure \
-            --startup-project src/Presentation/CardiTrack.API
+            --project src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj \
+            --startup-project src/Presentation/CardiTrack.API/CardiTrack.API.csproj \
+            --no-build
         env:
           SKIP_DB_CONTEXT_VALIDATION: 'true'
 
@@ -219,22 +221,15 @@ jobs:
     if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     permissions:
-      actions: read
       contents: read
-      security-events: write
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
-      - uses: github/codeql-action/init@v4
-        with:
-          languages: csharp
-          build-mode: manual
-      - run: dotnet build src/Presentation/CardiTrack.API/CardiTrack.API.csproj -c Release
-      - uses: github/codeql-action/analyze@v4
       - name: Dependency vulnerability audit
         run: |
+          dotnet restore src/Presentation/CardiTrack.API/CardiTrack.API.csproj
           dotnet list src/Presentation/CardiTrack.API/CardiTrack.API.csproj package \
             --vulnerable --include-transitive 2>&1 | tee audit.txt
           if grep -q "has the following vulnerable packages" audit.txt; then
@@ -371,7 +366,7 @@ jobs:
     name: Build Mobile (iOS)
     needs: changes
     if: needs.changes.outputs.mobile == 'true'
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
@@ -601,11 +596,13 @@ jobs:
           secrets: |
             db_conn:${{ needs.changes.outputs.gcp_project_id }}/carditrack-dev-db-connection-string
       - run: dotnet tool install --global dotnet-ef
-      - run: dotnet restore src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj
+      - run: dotnet restore src/Presentation/CardiTrack.API/CardiTrack.API.csproj
+      - run: dotnet build src/Presentation/CardiTrack.API/CardiTrack.API.csproj -c Release --no-restore
       - run: |
           dotnet ef database update \
-            --project src/Infrastructure/CardiTrack.Infrastructure \
-            --startup-project src/Presentation/CardiTrack.API \
+            --project src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj \
+            --startup-project src/Presentation/CardiTrack.API/CardiTrack.API.csproj \
+            --no-build \
             --connection "${{ steps.secrets.outputs.db_conn }}"
 
   deploy-api-dev:

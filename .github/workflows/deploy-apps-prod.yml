@@ -124,11 +124,13 @@ jobs:
           secrets: |
             db_conn:${{ needs.env.outputs.gcp_project_id }}/carditrack-prod-db-connection-string
       - run: dotnet tool install --global dotnet-ef
-      - run: dotnet restore src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj
+      - run: dotnet restore src/Presentation/CardiTrack.API/CardiTrack.API.csproj
+      - run: dotnet build src/Presentation/CardiTrack.API/CardiTrack.API.csproj -c Release --no-restore
       - run: |
           dotnet ef database update \
-            --project src/Infrastructure/CardiTrack.Infrastructure \
-            --startup-project src/Presentation/CardiTrack.API \
+            --project src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj \
+            --startup-project src/Presentation/CardiTrack.API/CardiTrack.API.csproj \
+            --no-build \
             --connection "${{ steps.secrets.outputs.db_conn }}"
 
   # ── Web ──────────────────────────────────────────────────────────────────────
@@ -211,7 +213,7 @@ jobs:
   deploy-mobile-ios:
     name: Deploy Mobile (iOS) → Prod
     needs: [env, validate-tag]
-    runs-on: macos-latest
+    runs-on: macos-26
 
     steps:
       - uses: actions/checkout@v6
