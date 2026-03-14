@@ -1,3 +1,4 @@
+using CardiTrack.Shared;
 using Serilog;
 using Serilog.Events;
 
@@ -21,7 +22,7 @@ public static class SerilogExtensions
                 retainedFileCountLimit: 30,
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
             .WriteTo.Seq(
-                serverUrl: builder.Configuration["Serilog:SeqUrl"] ?? "http://localhost:5341",
+                serverUrl: new ConfigurationLoader(builder.Configuration).Get(ConfigurationKeys.Serilog.SeqUrl) ?? "http://localhost:5341",
                 restrictedToMinimumLevel: LogEventLevel.Information)
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)

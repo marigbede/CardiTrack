@@ -6,6 +6,7 @@ using CardiTrack.Infrastructure.Repositories;
 using CardiTrack.Infrastructure.Security;
 using CardiTrack.Infrastructure.Settings;
 using CardiTrack.Application.Interfaces.Repositories;
+using CardiTrack.Shared;
 using AspNetCoreRateLimit;
 
 namespace CardiTrack.API.Extensions;
@@ -31,12 +32,11 @@ public static class ServiceCollectionExtensions
             configuration.GetSection(DeviceProviderSettings.SectionName));
 
         // Encryption — key must be a base64-encoded 256-bit value stored in config/Key Vault
+        services.AddSingleton<ConfigurationLoader>();
         services.AddScoped<IEncryptionService>(sp =>
         {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var key = config["Encryption:Key"]
-                ?? throw new InvalidOperationException(
-                    "Encryption:Key is not configured. Provide a base64-encoded 256-bit key.");
+            var loader = sp.GetRequiredService<ConfigurationLoader>();
+            var key = loader.GetRequired(ConfigurationKeys.Encryption.Key);
             return new AesEncryptionService(key);
         });
 
@@ -59,7 +59,7 @@ public static class ServiceCollectionExtensions
         // HTTP Client for Auth0 service
         services.AddHttpClient("Auth0Client", client =>
         {
-            var auth0Domain = configuration["Auth0:Domain"];
+            var auth0Domain = new ConfigurationLoader(configuration).GetRequired(ConfigurationKeys.Auth0.Domain);
             client.BaseAddress = new Uri($"https://{auth0Domain}/");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });

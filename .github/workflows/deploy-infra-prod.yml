@@ -128,7 +128,7 @@ jobs:
           terraform init \
             -backend-config="bucket=${{ needs.env.outputs.tf_state_bucket_prod }}" \
             -backend-config="prefix=carditrack/prod"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: prod-tfplan-${{ needs.validate-tag.outputs.tag }}
           path: ${{ needs.env.outputs.tf_working_dir }}

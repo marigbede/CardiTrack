@@ -1,3 +1,4 @@
+using CardiTrack.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
@@ -11,9 +12,9 @@ public static class Auth0Extensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var auth0Config = configuration.GetSection("Auth0");
-        var domain = auth0Config["Domain"];
-        var audience = auth0Config["Audience"];
+        var loader = new ConfigurationLoader(configuration);
+        var domain   = loader.GetRequired(ConfigurationKeys.Auth0.Domain);
+        var audience = loader.GetRequired(ConfigurationKeys.Auth0.Audience);
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

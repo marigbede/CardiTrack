@@ -536,15 +536,15 @@ jobs:
           workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
           service_account: ${{ needs.changes.outputs.gcp_service_account }}
       - uses: google-github-actions/setup-gcloud@v3
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: mobile-android
           path: artifacts/android
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: mobile-ios-build
           path: artifacts/ios
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: mobile-windows
           path: artifacts/windows

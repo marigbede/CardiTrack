@@ -5,6 +5,7 @@ using CardiTrack.Infrastructure.Persistence;
 using CardiTrack.Infrastructure.Repositories;
 using CardiTrack.Infrastructure.Security;
 using CardiTrack.Infrastructure.Settings;
+using CardiTrack.Shared;
 using CardiTrack.Worker;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,12 +23,11 @@ var host = Host.CreateDefaultBuilder(args)
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         // Encryption — key must be a base64-encoded 256-bit value in config/Key Vault
+        services.AddSingleton<ConfigurationLoader>();
         services.AddScoped<IEncryptionService>(sp =>
         {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var key = config["Encryption:Key"]
-                ?? throw new InvalidOperationException(
-                    "Encryption:Key is not configured. Provide a base64-encoded 256-bit key.");
+            var loader = sp.GetRequiredService<ConfigurationLoader>();
+            var key = loader.GetRequired(ConfigurationKeys.Encryption.Key);
             return new AesEncryptionService(key);
         });
 
