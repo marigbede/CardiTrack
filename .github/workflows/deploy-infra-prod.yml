@@ -23,7 +23,7 @@ jobs:
     outputs:
       tag: ${{ steps.check.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Validate semver format and existence
@@ -47,7 +47,7 @@ jobs:
     needs: [env, validate-tag]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.validate-tag.outputs.tag }}
       - uses: google-github-actions/auth@v2
@@ -108,7 +108,7 @@ jobs:
     needs: [env, validate-tag, plan-prod]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.validate-tag.outputs.tag }}
       - uses: google-github-actions/auth@v2

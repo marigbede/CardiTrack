@@ -6,6 +6,23 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
+    inputs:
+      api:
+        description: 'API'
+        type: boolean
+        default: true
+      web:
+        description: 'Web'
+        type: boolean
+        default: true
+      worker:
+        description: 'Worker'
+        type: boolean
+        default: true
+      mobile:
+        description: 'Mobile'
+        type: boolean
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,16 +54,16 @@ jobs:
       gcs_builds_bucket:   ${{ needs.env.outputs.gcs_builds_bucket }}
       api_url_dev:         ${{ needs.env.outputs.api_url_dev }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Build all on manual run
+      - uses: actions/checkout@v6
+      - name: Set components for manual run
         if: github.event_name == 'workflow_dispatch'
         id: manual
         run: |
-          echo "api=true"    >> $GITHUB_OUTPUT
-          echo "web=true"    >> $GITHUB_OUTPUT
-          echo "worker=true" >> $GITHUB_OUTPUT
-          echo "mobile=true" >> $GITHUB_OUTPUT
-      - uses: dorny/paths-filter@v3
+          echo "api=${{ inputs.api }}"       >> $GITHUB_OUTPUT
+          echo "web=${{ inputs.web }}"       >> $GITHUB_OUTPUT
+          echo "worker=${{ inputs.worker }}" >> $GITHUB_OUTPUT
+          echo "mobile=${{ inputs.mobile }}" >> $GITHUB_OUTPUT
+      - uses: dorny/paths-filter@v4
         if: github.event_name != 'workflow_dispatch'
         id: filter
         with:
@@ -79,7 +96,7 @@ jobs:
     name: Compute next version
     needs: changes
     if: |
-      github.ref == 'refs/heads/main' &&
+      (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
       (needs.changes.outputs.api    == 'true' ||
        needs.changes.outputs.web    == 'true' ||
        needs.changes.outputs.worker == 'true' ||
@@ -88,7 +105,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Compute patch bump
@@ -111,7 +128,7 @@ jobs:
     if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -123,7 +140,7 @@ jobs:
     needs: [changes, build-api]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -147,7 +164,7 @@ jobs:
     needs: [changes, build-api]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -170,7 +187,7 @@ jobs:
     needs: [changes, build-api]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -193,7 +210,7 @@ jobs:
     permissions:
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -218,7 +235,7 @@ jobs:
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -233,7 +250,7 @@ jobs:
     permissions:
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -254,7 +271,7 @@ jobs:
     if: needs.changes.outputs.worker == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -266,7 +283,7 @@ jobs:
     needs: [changes, build-worker]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -293,7 +310,7 @@ jobs:
     permissions:
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -314,7 +331,7 @@ jobs:
     if: needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -335,7 +352,7 @@ jobs:
     if: needs.changes.outputs.mobile == 'true'
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -357,7 +374,7 @@ jobs:
     if: needs.changes.outputs.mobile == 'true'
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -380,7 +397,7 @@ jobs:
     permissions:
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -405,12 +422,12 @@ jobs:
       - test-integration
       - security-api
       - check-migrations
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.api == 'true'
+    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.push.outputs.image }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
@@ -438,12 +455,12 @@ jobs:
       - compute-version
       - build-web
       - security-web
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.web == 'true'
+    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.push.outputs.image }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
@@ -472,12 +489,12 @@ jobs:
       - build-worker
       - test-unit-worker
       - security-worker
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.worker == 'true'
+    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.worker == 'true'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.push.outputs.image }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
@@ -507,7 +524,7 @@ jobs:
       - build-mobile-ios
       - build-mobile-windows
       - security-mobile
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.mobile == 'true'
+    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/auth@v2
@@ -545,7 +562,7 @@ jobs:
     needs: [changes, push-api-image]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
@@ -591,7 +608,7 @@ jobs:
   deploy-web-dev:
     name: Deploy Web → Dev
     needs: [changes, push-web-image]
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.web == 'true'
+    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/auth@v2
@@ -609,7 +626,7 @@ jobs:
   deploy-worker-dev:
     name: Deploy Worker → Dev
     needs: [changes, push-worker-image]
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.worker == 'true'
+    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.worker == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/auth@v2
@@ -638,13 +655,13 @@ jobs:
       contents: write
     if: |
       always() &&
-      github.ref == 'refs/heads/main' &&
+      (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
       !contains(needs.*.result, 'failure') &&
       !contains(needs.*.result, 'cancelled') &&
       contains(needs.*.result, 'success')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
