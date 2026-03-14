@@ -211,6 +211,7 @@ jobs:
           dotnet ef migrations has-pending-model-changes \
             --project src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj \
             --startup-project src/Presentation/CardiTrack.API/CardiTrack.API.csproj \
+            --configuration Release \
             --no-build
         env:
           SKIP_DB_CONTEXT_VALIDATION: 'true'
@@ -400,7 +401,7 @@ jobs:
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet workload install maui-windows
-      - run: dotnet restore src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj -p:TargetFrameworks=net10.0-windows10.0.19041.0
+      - run: dotnet restore src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj -p:TargetFrameworks=net10.0-windows10.0.19041.0 -r win-x64
       - run: dotnet restore src/Core/CardiTrack.Application/CardiTrack.Application.csproj
       - run: dotnet restore src/Core/CardiTrack.Domain/CardiTrack.Domain.csproj
       - run: |
@@ -408,6 +409,7 @@ jobs:
             -f net10.0-windows10.0.19041.0 `
             -c Release `
             --no-restore `
+            -r win-x64 `
             -p:TargetFrameworks=net10.0-windows10.0.19041.0
       - uses: actions/upload-artifact@v7
         with:

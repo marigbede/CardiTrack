@@ -19,6 +19,10 @@ resource "google_artifact_registry_repository" "images" {
   format        = "DOCKER"
   description   = "Central Docker image registry for CardiTrack services"
   depends_on    = [google_project_service.artifactregistry]
+
+  vulnerability_scanning_config {
+    enablement_config = "DISABLED"
+  }
 }
 
 # CI/CD service account — push images
