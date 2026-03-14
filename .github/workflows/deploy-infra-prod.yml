@@ -8,6 +8,10 @@ on:
         required: true
         type: string
 
+permissions:
+  id-token: write
+  contents: read
+
 concurrency:
   group: deploy-infra-prod
   cancel-in-progress: false
