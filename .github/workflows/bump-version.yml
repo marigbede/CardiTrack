@@ -62,15 +62,26 @@ jobs:
             const prev = '${{ steps.version.outputs.current }}';
             const notes = `${{ inputs.notes }}`;
 
-            const { data: commits } = await github.rest.repos.compareCommitsWithBasehead({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              basehead: `${prev}...HEAD`
-            });
-
-            const changelog = commits.commits
-              .map(c => `- ${c.commit.message.split('\n')[0]} (${c.sha.slice(0,7)})`)
-              .join('\n');
+            let changelog = '';
+            if (prev !== 'v0.0.0') {
+              const { data: commits } = await github.rest.repos.compareCommitsWithBasehead({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                basehead: `${prev}...HEAD`
+              });
+              changelog = commits.commits
+                .map(c => `- ${c.commit.message.split('\n')[0]} (${c.sha.slice(0,7)})`)
+                .join('\n');
+            } else {
+              const { data: commits } = await github.rest.repos.listCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100
+              });
+              changelog = commits
+                .map(c => `- ${c.commit.message.split('\n')[0]} (${c.sha.slice(0,7)})`)
+                .join('\n');
+            }
 
             await github.rest.repos.createRelease({
               owner: context.repo.owner,
