@@ -108,7 +108,7 @@ jobs:
     name: Compute next version
     needs: changes
     if: |
-      (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
+      github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
       (needs.changes.outputs.api    == 'true' ||
        needs.changes.outputs.web    == 'true' ||
        needs.changes.outputs.worker == 'true' ||
@@ -219,6 +219,7 @@ jobs:
     if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       security-events: write
     steps:
@@ -229,6 +230,7 @@ jobs:
       - uses: github/codeql-action/init@v4
         with:
           languages: csharp
+          build-mode: manual
       - run: dotnet build src/Presentation/CardiTrack.API/CardiTrack.API.csproj -c Release
       - uses: github/codeql-action/analyze@v4
       - name: Dependency vulnerability audit
@@ -453,7 +455,7 @@ jobs:
       - test-integration
       - security-api
       - check-migrations
-    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.api == 'true'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.push.outputs.image }}
@@ -484,7 +486,7 @@ jobs:
       - compute-version
       - build-web
       - security-web
-    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.web == 'true'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.push.outputs.image }}
@@ -516,7 +518,7 @@ jobs:
       - build-worker
       - test-unit-worker
       - security-worker
-    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.worker == 'true'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.worker == 'true'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.push.outputs.image }}
@@ -549,7 +551,7 @@ jobs:
       - build-mobile-ios
       - build-mobile-windows
       - security-mobile
-    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.mobile == 'true'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/auth@v3
@@ -582,6 +584,7 @@ jobs:
   run-db-migrations:
     name: DB Migrations (Dev)
     needs: [changes, push-api-image]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -608,6 +611,7 @@ jobs:
   deploy-api-dev:
     name: Deploy API → Dev
     needs: [changes, push-api-image, run-db-migrations]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/auth@v3
@@ -630,7 +634,7 @@ jobs:
   deploy-web-dev:
     name: Deploy Web → Dev
     needs: [changes, push-web-image]
-    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.web == 'true'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/auth@v3
@@ -648,7 +652,7 @@ jobs:
   deploy-worker-dev:
     name: Deploy Worker → Dev
     needs: [changes, push-worker-image]
-    if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.worker == 'true'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.worker == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/auth@v3
@@ -677,7 +681,7 @@ jobs:
       contents: write
     if: |
       always() &&
-      (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
+      github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
       !contains(needs.*.result, 'failure') &&
       !contains(needs.*.result, 'cancelled') &&
       contains(needs.*.result, 'success')

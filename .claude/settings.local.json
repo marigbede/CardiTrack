@@ -25,7 +25,8 @@
       "Bash(C:/Utilities/Python314/python.exe -m pip list)",
       "Bash(bash rename_cs_files.sh)",
       "Bash(find /c/Code/Github/Carditrack -name *.yml -o -name *.yaml -o -name Dockerfile*)",
-      "Bash(dotnet restore:*)"
+      "Bash(dotnet restore:*)",
+      "Bash(gh api:*)"
     ]
   }
 }

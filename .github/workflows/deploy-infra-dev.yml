@@ -19,10 +19,6 @@ on:
         type: choice
         options: [dev]
         default: dev
-      force_apply:
-        description: 'Apply even if plan shows no changes'
-        type: boolean
-        default: false
 
 permissions:
   id-token: write
@@ -96,8 +92,6 @@ jobs:
       id-token: write
       contents: read
       pull-requests: write
-    outputs:
-      exitcode: ${{ steps.plan.outputs.exitcode }}
     steps:
       - uses: actions/checkout@v6
       - uses: google-github-actions/auth@v3
@@ -157,9 +151,7 @@ jobs:
   apply-dev:
     name: Apply (Dev)
     needs: [env, plan-dev]
-    if: |
-      (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
-      (needs.plan-dev.outputs.exitcode == '2' || inputs.force_apply == true)
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
