@@ -160,11 +160,6 @@ variable "cloud_run_labels" {
   default     = {}
 }
 
-variable "project_id" {
-  description = "GCP project ID"
-  type        = string
-}
-
 variable "api_custom_domain" {
   description = "Custom domain for the API service (e.g. api.carditrack.com)"
   type        = string
