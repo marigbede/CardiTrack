@@ -48,8 +48,12 @@ resource "google_cloud_run_v2_service" "api" {
     }
   }
 
-  labels     = var.cloud_run_labels
-  depends_on = [google_project_service.run]
+  labels = var.cloud_run_labels
+  depends_on = [
+    google_project_service.run,
+    google_secret_manager_secret_version.app_secrets,
+    google_secret_manager_secret_version.db_connection_string,
+  ]
 }
 
 resource "google_cloud_run_v2_service" "web" {
@@ -99,8 +103,12 @@ resource "google_cloud_run_v2_service" "web" {
     }
   }
 
-  labels     = var.cloud_run_labels
-  depends_on = [google_project_service.run]
+  labels = var.cloud_run_labels
+  depends_on = [
+    google_project_service.run,
+    google_secret_manager_secret_version.app_secrets,
+    google_secret_manager_secret_version.db_connection_string,
+  ]
 }
 
 # Allow unauthenticated access (traffic enters via GCLB + Cloud Armor)

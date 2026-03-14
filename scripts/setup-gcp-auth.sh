@@ -40,7 +40,7 @@ fi
 # ── Grant roles ───────────────────────────────────────────────────────────────
 for ROLE in \
   roles/run.admin \
-  roles/artifactregistry.writer \
+  roles/artifactregistry.admin \
   roles/storage.admin \
   roles/secretmanager.admin \
   roles/cloudsql.admin \
