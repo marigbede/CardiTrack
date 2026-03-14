@@ -42,6 +42,11 @@ resource "google_project_service" "compute" {
   disable_on_destroy = false
 }
 
+resource "google_project_service" "servicenetworking" {
+  service            = "servicenetworking.googleapis.com"
+  disable_on_destroy = false
+}
+
 # Variables
 variable "project_id" {
   description = "GCP project ID"

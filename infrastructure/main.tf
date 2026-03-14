@@ -73,6 +73,10 @@ module "deployments" {
   cloud_run_memory = var.cloud_run_memory
   cloud_run_labels = local.common_labels
 
+  # Networking
+  vpc_name    = "${var.project_name}-${local.environment}-vpc"
+  subnet_name = "${var.project_name}-${local.environment}-subnet"
+
   # Cloud SQL (PostgreSQL)
   cloud_sql_instance_name       = local.cloud_sql_name
   cloud_sql_database_name       = local.cloud_sql_db_name

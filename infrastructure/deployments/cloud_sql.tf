@@ -24,8 +24,9 @@ resource "google_sql_database_instance" "main" {
     }
 
     ip_configuration {
-      ipv4_enabled = var.cloud_sql_public_ip_enabled
-      ssl_mode     = "ENCRYPTED_ONLY"
+      ipv4_enabled    = var.cloud_sql_public_ip_enabled
+      private_network = google_compute_network.main.self_link
+      ssl_mode        = "ENCRYPTED_ONLY"
     }
 
     database_flags {
@@ -43,7 +44,7 @@ resource "google_sql_database_instance" "main" {
 
   deletion_protection = var.cloud_sql_deletion_protection
 
-  depends_on = [google_project_service.sql]
+  depends_on = [google_project_service.sql, google_service_networking_connection.private_services]
 }
 
 resource "google_sql_database" "main" {
@@ -124,4 +125,12 @@ variable "cloud_sql_labels" {
   description = "Labels for Cloud SQL resources"
   type        = map(string)
   default     = {}
+}
+
+# ── IAM — allow the default Compute SA to use the Cloud SQL Auth Proxy ────────
+# Required for Cloud Run services (API, Web, Migrator) to connect via Unix socket.
+resource "google_project_iam_member" "cloudsql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
 }

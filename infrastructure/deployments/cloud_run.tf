@@ -8,6 +8,14 @@ resource "google_cloud_run_v2_service" "api" {
   client   = "terraform"
 
   template {
+    vpc_access {
+      network_interfaces {
+        network    = google_compute_network.main.id
+        subnetwork = google_compute_subnetwork.main.id
+      }
+      egress = "PRIVATE_RANGES_ONLY"
+    }
+
     volumes {
       name = "cloudsql"
       cloud_sql_instance {
@@ -75,6 +83,14 @@ resource "google_cloud_run_v2_service" "web" {
   client   = "terraform"
 
   template {
+    vpc_access {
+      network_interfaces {
+        network    = google_compute_network.main.id
+        subnetwork = google_compute_subnetwork.main.id
+      }
+      egress = "PRIVATE_RANGES_ONLY"
+    }
+
     volumes {
       name = "cloudsql"
       cloud_sql_instance {
@@ -146,6 +162,14 @@ resource "google_cloud_run_v2_job" "migrator" {
   template {
     template {
       max_retries = 1
+
+      vpc_access {
+        network_interfaces {
+          network    = google_compute_network.main.id
+          subnetwork = google_compute_subnetwork.main.id
+        }
+        egress = "PRIVATE_RANGES_ONLY"
+      }
 
       volumes {
         name = "cloudsql"

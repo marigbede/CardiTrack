@@ -23,7 +23,7 @@ cloud_sql_tier                = "db-f1-micro" # Shared-core for dev
 cloud_sql_disk_size_gb        = 10
 cloud_sql_ha_enabled          = false
 cloud_sql_deletion_protection = false
-cloud_sql_public_ip_enabled   = false # Private only; Cloud Run connects via Auth Proxy socket
+cloud_sql_public_ip_enabled   = false # DB is private-only; Cloud Run connects via Auth Proxy socket over the VPC private network
 
 # Storage
 storage_location = "EU"
