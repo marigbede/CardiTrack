@@ -46,11 +46,11 @@ jobs:
           fi
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
           echo "Tag validated: ${TAG}"
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v3
       - name: Verify images exist in Artifact Registry
         env:
           REGISTRY: ${{ needs.env.outputs.registry }}
@@ -85,11 +85,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v3
       - name: Deploy
         run: |
           gcloud run deploy carditrack-prod-api \
@@ -114,7 +114,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.env.outputs.dotnet_version }}
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
@@ -138,11 +138,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v3
       - name: Deploy
         run: |
           gcloud run deploy carditrack-prod-web \
@@ -163,11 +163,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v3
       - name: Deploy
         run: |
           gcloud run deploy carditrack-prod-worker \
@@ -186,11 +186,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v3
       - name: Download APK from GCS
         run: |
           mkdir -p artifacts/android
@@ -220,11 +220,11 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.env.outputs.dotnet_version }}
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@v3
       - uses: google-github-actions/get-secretmanager-secrets@v2
         id: secrets
         with:
