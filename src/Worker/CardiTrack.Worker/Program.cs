@@ -12,49 +12,54 @@ using Microsoft.EntityFrameworkCore;
 // Enforce UTC for all DateTime values read from PostgreSQL timestamptz columns
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
 
-var host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((context, services) =>
-    {
-        var configuration = context.Configuration;
+var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
-        // Device provider config array
-        services.Configure<List<DeviceProviderSettings>>(
-            configuration.GetSection(DeviceProviderSettings.SectionName));
+// Device provider config array
+builder.Services.Configure<List<DeviceProviderSettings>>(
+    configuration.GetSection(DeviceProviderSettings.SectionName));
 
-        // Database
-        services.AddDbContext<CardiTrackDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+// Database
+builder.Services.AddDbContext<CardiTrackDbContext>(options =>
+    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
-        // Encryption — key must be a base64-encoded 256-bit value in config/Key Vault
-        services.AddSingleton<ConfigurationLoader>();
-        services.AddScoped<IEncryptionService>(sp =>
-        {
-            var loader = sp.GetRequiredService<ConfigurationLoader>();
-            var key = loader.GetRequired(ConfigurationKeys.Encryption.Key);
-            return new AesEncryptionService(key);
-        });
+// Encryption — key must be a base64-encoded 256-bit value in config/Key Vault
+builder.Services.AddSingleton<ConfigurationLoader>();
+builder.Services.AddScoped<IEncryptionService>(sp =>
+{
+    var loader = sp.GetRequiredService<ConfigurationLoader>();
+    var key = loader.GetRequired(ConfigurationKeys.Encryption.Key);
+    return new AesEncryptionService(key);
+});
 
-        // Repositories
-        services.AddScoped<IOrganizationRepository, OrganizationRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<ICardiMemberRepository, CardiMemberRepository>();
-        services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
-        services.AddScoped<IUserCardiMemberRepository, UserCardiMemberRepository>();
-        services.AddScoped<IDeviceConnectionRepository, DeviceConnectionRepository>();
-        services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
-        services.AddScoped<IDeviceRepository, DeviceRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+// Repositories
+builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICardiMemberRepository, CardiMemberRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IUserCardiMemberRepository, UserCardiMemberRepository>();
+builder.Services.AddScoped<IDeviceConnectionRepository, DeviceConnectionRepository>();
+builder.Services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
+builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // External clients
-        services.AddHttpClient();
-        services.AddScoped<IOAuthTokenRefreshService, OAuthTokenRefreshService>();
+// External clients
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IOAuthTokenRefreshService, OAuthTokenRefreshService>();
 
-        // Fitbit provider (keyed IDeviceApiClient + keyed IDeviceSyncService)
-        services.AddFitbitProvider();
+// Fitbit provider (keyed IDeviceApiClient + keyed IDeviceSyncService)
+builder.Services.AddFitbitProvider();
 
-        // Background workers
-        services.AddWorker<WearableSyncWorker>(configuration, nameof(WearableSyncWorker));
-    })
-    .Build();
+// Background workers
+builder.Services.AddWorker<WearableSyncWorker>(configuration, nameof(WearableSyncWorker));
 
-await host.RunAsync();
+// Bind to PORT env var (Cloud Run sets this to 8080)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+var app = builder.Build();
+
+// Health check endpoint required by Cloud Run startup probe
+app.MapGet("/healthz", () => Results.Ok("healthy"));
+
+await app.RunAsync();

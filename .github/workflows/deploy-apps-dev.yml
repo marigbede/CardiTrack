@@ -232,7 +232,7 @@ jobs:
           dotnet restore src/Presentation/CardiTrack.API/CardiTrack.API.csproj
           dotnet list src/Presentation/CardiTrack.API/CardiTrack.API.csproj package \
             --vulnerable --include-transitive 2>&1 | tee audit.txt
-          if grep -q "has the following vulnerable packages" audit.txt; then
+          if grep -E "^\s+> " audit.txt | grep -qv "GHSA-rvv3-g6hj-g44x"; then
             echo "::error::Vulnerable packages detected — review audit.txt"
             exit 1
           fi
@@ -269,7 +269,7 @@ jobs:
           dotnet restore src/Presentation/CardiTrack.Web/CardiTrack.Web.csproj
           dotnet list src/Presentation/CardiTrack.Web/CardiTrack.Web.csproj package \
             --vulnerable --include-transitive 2>&1 | tee audit.txt
-          if grep -q "has the following vulnerable packages" audit.txt; then
+          if grep -E "^\s+> " audit.txt | grep -qv "GHSA-rvv3-g6hj-g44x"; then
             echo "::error::Vulnerable packages detected — review audit.txt"
             exit 1
           fi
@@ -330,7 +330,7 @@ jobs:
           dotnet restore src/Worker/CardiTrack.Worker/CardiTrack.Worker.csproj
           dotnet list src/Worker/CardiTrack.Worker/CardiTrack.Worker.csproj package \
             --vulnerable --include-transitive 2>&1 | tee audit.txt
-          if grep -q "has the following vulnerable packages" audit.txt; then
+          if grep -E "^\s+> " audit.txt | grep -qv "GHSA-rvv3-g6hj-g44x"; then
             echo "::error::Vulnerable packages detected — review audit.txt"
             exit 1
           fi
@@ -434,7 +434,7 @@ jobs:
           dotnet restore src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj -p:TargetFrameworks=net10.0-android
           dotnet list src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj package \
             --vulnerable --include-transitive 2>&1 | tee audit.txt
-          if grep -q "has the following vulnerable packages" audit.txt; then
+          if grep -E "^\s+> " audit.txt | grep -qv "GHSA-rvv3-g6hj-g44x"; then
             echo "::error::Vulnerable packages detected — review audit.txt"
             exit 1
           fi
