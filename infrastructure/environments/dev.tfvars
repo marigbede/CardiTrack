@@ -1,5 +1,4 @@
-# Development Environment Configuration Example
-# Copy this file to dev.tfvars and fill in sensitive values
+# Development Environment Configuration
 # terraform apply -var-file="environments/dev.tfvars"
 
 environment  = "dev"
@@ -20,7 +19,7 @@ cloud_run_cpu    = "1"
 cloud_run_memory = "512Mi"
 
 # Cloud SQL
-cloud_sql_tier                = "db-f1-micro"
+cloud_sql_tier                = "db-f1-micro" # Shared-core for dev
 cloud_sql_disk_size_gb        = 10
 cloud_sql_ha_enabled          = false
 cloud_sql_deletion_protection = false
@@ -30,11 +29,11 @@ storage_location = "EU"
 storage_class    = "STANDARD"
 
 # Pub/Sub
-enable_pubsub = false
+enable_pubsub = false # Disabled in dev
 
 # HIPAA Compliance
-enable_hipaa_compliance  = false
-audit_retention_days     = 30
+enable_hipaa_compliance = false
+audit_retention_days    = 30
 
 # Labels
 additional_labels = {

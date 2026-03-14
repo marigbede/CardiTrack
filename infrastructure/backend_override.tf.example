@@ -1,0 +1,9 @@
+# Local development: copy this file to backend_override.tf
+# backend_override.tf is gitignored — it overrides the GCS backend with local state.
+#
+# cp backend_override.tf.example backend_override.tf
+# terraform init
+
+terraform {
+  backend "local" {}
+}

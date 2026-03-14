@@ -23,7 +23,9 @@
       "Bash(C:/Utilities/Python314/python.exe -c \"import weasyprint; print\\(''''weasyprint ok''''\\)\")",
       "Bash(C:/Utilities/Python314/python.exe -c \"from reportlab.lib.pagesizes import A4; print\\(''''reportlab ok''''\\)\")",
       "Bash(C:/Utilities/Python314/python.exe -m pip list)",
-      "Bash(bash rename_cs_files.sh)"
+      "Bash(bash rename_cs_files.sh)",
+      "Bash(find /c/Code/Github/Carditrack -name *.yml -o -name *.yaml -o -name Dockerfile*)",
+      "Bash(dotnet restore:*)"
     ]
   }
 }

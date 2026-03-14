@@ -1,11 +1,4 @@
-provider "azurerm" {
-  features {
-    key_vault {
-      purge_soft_delete_on_destroy = var.environment == "dev" ? true : false
-    }
-
-    resource_group {
-      prevent_deletion_if_contains_resources = var.environment == "prod" ? true : false
-    }
-  }
+provider "google" {
+  project = var.project_id
+  region  = var.region
 }

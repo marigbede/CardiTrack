@@ -3,125 +3,93 @@
 
 locals {
   environment = var.environment
-  location    = var.location
+  region      = var.region
+  is_prod     = var.environment == "prod"
 
-  common_tags = merge(
+  common_labels = merge(
     {
-      Environment = title(var.environment)
-      Project     = "CardiTrack"
-      ManagedBy   = "Terraform"
+      environment = lower(var.environment)
+      project     = "carditrack"
+      managed_by  = "terraform"
+      cost_center = "engineering"
     },
-    var.environment == "prod" ? { CostCenter = "Engineering" } : {},
-    var.additional_tags
+    var.additional_labels
   )
 
   # Resource naming
-  resource_group_name  = "${var.project_name}-${local.environment}-rg"
-  app_service_plan_name = "${var.project_name}-${local.environment}-asp"
-  api_app_name         = "${var.project_name}-${local.environment}-api"
-  web_app_name         = "${var.project_name}-${local.environment}-web"
-  sql_server_name      = "${var.project_name}-${local.environment}-sql"
-  sql_database_name    = "${var.project_name}-${local.environment}-db"
-  storage_account_name = "${var.project_name}${local.environment}st"
-  key_vault_name       = "${var.project_name}-${local.environment}-kv"
-  app_insights_name    = "${var.project_name}-${local.environment}-ai"
-  signalr_name         = "${var.project_name}-${local.environment}-signalr"
+  api_service_name    = "${var.project_name}-${local.environment}-api"
+  web_service_name    = "${var.project_name}-${local.environment}-web"
+  cloud_sql_name      = "${var.project_name}-${local.environment}-sql"
+  cloud_sql_db_name   = "${var.project_name}-${local.environment}-db"
+  storage_bucket_name = "${var.project_id}-${var.project_name}-${local.environment}"
+  pubsub_topic_name   = "${var.project_name}-${local.environment}-realtime"
+  log_sink_name       = "${var.project_name}-${local.environment}-audit-sink"
+  audit_bucket_name   = "${var.project_id}-${var.project_name}-${local.environment}-audit"
 }
 
 # All deployments are managed through a single module
 module "deployments" {
   source = "./deployments"
 
-  # Resource Group
-  resource_group_name = local.resource_group_name
-  location            = local.location
-  tags                = local.common_tags
+  # Project / Region
+  project_id = var.project_id
+  region     = local.region
 
-  # Storage Account
-  storage_account_name                      = local.storage_account_name
-  storage_location                          = local.location
-  storage_resource_group_name               = local.resource_group_name
-  storage_replication_type                  = var.storage_replication_type
-  storage_infrastructure_encryption_enabled = var.storage_enable_infrastructure_encryption
-  storage_tags                              = local.common_tags
-
-  # Application Insights
-  app_insights_name              = local.app_insights_name
-  monitoring_location            = local.location
-  monitoring_resource_group_name = local.resource_group_name
-  monitoring_retention_in_days   = var.app_insights_retention_days
-  monitoring_tags                = local.common_tags
-
-  # App Service Plan and Web Apps
-  app_service_plan_name           = local.app_service_plan_name
-  api_app_name                    = local.api_app_name
-  web_app_name                    = local.web_app_name
-  app_service_location            = local.location
-  app_service_resource_group_name = local.resource_group_name
-  app_service_sku_name            = var.app_service_sku
-  app_service_always_on           = var.app_service_always_on
-  app_service_http2_enabled       = var.environment == "prod"
-  app_service_ftps_state          = var.environment == "prod" ? "Disabled" : "AllAllowed"
-  app_service_health_check_path   = var.environment == "prod" ? "/health" : null
-  app_service_https_only          = var.environment == "prod"
-
-  api_app_settings = merge(
-    {
-      "ASPNETCORE_ENVIRONMENT" = title(var.environment)
-    },
-    var.environment == "prod" ? {
-      "APPLICATIONINSIGHTS_CONNECTION_STRING"   = module.deployments.app_insights_connection_string
-      "ApplicationInsights__InstrumentationKey" = module.deployments.app_insights_instrumentation_key
-    } : {}
+  # Cloud Run - API Service
+  api_custom_domain   = var.api_custom_domain
+  web_custom_domain   = var.web_custom_domain
+  api_service_name    = local.api_service_name
+  api_container_image = var.api_container_image
+  api_env_vars = merge(
+    { "ASPNETCORE_ENVIRONMENT" = title(var.environment) },
+    { "GCP_PROJECT_ID" = var.project_id }
   )
+  cloud_run_location      = local.region
+  cloud_run_min_instances = local.is_prod ? 1 : 0
+  cloud_run_max_instances = local.is_prod ? 3 : 1
 
-  web_app_settings = merge(
-    {
-      "ASPNETCORE_ENVIRONMENT" = title(var.environment)
-    },
-    var.environment == "prod" ? {
-      "APPLICATIONINSIGHTS_CONNECTION_STRING"   = module.deployments.app_insights_connection_string
-      "ApplicationInsights__InstrumentationKey" = module.deployments.app_insights_instrumentation_key
-    } : {}
-  )
+  # Cloud Run - Web Service
+  web_service_name    = local.web_service_name
+  web_container_image = var.web_container_image
+  web_env_vars        = { "ASPNETCORE_ENVIRONMENT" = title(var.environment) }
 
-  app_service_tags = local.common_tags
+  cloud_run_cpu    = var.cloud_run_cpu
+  cloud_run_memory = var.cloud_run_memory
+  cloud_run_labels = local.common_labels
 
-  # Azure SQL Server and Database
-  sql_server_name              = local.sql_server_name
-  sql_database_name            = local.sql_database_name
-  sql_location                 = local.location
-  sql_resource_group_name      = local.resource_group_name
-  sql_admin_username           = var.sql_admin_username
-  sql_admin_password           = var.sql_admin_password
-  sql_aad_admin_login          = var.sql_aad_admin_login
-  sql_aad_admin_object_id      = var.sql_aad_admin_object_id
-  sql_database_sku_name        = var.sql_database_sku
-  sql_database_max_size_gb     = var.sql_database_max_size_gb
-  sql_enable_auditing          = var.enable_hipaa_compliance
-  sql_audit_storage_endpoint   = var.enable_hipaa_compliance ? module.deployments.storage_primary_blob_endpoint : null
-  sql_audit_storage_access_key = var.enable_hipaa_compliance ? module.deployments.storage_primary_access_key : null
-  sql_audit_retention_days     = var.sql_audit_retention_days
-  sql_tags                     = local.common_tags
+  # Cloud SQL (PostgreSQL)
+  cloud_sql_instance_name       = local.cloud_sql_name
+  cloud_sql_database_name       = local.cloud_sql_db_name
+  cloud_sql_region              = local.region
+  db_admin_username             = var.db_admin_username
+  cloud_sql_tier                = var.cloud_sql_tier
+  cloud_sql_disk_size_gb        = var.cloud_sql_disk_size_gb
+  cloud_sql_ha_enabled          = var.cloud_sql_ha_enabled
+  cloud_sql_deletion_protection = var.cloud_sql_deletion_protection
+  cloud_sql_enable_audit        = var.enable_hipaa_compliance
+  cloud_sql_labels              = local.common_labels
 
-  # Key Vault
-  key_vault_name                        = local.key_vault_name
-  key_vault_location                    = local.location
-  key_vault_resource_group_name         = local.resource_group_name
-  key_vault_sku_name                    = var.key_vault_sku
-  key_vault_soft_delete_retention_days  = var.key_vault_soft_delete_retention_days
-  key_vault_purge_protection_enabled    = var.key_vault_purge_protection_enabled
-  key_vault_enabled_for_disk_encryption = var.enable_hipaa_compliance
-  key_vault_enabled_for_deployment      = var.enable_hipaa_compliance
-  key_vault_enable_network_acls         = var.environment == "prod"
-  key_vault_tags                        = local.common_tags
+  # Cloud Storage
+  storage_bucket_name   = local.storage_bucket_name
+  storage_location      = var.storage_location
+  storage_class         = var.storage_class
+  storage_force_destroy = !local.is_prod
+  storage_labels        = local.common_labels
 
-  # SignalR Service (Optional - Production only)
-  signalr_name                = local.signalr_name
-  signalr_location            = local.location
-  signalr_resource_group_name = local.resource_group_name
-  signalr_sku_name            = var.signalr_sku_name
-  signalr_capacity            = var.enable_signalr ? 1 : 0
-  signalr_allowed_origins     = var.enable_signalr ? ["https://${module.deployments.web_app_hostname}"] : []
-  signalr_tags                = local.common_tags
+  # Secret Manager
+  db_password_secret_id = "${var.project_name}-${local.environment}-db-password"
+  secret_labels         = local.common_labels
+
+  # Cloud Pub/Sub (real-time messaging)
+  pubsub_topic_name = local.pubsub_topic_name
+  pubsub_region     = local.region
+  enable_pubsub     = var.enable_pubsub
+  pubsub_labels     = local.common_labels
+
+  # Cloud Monitoring & Audit Logging
+  log_sink_name           = local.log_sink_name
+  audit_bucket_name       = local.audit_bucket_name
+  enable_hipaa_compliance = var.enable_hipaa_compliance
+  audit_retention_days    = var.audit_retention_days
+  monitoring_labels       = local.common_labels
 }

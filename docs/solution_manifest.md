@@ -87,7 +87,7 @@ Customer LTV (3 years): $368
 - .NET 10 (ASP.NET Core Web API)
 - Entity Framework Core
 - SQL Server / PostgreSQL
-- Azure Functions (background jobs)
+- .NET Worker Service + Cronos (background jobs)
 - ML.NET (pattern analysis & anomaly detection)
 
 **Frontend:**
@@ -148,8 +148,8 @@ Customer LTV (3 years): $368
                             │
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                BACKGROUND JOBS (Azure Functions)            │
-│  - Device Data Sync (every 30 mins)                         │
+│              BACKGROUND JOBS (Worker Service)               │
+│  - Device Data Sync (every 30 mins, cron-driven)            │
 │  - Pattern Analysis (ML anomaly detection)                  │
 │  - Token Refresh (OAuth management)                         │
 │  - Baseline Recalculation (weekly)                          │
@@ -485,19 +485,19 @@ Prevention: Catches gradual decline before it becomes severe
 ### Cloud Infrastructure (Azure)
 
 **MVP Phase (0-100 users):**
-- App Service (Basic): $13/month
+- App Service (Basic B1 — API): $13/month
 - Azure SQL (Basic): $5/month
-- Functions (Consumption): ~$5/month
-- **Total**: ~$25-30/month
+- Worker (App Service Basic B1): $13/month
+- **Total**: ~$31-35/month
 
 **Growth Phase (1,000-10,000 users):**
-- App Service (Premium P1V2): $146/month
+- App Service (Premium P1V2 — API): $146/month
 - Azure SQL (Standard S2): $75/month
-- Functions: ~$100/month
+- Worker (Container App): ~$30-50/month
 - SignalR (Standard): $50/month
-- **Total**: ~$371/month
-- **Per user cost**: $0.037/month
-- **Margin**: $14.96/user/month
+- **Total**: ~$301-321/month
+- **Per user cost**: ~$0.030-0.032/month
+- **Margin**: ~$14.97/user/month
 
 ### Database Storage
 
@@ -516,8 +516,8 @@ Prevention: Catches gradual decline before it becomes severe
 
 **Horizontal Scaling:**
 - Auto-scale App Service based on CPU (>70%) and memory (>80%)
-- Azure Functions auto-scale with queue depth
-- Max instances: 10 (API), unlimited (Functions)
+- Worker Service scales by replica count (Azure Container Apps)
+- Max instances: 10 (API), configurable replicas (Worker)
 
 **Database Scaling:**
 - Read replicas for dashboard queries

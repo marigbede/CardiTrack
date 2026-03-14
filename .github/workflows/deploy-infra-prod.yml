@@ -1,0 +1,138 @@
+name: Deploy Infrastructure → Prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Semver tag to deploy (e.g. v1.3.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-infra-prod
+  cancel-in-progress: false
+
+jobs:
+  # ── Shared config ────────────────────────────────────────────────────────────
+  env:
+    uses: ./.github/workflows/_env.yml
+
+  validate-tag:
+    name: Validate tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate semver format and existence
+        id: check
+        run: |
+          TAG="${{ inputs.tag }}"
+          if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Tag '$TAG' is not valid semver (expected vMAJOR.MINOR.PATCH)"
+            exit 1
+          fi
+          git fetch --tags
+          if ! git tag | grep -q "^${TAG}$"; then
+            echo "::error::Tag '$TAG' does not exist in this repository"
+            exit 1
+          fi
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "Tag validated: ${TAG}"
+
+  plan-prod:
+    name: Plan (Prod)
+    needs: [env, validate-tag]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate-tag.outputs.tag }}
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.env.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Ensure state bucket exists
+        env:
+          BUCKET: ${{ needs.env.outputs.tf_state_bucket_prod }}
+          PROJECT: ${{ needs.env.outputs.gcp_project_id }}
+          REGION: ${{ needs.env.outputs.gcp_region }}
+        run: |
+          if gcloud storage buckets describe gs://$BUCKET --project=$PROJECT > /dev/null 2>&1; then
+            echo "Bucket gs://$BUCKET already exists"
+          else
+            echo "Bucket gs://$BUCKET not found — creating..."
+            gcloud storage buckets create gs://$BUCKET \
+              --project=$PROJECT \
+              --location=$REGION \
+              --uniform-bucket-level-access
+            gcloud storage buckets update gs://$BUCKET --versioning
+            echo "Bucket gs://$BUCKET created with versioning enabled"
+          fi
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ needs.env.outputs.tf_version }}
+      - name: terraform init
+        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ needs.env.outputs.tf_state_bucket_prod }}" \
+            -backend-config="prefix=carditrack/prod"
+      - name: terraform plan
+        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        run: |
+          terraform plan \
+            -var-file=environments/prod.tfvars \
+            -out=prod.tfplan \
+            -no-color 2>&1 | tee plan.txt
+      - name: Save plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-tfplan-${{ needs.validate-tag.outputs.tag }}
+          path: |
+            ${{ needs.env.outputs.tf_working_dir }}/prod.tfplan
+            ${{ needs.env.outputs.tf_working_dir }}/plan.txt
+          retention-days: 3
+      - name: Plan summary
+        run: |
+          echo "### Terraform Plan — Prod @ \`${{ needs.validate-tag.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -20 ${{ needs.env.outputs.tf_working_dir }}/plan.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  apply-prod:
+    name: Apply (Prod)
+    needs: [env, validate-tag, plan-prod]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate-tag.outputs.tag }}
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.env.outputs.gcp_service_account }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ needs.env.outputs.tf_version }}
+      - name: terraform init
+        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ needs.env.outputs.tf_state_bucket_prod }}" \
+            -backend-config="prefix=carditrack/prod"
+      - uses: actions/download-artifact@v4
+        with:
+          name: prod-tfplan-${{ needs.validate-tag.outputs.tag }}
+          path: ${{ needs.env.outputs.tf_working_dir }}
+      - name: terraform apply
+        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        run: terraform apply prod.tfplan
+      - name: Output summary
+        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        run: |
+          echo "### Terraform Applied — Prod @ \`${{ needs.validate-tag.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          terraform output -no-color >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,117 @@
+name: Environment Config
+
+# Reusable workflow — single source of truth for all shared config.
+# Call with: uses: ./.github/workflows/_env.yml
+# Reference outputs as: needs.<job>.outputs.<name>
+#
+# Version pins:
+#   dotnet_version  — update when upgrading .NET SDK
+#   tf_version      — update when upgrading Terraform CLI
+#
+# Computed values (built from GitHub Variables):
+#   registry        — Artifact Registry base path  (GCP_REGION + GCP_PROJECT_ID + ARTIFACT_REGISTRY_REPO)
+#   tf_state_bucket — GCS bucket for Terraform state (GCS_TF_STATE_BUCKET)
+#   tf_working_dir  — always 'infrastructure'
+
+on:
+  workflow_call:
+    outputs:
+      dotnet_version:
+        description: '.NET SDK version'
+        value: ${{ jobs.config.outputs.dotnet_version }}
+      tf_version:
+        description: 'Terraform CLI version'
+        value: ${{ jobs.config.outputs.tf_version }}
+      tf_working_dir:
+        description: 'Terraform working directory'
+        value: ${{ jobs.config.outputs.tf_working_dir }}
+      gcp_project_id:
+        description: 'GCP project ID'
+        value: ${{ jobs.config.outputs.gcp_project_id }}
+      gcp_region:
+        description: 'GCP region'
+        value: ${{ jobs.config.outputs.gcp_region }}
+      gcp_wif_provider:
+        description: 'Workload Identity Federation provider resource name'
+        value: ${{ jobs.config.outputs.gcp_wif_provider }}
+      gcp_service_account:
+        description: 'GCP service account email for deployments'
+        value: ${{ jobs.config.outputs.gcp_service_account }}
+      registry:
+        description: 'Artifact Registry base path (REGION-docker.pkg.dev/PROJECT/REPO)'
+        value: ${{ jobs.config.outputs.registry }}
+      tf_state_bucket_dev:
+        description: 'GCS bucket name for Terraform dev state'
+        value: ${{ jobs.config.outputs.tf_state_bucket_dev }}
+      tf_state_bucket_prod:
+        description: 'GCS bucket name for Terraform prod state'
+        value: ${{ jobs.config.outputs.tf_state_bucket_prod }}
+      gcs_builds_bucket:
+        description: 'GCS bucket for mobile build artifacts'
+        value: ${{ jobs.config.outputs.gcs_builds_bucket }}
+      api_url_dev:
+        description: 'API base URL for the dev environment'
+        value: ${{ jobs.config.outputs.api_url_dev }}
+      web_url_dev:
+        description: 'Web base URL for the dev environment'
+        value: ${{ jobs.config.outputs.web_url_dev }}
+      api_url_prod:
+        description: 'API base URL for the prod environment'
+        value: ${{ jobs.config.outputs.api_url_prod }}
+      web_url_prod:
+        description: 'Web base URL for the prod environment'
+        value: ${{ jobs.config.outputs.web_url_prod }}
+
+jobs:
+  config:
+    name: Resolve config
+    runs-on: ubuntu-latest
+    outputs:
+      dotnet_version:      ${{ steps.out.outputs.dotnet_version }}
+      tf_version:          ${{ steps.out.outputs.tf_version }}
+      tf_working_dir:      ${{ steps.out.outputs.tf_working_dir }}
+      gcp_project_id:      ${{ steps.out.outputs.gcp_project_id }}
+      gcp_region:          ${{ steps.out.outputs.gcp_region }}
+      gcp_wif_provider:    ${{ steps.out.outputs.gcp_wif_provider }}
+      gcp_service_account: ${{ steps.out.outputs.gcp_service_account }}
+      registry:            ${{ steps.out.outputs.registry }}
+      tf_state_bucket_dev:  ${{ steps.out.outputs.tf_state_bucket_dev }}
+      tf_state_bucket_prod: ${{ steps.out.outputs.tf_state_bucket_prod }}
+      gcs_builds_bucket:    ${{ steps.out.outputs.gcs_builds_bucket }}
+      api_url_dev:          ${{ steps.out.outputs.api_url_dev }}
+      web_url_dev:          ${{ steps.out.outputs.web_url_dev }}
+      api_url_prod:         ${{ steps.out.outputs.api_url_prod }}
+      web_url_prod:         ${{ steps.out.outputs.web_url_prod }}
+    steps:
+      - name: Set outputs
+        id: out
+        run: |
+          # ── Version pins ────────────────────────────────────────────────────────
+          echo "dotnet_version=10.0.x"         >> $GITHUB_OUTPUT
+          echo "tf_version=1.14.x"             >> $GITHUB_OUTPUT
+          echo "tf_working_dir=infrastructure" >> $GITHUB_OUTPUT
+
+          # ── GCP project ─────────────────────────────────────────────────────────
+          GCP_PROJECT_ID=carditrack-490120
+          GCP_PROJECT_NUMBER=206164751924
+          GCP_REGION=europe-west2
+          echo "gcp_project_id=${GCP_PROJECT_ID}"   >> $GITHUB_OUTPUT
+          echo "gcp_region=${GCP_REGION}"           >> $GITHUB_OUTPUT
+
+          # ── Workload Identity Federation ────────────────────────────────────────
+          echo "gcp_wif_provider=projects/${GCP_PROJECT_NUMBER}/locations/global/workloadIdentityPools/carditrack-pool/providers/github" >> $GITHUB_OUTPUT
+          echo "gcp_service_account=carditrack-deploy@${GCP_PROJECT_ID}.iam.gserviceaccount.com" >> $GITHUB_OUTPUT
+
+          # ── Artifact Registry ───────────────────────────────────────────────────
+          echo "registry=${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/carditrack" >> $GITHUB_OUTPUT
+
+          # ── GCS buckets ─────────────────────────────────────────────────────────
+          echo "tf_state_bucket_dev=carditrack-tf-state-dev"   >> $GITHUB_OUTPUT
+          echo "tf_state_bucket_prod=carditrack-tf-state-prod" >> $GITHUB_OUTPUT
+          echo "gcs_builds_bucket=carditrack-builds"           >> $GITHUB_OUTPUT
+
+          # ── Service URLs ─────────────────────────────────────────────────────────
+          echo "api_url_dev=https://api.dev.carditrack.com"  >> $GITHUB_OUTPUT
+          echo "web_url_dev=https://app.dev.carditrack.com"  >> $GITHUB_OUTPUT
+          echo "api_url_prod=https://api.carditrack.com"     >> $GITHUB_OUTPUT
+          echo "web_url_prod=https://app.carditrack.com"     >> $GITHUB_OUTPUT

@@ -3,24 +3,24 @@ using CardiTrack.Infrastructure.Persistence;
 using CardiTrack.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Testcontainers.MsSql;
+using Testcontainers.PostgreSql;
 
 namespace CardiTrack.UnitTests.Infrastructure;
 
 public class TestDatabaseFixture : IAsyncLifetime
 {
-    private MsSqlContainer _container = null!;
+    private PostgreSqlContainer _container = null!;
     private ServiceProvider _serviceProvider = null!;
 
     public async Task InitializeAsync()
     {
-        _container = SqlServerTestContainerFactory.CreateStandardContainer();
+        _container = PostgreSqlTestContainerFactory.CreateStandardContainer();
         await _container.StartAsync();
 
         var services = new ServiceCollection();
 
         services.AddDbContext<CardiTrackDbContext>(options =>
-            options.UseSqlServer(_container.GetConnectionString())
+            options.UseNpgsql(_container.GetConnectionString())
                    .EnableDetailedErrors()
                    .EnableSensitiveDataLogging());
 

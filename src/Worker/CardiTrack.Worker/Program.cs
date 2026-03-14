@@ -5,14 +5,10 @@ using CardiTrack.Infrastructure.Persistence;
 using CardiTrack.Infrastructure.Repositories;
 using CardiTrack.Infrastructure.Security;
 using CardiTrack.Infrastructure.Settings;
-using Microsoft.Azure.Functions.Worker;
+using CardiTrack.Worker;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
-var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
+var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         var configuration = context.Configuration;
@@ -23,7 +19,7 @@ var host = new HostBuilder()
 
         // Database
         services.AddDbContext<CardiTrackDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         // Encryption — key must be a base64-encoded 256-bit value in config/Key Vault
         services.AddScoped<IEncryptionService>(sp =>
@@ -52,6 +48,9 @@ var host = new HostBuilder()
 
         // Fitbit provider (keyed IDeviceApiClient + keyed IDeviceSyncService)
         services.AddFitbitProvider();
+
+        // Background workers
+        services.AddWorker<WearableSyncWorker>(configuration, nameof(WearableSyncWorker));
     })
     .Build();
 

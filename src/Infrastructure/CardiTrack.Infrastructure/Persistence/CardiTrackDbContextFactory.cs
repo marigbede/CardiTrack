@@ -22,7 +22,7 @@ public class CardiTrackDbContextFactory : IDesignTimeDbContextFactory<CardiTrack
         var optionsBuilder = new DbContextOptionsBuilder<CardiTrackDbContext>();
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-        optionsBuilder.UseSqlServer(connectionString, b => b.MigrationsAssembly("CardiTrack.Infrastructure"));
+        optionsBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("CardiTrack.Infrastructure"));
 
         return new CardiTrackDbContext(optionsBuilder.Options);
     }

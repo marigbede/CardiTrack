@@ -69,8 +69,7 @@ artifacts/
 *.coveragexml
 
 # Entity Framework
-**/Migrations/*_*.cs
-!**/Migrations/Configuration.cs
+# Migrations are committed to track schema history and support auto-migration on startup
 
 # Secrets and Configuration
 appsettings.Development.json
@@ -83,9 +82,10 @@ secrets/
 
 # Terraform
 **/.terraform/*
+*.lock.hcl
 *.tfstate
 *.tfstate.*
-*.tfvars
+!*.tfvars
 !*.tfvars.example
 crash.log
 crash.*.log

@@ -1,0 +1,260 @@
+name: Deploy Apps → Prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Semver tag to deploy (e.g. v1.3.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-apps-prod
+  cancel-in-progress: false
+
+jobs:
+  # ── Shared config ────────────────────────────────────────────────────────────
+  env:
+    uses: ./.github/workflows/_env.yml
+
+  validate-tag:
+    name: Validate tag
+    needs: env
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate semver format and existence
+        id: check
+        run: |
+          TAG="${{ inputs.tag }}"
+          if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Tag '$TAG' is not valid semver (expected vMAJOR.MINOR.PATCH)"
+            exit 1
+          fi
+          git fetch --tags
+          if ! git tag | grep -q "^${TAG}$"; then
+            echo "::error::Tag '$TAG' does not exist in this repository"
+            exit 1
+          fi
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "Tag validated: ${TAG}"
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.env.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Verify images exist in Artifact Registry
+        env:
+          REGISTRY: ${{ needs.env.outputs.registry }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          check_image() {
+            gcloud artifacts docker images describe \
+              $REGISTRY/$1:$TAG \
+              --project ${{ needs.env.outputs.gcp_project_id }} \
+              --quiet > /dev/null 2>&1 || \
+            (echo "::error::Image $1:$TAG not found in Artifact Registry" && exit 1)
+            echo "✓ $1:$TAG found"
+          }
+          check_image api
+          check_image web
+          check_image worker
+      - name: Verify mobile artifacts exist in GCS
+        run: |
+          TAG="${{ inputs.tag }}"
+          BUCKET=gs://${{ needs.env.outputs.gcs_builds_bucket }}
+          gcloud storage ls $BUCKET/$TAG/android/ > /dev/null 2>&1 || \
+            (echo "::error::Android artifacts not found for tag $TAG" && exit 1)
+          echo "✓ Android artifacts found"
+          gcloud storage ls $BUCKET/$TAG/ios/ > /dev/null 2>&1 || \
+            (echo "::error::iOS artifacts not found for tag $TAG" && exit 1)
+          echo "✓ iOS artifacts found"
+
+  # ── API ──────────────────────────────────────────────────────────────────────
+  deploy-api:
+    name: Deploy API → Prod
+    needs: [env, validate-tag]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.env.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Deploy
+        run: |
+          gcloud run deploy carditrack-prod-api \
+            --image ${{ needs.env.outputs.registry }}/api:${{ needs.validate-tag.outputs.tag }} \
+            --region ${{ needs.env.outputs.gcp_region }} \
+            --project ${{ needs.env.outputs.gcp_project_id }} \
+            --quiet
+      - name: Smoke test
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ needs.env.outputs.api_url_prod }}/health")
+          [ "$STATUS" = "200" ] || (echo "::error::Prod API health check failed: HTTP $STATUS" && exit 1)
+          echo "### API deployed @ \`${{ needs.validate-tag.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+
+  run-db-migrations-prod:
+    name: DB Migrations (Prod)
+    needs: [env, validate-tag, deploy-api]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate-tag.outputs.tag }}
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ needs.env.outputs.dotnet_version }}
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.env.outputs.gcp_service_account }}
+      - uses: google-github-actions/get-secretmanager-secrets@v2
+        id: secrets
+        with:
+          secrets: |
+            db_conn:${{ needs.env.outputs.gcp_project_id }}/carditrack-prod-db-connection-string
+      - run: dotnet tool install --global dotnet-ef
+      - run: dotnet restore src/Infrastructure/CardiTrack.Infrastructure/CardiTrack.Infrastructure.csproj
+      - run: |
+          dotnet ef database update \
+            --project src/Infrastructure/CardiTrack.Infrastructure \
+            --startup-project src/Presentation/CardiTrack.API \
+            --connection "${{ steps.secrets.outputs.db_conn }}"
+
+  # ── Web ──────────────────────────────────────────────────────────────────────
+  deploy-web:
+    name: Deploy Web → Prod
+    needs: [env, validate-tag]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.env.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Deploy
+        run: |
+          gcloud run deploy carditrack-prod-web \
+            --image ${{ needs.env.outputs.registry }}/web:${{ needs.validate-tag.outputs.tag }} \
+            --region ${{ needs.env.outputs.gcp_region }} \
+            --project ${{ needs.env.outputs.gcp_project_id }} \
+            --quiet
+      - name: Smoke test
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ needs.env.outputs.web_url_prod }}/health")
+          [ "$STATUS" = "200" ] || (echo "::error::Prod Web health check failed: HTTP $STATUS" && exit 1)
+          echo "### Web deployed @ \`${{ needs.validate-tag.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ── Worker ───────────────────────────────────────────────────────────────────
+  deploy-worker:
+    name: Deploy Worker → Prod
+    needs: [env, validate-tag]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.env.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Deploy
+        run: |
+          gcloud run deploy carditrack-prod-worker \
+            --image ${{ needs.env.outputs.registry }}/worker:${{ needs.validate-tag.outputs.tag }} \
+            --region ${{ needs.env.outputs.gcp_region }} \
+            --project ${{ needs.env.outputs.gcp_project_id }} \
+            --quiet
+      - name: Summary
+        run: |
+          echo "### Worker deployed @ \`${{ needs.validate-tag.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ── Mobile: Android ──────────────────────────────────────────────────────────
+  deploy-mobile-android:
+    name: Deploy Mobile (Android) → Prod
+    needs: [env, validate-tag]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.env.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Download APK from GCS
+        run: |
+          mkdir -p artifacts/android
+          gcloud storage cp -r \
+            gs://${{ needs.env.outputs.gcs_builds_bucket }}/${{ needs.validate-tag.outputs.tag }}/android/** \
+            artifacts/android/
+      - uses: google-github-actions/get-secretmanager-secrets@v2
+        id: secrets
+        with:
+          secrets: |
+            play_store_key:${{ needs.env.outputs.gcp_project_id }}/carditrack-play-store-service-account-key
+      - name: Upload to Play Store (internal track)
+        run: |
+          echo '${{ steps.secrets.outputs.play_store_key }}' > play-store-key.json
+          echo "### Android deployed @ \`${{ needs.validate-tag.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ── Mobile: iOS ──────────────────────────────────────────────────────────────
+  deploy-mobile-ios:
+    name: Deploy Mobile (iOS) → Prod
+    needs: [env, validate-tag]
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate-tag.outputs.tag }}
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ needs.env.outputs.dotnet_version }}
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.env.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/get-secretmanager-secrets@v2
+        id: secrets
+        with:
+          secrets: |
+            apple_cert_p12:${{ needs.env.outputs.gcp_project_id }}/carditrack-apple-distribution-cert-p12
+            apple_cert_password:${{ needs.env.outputs.gcp_project_id }}/carditrack-apple-cert-password
+            apple_provisioning_profile:${{ needs.env.outputs.gcp_project_id }}/carditrack-app-store-provisioning-profile
+            app_store_connect_key:${{ needs.env.outputs.gcp_project_id }}/carditrack-app-store-connect-api-key
+      - name: Install Apple certificate and provisioning profile
+        run: |
+          echo '${{ steps.secrets.outputs.apple_cert_p12 }}' | base64 --decode > cert.p12
+          security create-keychain -p "" build.keychain
+          security import cert.p12 -k build.keychain \
+            -P '${{ steps.secrets.outputs.apple_cert_password }}' \
+            -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+          security list-keychains -d user -s build.keychain
+          echo '${{ steps.secrets.outputs.apple_provisioning_profile }}' | base64 --decode \
+            > ~/Library/MobileDevice/Provisioning\ Profiles/carditrack.mobileprovision
+      - run: dotnet workload install maui-ios
+      - name: Build and archive IPA
+        run: |
+          dotnet publish src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
+            -f net10.0-ios \
+            -c Release \
+            /p:ArchiveOnBuild=true \
+            /p:CodesignKey="iPhone Distribution" \
+            /p:CodesignProvision="carditrack"
+      - name: Upload to App Store Connect
+        run: |
+          echo '${{ steps.secrets.outputs.app_store_connect_key }}' > asc-key.json
+          xcrun altool --upload-app \
+            --type ios \
+            --file $(find . -name "*.ipa" | head -1) \
+            --apiKey $(jq -r '.key_id' asc-key.json) \
+            --apiIssuer $(jq -r '.issuer_id' asc-key.json)
+          echo "### iOS deployed @ \`${{ needs.validate-tag.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY

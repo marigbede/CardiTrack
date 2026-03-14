@@ -25,9 +25,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardiTrack.Web", "src\Prese
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardiTrack.Mobile", "src\Presentation\CardiTrack.Mobile\CardiTrack.Mobile.csproj", "{99E87E67-A304-4502-97A9-974C644AA24E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Functions", "Functions", "{8ACE4114-8886-9720-B387-343844A27A5F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Worker", "Worker", "{8ACE4114-8886-9720-B387-343844A27A5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardiTrack.Functions", "src\Functions\CardiTrack.Functions\CardiTrack.Functions.csproj", "{F3609AF3-5899-4FF6-BE5E-83A9D94FC2C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardiTrack.Worker", "src\Worker\CardiTrack.Worker\CardiTrack.Worker.csproj", "{F3609AF3-5899-4FF6-BE5E-83A9D94FC2C4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject

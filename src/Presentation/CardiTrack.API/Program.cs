@@ -16,7 +16,7 @@ try
 
     // 1. DATABASE
     builder.Services.AddDbContext<CardiTrackDbContext>(options =>
-        options.UseSqlServer(
+        options.UseNpgsql(
             builder.Configuration.GetConnectionString("DefaultConnection"),
             b => b.MigrationsAssembly("CardiTrack.Infrastructure")));
 

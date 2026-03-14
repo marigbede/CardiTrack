@@ -360,10 +360,9 @@ public class AesEncryptionService : IEncryptionService
 
 ```
 carditrack-dev-rg
-├── carditrack-dev-app (App Service)
+├── carditrack-dev-app (App Service — API)
 ├── carditrack-dev-sql (SQL Database)
-├── carditrack-dev-func (Function App)
-├── carditrack-dev-storage (Storage Account)
+├── carditrack-dev-worker (App Service / Container App — Worker)
 ├── carditrack-dev-kv (Key Vault)
 ├── carditrack-dev-insights (Application Insights)
 └── carditrack-dev-signalr (SignalR Service)
@@ -372,19 +371,18 @@ carditrack-dev-rg
 ### Cost Estimates
 
 #### MVP Phase (0-100 users)
-- **App Service** (Basic B1): $13/month
+- **App Service** (Basic B1 — API): $13/month
 - **Azure SQL** (Basic): $5/month
-- **Function App** (Consumption): ~$5/month
-- **Storage**: ~$2/month
+- **Worker** (App Service Basic B1): $13/month
 - **Key Vault**: Free tier
-- **Total**: ~$25-30/month
+- **Total**: ~$31-35/month
 
 #### Growth Phase (1,000-10,000 users)
-- **App Service** (Premium P1V2): $146/month
+- **App Service** (Premium P1V2 — API): $146/month
 - **Azure SQL** (Standard S2): $75/month
-- **Function App**: ~$100/month
+- **Worker** (Container App): ~$30-50/month
 - **SignalR** (Standard): $50/month
-- **Total**: ~$371/month + third-party services
+- **Total**: ~$301-321/month + third-party services
 
 ---
 
@@ -407,8 +405,7 @@ infrastructure/
 └── deployments/
     ├── app_service.tf
     ├── azure_sql.tf
-    ├── function_app.tf
-    ├── storage.tf
+    ├── worker.tf
     ├── key_vault.tf
     ├── monitoring.tf
     └── signalr.tf
@@ -561,8 +558,8 @@ resource "azurerm_monitor_metric_alert" "api_errors" {
 - Max instances: 10
 
 **Background Jobs:**
-- Use Azure Functions consumption plan
-- Scales automatically based on queue depth
+- Deploy `CardiTrack.Worker` as an Azure Container App or App Service
+- Scale out by running multiple replicas; each instance claims a DI scope per cron tick
 
 ### Database Scaling
 
