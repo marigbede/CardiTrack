@@ -3,7 +3,7 @@
 
 environment  = "prod"
 region       = "europe-west2"
-project_id   = "your-gcp-project-id"
+project_id   = "carditrack-490120"
 project_name = "carditrack"
 
 # Database Credentials
@@ -12,8 +12,8 @@ db_admin_username = "carditrackadmin"
 
 # Container Images — updated by deploy-apps-prod.yml workflow
 # Format: REGION-docker.pkg.dev/PROJECT_ID/REPO/IMAGE:TAG
-api_container_image = "europe-west2-docker.pkg.dev/your-gcp-project-id/carditrack/api:latest"
-web_container_image = "europe-west2-docker.pkg.dev/your-gcp-project-id/carditrack/web:latest"
+api_container_image = "europe-west2-docker.pkg.dev/carditrack-490120/carditrack/api:latest"
+web_container_image = "europe-west2-docker.pkg.dev/carditrack-490120/carditrack/web:latest"
 
 # Custom Domains (optional — leave empty to use Cloud Run default URLs)
 api_custom_domain = ""

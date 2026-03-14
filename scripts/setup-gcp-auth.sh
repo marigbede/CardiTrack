@@ -13,6 +13,7 @@ PROVIDER_NAME=github
 
 # ── Enable required APIs ──────────────────────────────────────────────────────
 gcloud services enable \
+  cloudresourcemanager.googleapis.com \
   iam.googleapis.com \
   iamcredentials.googleapis.com \
   sts.googleapis.com \

@@ -1,4 +1,4 @@
-name: CI / Dev Deploy
+name: CI / Deploy Apps → Dev
 
 on:
   push:

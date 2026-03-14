@@ -1,4 +1,4 @@
-name: Terraform
+name: Deploy Infrastructure → Dev
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ needs.env.outputs.tf_version }}
       - name: terraform fmt
@@ -102,7 +102,7 @@ jobs:
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ needs.env.outputs.tf_version }}
       - name: terraform init
@@ -160,7 +160,7 @@ jobs:
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ needs.env.outputs.tf_version }}
       - name: terraform init

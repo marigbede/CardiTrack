@@ -3,7 +3,7 @@
 
 environment  = "dev"
 region       = "europe-west2"
-project_id   = "your-gcp-project-id"
+project_id   = "carditrack-490120"
 project_name = "carditrack"
 
 # Database Credentials

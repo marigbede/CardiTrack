@@ -76,7 +76,7 @@ jobs:
             gcloud storage buckets update gs://$BUCKET --versioning
             echo "Bucket gs://$BUCKET created with versioning enabled"
           fi
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ needs.env.outputs.tf_version }}
       - name: terraform init
@@ -119,7 +119,7 @@ jobs:
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ needs.env.outputs.tf_version }}
       - name: terraform init
