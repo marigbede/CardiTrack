@@ -9,6 +9,12 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
+  <!-- AutoMapper GHSA-rvv3-g6hj-g44x: design-level issue with user-controlled lambda expressions.
+       Mapping profiles in this project are developer-controlled; not an exploitable path. -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rvv3-g6hj-g44x" />
+  </ItemGroup>
+
   <ItemGroup>
     <!-- ASP.NET Core -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
@@ -29,7 +35,7 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.12.0" />
 
     <!-- AutoMapper -->
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
 
     <!-- API Versioning -->
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />

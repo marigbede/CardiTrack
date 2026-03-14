@@ -1,10 +1,6 @@
 # Secret Manager
 # Manages Google Cloud Secret Manager secrets
 
-data "google_project" "current" {
-  project_id = var.project_id
-}
-
 locals {
   db_connection_string = join(";", [
     "Host=${google_sql_database_instance.main.public_ip_address}",

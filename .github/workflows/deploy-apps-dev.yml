@@ -209,8 +209,7 @@ jobs:
         run: |
           dotnet ef migrations has-pending-model-changes \
             --project src/Infrastructure/CardiTrack.Infrastructure \
-            --startup-project src/Presentation/CardiTrack.API \
-            --no-build
+            --startup-project src/Presentation/CardiTrack.API
         env:
           SKIP_DB_CONTEXT_VALIDATION: 'true'
 
@@ -227,11 +226,11 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
-      - uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@v4
         with:
           languages: csharp
       - run: dotnet build src/Presentation/CardiTrack.API/CardiTrack.API.csproj -c Release
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@v4
       - name: Dependency vulnerability audit
         run: |
           dotnet list src/Presentation/CardiTrack.API/CardiTrack.API.csproj package \
@@ -351,9 +350,14 @@ jobs:
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet workload install maui-android
+      - run: dotnet restore src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj -p:TargetFrameworks=net10.0-android
+      - run: dotnet restore src/Core/CardiTrack.Application/CardiTrack.Application.csproj
+      - run: dotnet restore src/Core/CardiTrack.Domain/CardiTrack.Domain.csproj
       - run: |
           dotnet publish src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
+            -f net10.0-android \
             -c Release \
+            --no-restore \
             -p:TargetFrameworks=net10.0-android
       - uses: actions/upload-artifact@v7
         with:
@@ -372,9 +376,14 @@ jobs:
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet workload install maui-ios
+      - run: dotnet restore src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj -p:TargetFrameworks=net10.0-ios
+      - run: dotnet restore src/Core/CardiTrack.Application/CardiTrack.Application.csproj
+      - run: dotnet restore src/Core/CardiTrack.Domain/CardiTrack.Domain.csproj
       - run: |
           dotnet build src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
+            -f net10.0-ios \
             -c Release \
+            --no-restore \
             -p:TargetFrameworks=net10.0-ios \
             /p:ArchiveOnBuild=false
       - uses: actions/upload-artifact@v7
@@ -394,9 +403,14 @@ jobs:
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet workload install maui-windows
+      - run: dotnet restore src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj -p:TargetFrameworks=net10.0-windows10.0.19041.0
+      - run: dotnet restore src/Core/CardiTrack.Application/CardiTrack.Application.csproj
+      - run: dotnet restore src/Core/CardiTrack.Domain/CardiTrack.Domain.csproj
       - run: |
           dotnet publish src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj `
+            -f net10.0-windows10.0.19041.0 `
             -c Release `
+            --no-restore `
             -p:TargetFrameworks=net10.0-windows10.0.19041.0
       - uses: actions/upload-artifact@v7
         with:
@@ -459,10 +473,8 @@ jobs:
         run: |
           docker build -f src/Presentation/CardiTrack.API/Dockerfile \
             -t $IMAGE:$TAG \
-            -t $IMAGE:latest \
             .
           docker push $IMAGE:$TAG
-          docker push $IMAGE:latest
           echo "image=$IMAGE:$TAG" >> $GITHUB_OUTPUT
 
   push-web-image:
@@ -492,10 +504,8 @@ jobs:
         run: |
           docker build -f src/Presentation/CardiTrack.Web/Dockerfile \
             -t $IMAGE:$TAG \
-            -t $IMAGE:latest \
             .
           docker push $IMAGE:$TAG
-          docker push $IMAGE:latest
           echo "image=$IMAGE:$TAG" >> $GITHUB_OUTPUT
 
   push-worker-image:
@@ -526,10 +536,8 @@ jobs:
         run: |
           docker build -f src/Worker/CardiTrack.Worker/Dockerfile \
             -t $IMAGE:$TAG \
-            -t $IMAGE:latest \
             .
           docker push $IMAGE:$TAG
-          docker push $IMAGE:latest
           echo "image=$IMAGE:$TAG" >> $GITHUB_OUTPUT
 
   upload-mobile-artifacts:
@@ -569,9 +577,6 @@ jobs:
           gcloud storage cp -r artifacts/android/** $BUCKET/$TAG/android/
           gcloud storage cp -r artifacts/ios/**     $BUCKET/$TAG/ios/
           gcloud storage cp -r artifacts/windows/** $BUCKET/$TAG/windows/
-          gcloud storage cp -r artifacts/android/** $BUCKET/latest/android/
-          gcloud storage cp -r artifacts/ios/**     $BUCKET/latest/ios/
-          gcloud storage cp -r artifacts/windows/** $BUCKET/latest/windows/
 
   # ── Main only: DB Migrations + Deploy Dev ───────────────────────────────────
   run-db-migrations:
@@ -602,7 +607,7 @@ jobs:
 
   deploy-api-dev:
     name: Deploy API → Dev
-    needs: [changes, run-db-migrations]
+    needs: [changes, push-api-image, run-db-migrations]
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/auth@v3
@@ -613,7 +618,7 @@ jobs:
       - name: Deploy
         run: |
           gcloud run deploy carditrack-dev-api \
-            --image ${{ needs.changes.outputs.registry }}/api:latest \
+            --image ${{ needs.push-api-image.outputs.image }} \
             --region ${{ needs.changes.outputs.gcp_region }} \
             --project ${{ needs.changes.outputs.gcp_project_id }} \
             --quiet
@@ -635,7 +640,7 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v3
       - run: |
           gcloud run deploy carditrack-dev-web \
-            --image ${{ needs.changes.outputs.registry }}/web:latest \
+            --image ${{ needs.push-web-image.outputs.image }} \
             --region ${{ needs.changes.outputs.gcp_region }} \
             --project ${{ needs.changes.outputs.gcp_project_id }} \
             --quiet
@@ -653,7 +658,7 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v3
       - run: |
           gcloud run deploy carditrack-dev-worker \
-            --image ${{ needs.changes.outputs.registry }}/worker:latest \
+            --image ${{ needs.push-worker-image.outputs.image }} \
             --region ${{ needs.changes.outputs.gcp_region }} \
             --project ${{ needs.changes.outputs.gcp_project_id }} \
             --quiet
