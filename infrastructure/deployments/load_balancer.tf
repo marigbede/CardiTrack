@@ -153,6 +153,11 @@ resource "google_compute_backend_service" "api" {
   security_policy       = google_compute_security_policy.waf[0].id
   enable_cdn            = false
 
+  log_config {
+    enable      = true
+    sample_rate = 1.0
+  }
+
   backend {
     group = google_compute_region_network_endpoint_group.api[0].id
   }
@@ -168,6 +173,11 @@ resource "google_compute_backend_service" "web" {
   protocol              = "HTTPS"
   security_policy       = google_compute_security_policy.waf[0].id
   enable_cdn            = true
+
+  log_config {
+    enable      = true
+    sample_rate = 1.0
+  }
 
   cdn_policy {
     cache_mode        = "USE_ORIGIN_HEADERS"
