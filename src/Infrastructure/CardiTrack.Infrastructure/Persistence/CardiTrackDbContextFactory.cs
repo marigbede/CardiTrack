@@ -16,8 +16,10 @@ public class CardiTrackDbContextFactory : IDesignTimeDbContextFactory<CardiTrack
             .AddEnvironmentVariables()
             .Build();
         var loader = new ConfigurationLoader(configuration);
+        // Fall back to a dummy value so design-time commands (migrations, has-pending-model-changes)
+        // can instantiate the DbContext without a real database connection.
         var connectionString = loader.Get(ConfigurationKeys.ConnectionStrings.DefaultConnection)
-            ?? throw new ArgumentNullException(ConfigurationKeys.ConnectionStrings.DefaultConnection);
+            ?? "Host=localhost;Database=carditrack_designtime;Username=postgres;Password=postgres";
 
         var optionsBuilder = new DbContextOptionsBuilder<CardiTrackDbContext>();
         optionsBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("CardiTrack.Infrastructure"));
