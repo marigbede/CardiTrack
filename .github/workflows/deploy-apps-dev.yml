@@ -664,6 +664,7 @@ jobs:
             --image ${{ needs.push-api-image.outputs.image }} \
             --region ${{ needs.changes.outputs.gcp_region }} \
             --project ${{ needs.changes.outputs.gcp_project_id }} \
+            --add-cloudsql-instances carditrack-490120:europe-west2:carditrack-dev-sql \
             --quiet
       - name: Smoke test
         run: |

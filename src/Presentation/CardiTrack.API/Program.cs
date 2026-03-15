@@ -1,8 +1,6 @@
 using AspNetCoreRateLimit;
 using CardiTrack.API.Extensions;
 using CardiTrack.API.Middleware;
-using CardiTrack.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 // Enforce UTC for all DateTime values read from PostgreSQL timestamptz columns
@@ -77,33 +75,6 @@ try
     builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
     var app = builder.Build();
-
-    // AUTO-MIGRATE DATABASE ON STARTUP
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<CardiTrackDbContext>();
-        try
-        {
-            Log.Information("Checking database migrations...");
-            var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-
-            if (pendingMigrations.Any())
-            {
-                Log.Information("Applying {Count} pending migrations", pendingMigrations.Count());
-                await dbContext.Database.MigrateAsync();
-                Log.Information("Database migrations applied successfully");
-            }
-            else
-            {
-                Log.Information("Database is up to date");
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "An error occurred while migrating the database");
-            throw;
-        }
-    }
 
     // MIDDLEWARE PIPELINE
     app.UseHttpsRedirection();
