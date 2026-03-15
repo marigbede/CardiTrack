@@ -24,6 +24,7 @@ gcloud services enable \
   storage.googleapis.com \
   compute.googleapis.com \
   pubsub.googleapis.com \
+  servicenetworking.googleapis.com \
   --project=$PROJECT_ID
 
 # ── Service account ───────────────────────────────────────────────────────────
@@ -47,7 +48,10 @@ for ROLE in \
   roles/iam.serviceAccountUser \
   roles/iam.serviceAccountTokenCreator \
   roles/compute.loadBalancerAdmin \
-  roles/compute.securityAdmin; do
+  roles/compute.securityAdmin \
+  roles/compute.networkAdmin \
+  roles/serviceusage.serviceUsageAdmin \
+  roles/resourcemanager.projectIamAdmin; do
   gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:$SA_EMAIL" \
     --role="$ROLE" \
