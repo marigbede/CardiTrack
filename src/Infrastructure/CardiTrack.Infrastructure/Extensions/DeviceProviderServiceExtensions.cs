@@ -2,7 +2,6 @@ using CardiTrack.Application.Interfaces.Repositories;
 using CardiTrack.Application.Interfaces.Services;
 using CardiTrack.Domain.Enums;
 using CardiTrack.Infrastructure.ExternalClients;
-using CardiTrack.Infrastructure.Repositories;
 using CardiTrack.Infrastructure.Services;
 using CardiTrack.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;

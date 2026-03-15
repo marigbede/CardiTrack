@@ -1,8 +1,8 @@
 using CardiTrack.Application.Interfaces.Repositories;
-using CardiTrack.Infrastructure.Services;
 using CardiTrack.Domain.Entities;
 using CardiTrack.Domain.Enums;
 using CardiTrack.Infrastructure.ExternalClients;
+using CardiTrack.Infrastructure.Services;
 using CardiTrack.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using NSubstitute;

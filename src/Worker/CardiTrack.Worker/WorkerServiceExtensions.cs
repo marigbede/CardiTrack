@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Options;
-
 namespace CardiTrack.Worker;
 
 public static class WorkerServiceExtensions

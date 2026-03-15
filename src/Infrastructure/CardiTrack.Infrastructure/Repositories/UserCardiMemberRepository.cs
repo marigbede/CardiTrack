@@ -1,6 +1,6 @@
+using CardiTrack.Application.Interfaces.Repositories;
 using CardiTrack.Domain.Entities;
 using CardiTrack.Infrastructure.Persistence;
-using CardiTrack.Application.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace CardiTrack.Infrastructure.Repositories;

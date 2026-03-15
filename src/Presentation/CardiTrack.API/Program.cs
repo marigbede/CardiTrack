@@ -1,10 +1,9 @@
+using AspNetCoreRateLimit;
 using CardiTrack.API.Extensions;
 using CardiTrack.API.Middleware;
 using CardiTrack.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using AspNetCoreRateLimit;
-using FluentValidation.AspNetCore;
 
 // Enforce UTC for all DateTime values read from PostgreSQL timestamptz columns
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
@@ -29,8 +28,7 @@ try
 
     // 3. CONTROLLERS & VALIDATION
     builder.Services.AddControllers();
-    builder.Services.AddFluentValidationAutoValidation();
-    builder.Services.AddFluentValidationClientsideAdapters();
+    builder.Services.AddValidators();
 
     // 4. API VERSIONING
     builder.Services.AddApiVersioning(options =>

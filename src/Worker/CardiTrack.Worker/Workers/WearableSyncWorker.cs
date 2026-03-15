@@ -2,7 +2,7 @@ using CardiTrack.Application.Interfaces.Repositories;
 using CardiTrack.Application.Interfaces.Services;
 using Microsoft.Extensions.Options;
 
-namespace CardiTrack.Worker;
+namespace CardiTrack.Worker.Workers;
 
 public class WearableSyncWorker : CronBackgroundService
 {

@@ -1,5 +1,5 @@
-using CardiTrack.Infrastructure.Persistence;
 using CardiTrack.Application.Interfaces.Repositories;
+using CardiTrack.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace CardiTrack.Infrastructure.Repositories;

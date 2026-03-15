@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\CardiTrack.Application\CardiTrack.Application.csproj" />
     <ProjectReference Include="..\..\Core\CardiTrack.Domain\CardiTrack.Domain.csproj" />
+    <ProjectReference Include="..\CardiTrack.Shared\CardiTrack.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

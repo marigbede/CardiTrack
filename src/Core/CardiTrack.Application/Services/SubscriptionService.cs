@@ -1,7 +1,7 @@
+using CardiTrack.Application.Interfaces.Repositories;
 using CardiTrack.Application.Interfaces.Services;
 using CardiTrack.Domain.Entities;
 using CardiTrack.Domain.Enums;
-using CardiTrack.Application.Interfaces.Repositories;
 
 namespace CardiTrack.Application.Services;
 

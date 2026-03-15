@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using Serilog.Context;
 using CardiTrack.API.Infrastructure.UserContext;
+using Serilog.Context;
 
 namespace CardiTrack.API.Middleware;
 

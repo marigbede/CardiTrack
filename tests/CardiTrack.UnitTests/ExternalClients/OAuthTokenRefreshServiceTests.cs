@@ -8,7 +8,6 @@ using CardiTrack.Infrastructure.ExternalClients;
 using CardiTrack.Infrastructure.Security;
 using CardiTrack.Infrastructure.Settings;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 
 namespace CardiTrack.UnitTests.ExternalClients;
 

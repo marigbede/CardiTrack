@@ -1,5 +1,6 @@
-using CardiTrack.Application.DTOs.Responses;
 using CardiTrack.API.Infrastructure.UserContext;
+using CardiTrack.Application.DTOs.Responses;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CardiTrack.API.Controllers;
@@ -42,6 +43,24 @@ public abstract class BaseApiController : ControllerBase
         {
             Success = true,
             Message = message,
+            Timestamp = DateTime.UtcNow
+        });
+    }
+
+    /// <summary>
+    /// Returns a 400 response populated with FluentValidation errors
+    /// </summary>
+    protected ActionResult ValidationFailed(ValidationResult result)
+    {
+        return BadRequest(new ErrorResponse
+        {
+            Success = false,
+            Message = "Validation failed",
+            Errors = result.Errors.Select(e => new ValidationError
+            {
+                Field = e.PropertyName,
+                Message = e.ErrorMessage
+            }).ToList(),
             Timestamp = DateTime.UtcNow
         });
     }

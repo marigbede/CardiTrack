@@ -1,18 +1,28 @@
+using AspNetCoreRateLimit;
 using CardiTrack.API.Infrastructure.UserContext;
-using CardiTrack.Application.Interfaces.Services;
+using CardiTrack.API.Validators;
+using CardiTrack.Application.DTOs.Requests;
+using CardiTrack.Application.Interfaces.Repositories;
 using CardiTrack.Infrastructure.Extensions;
 using CardiTrack.Infrastructure.ExternalClients;
 using CardiTrack.Infrastructure.Repositories;
 using CardiTrack.Infrastructure.Security;
 using CardiTrack.Infrastructure.Settings;
-using CardiTrack.Application.Interfaces.Repositories;
 using CardiTrack.Shared;
-using AspNetCoreRateLimit;
+using FluentValidation;
 
 namespace CardiTrack.API.Extensions;
 
 public static class ServiceCollectionExtensions
 {
+    public static IServiceCollection AddValidators(this IServiceCollection services)
+    {
+        services.AddScoped<IValidator<CreateOrganizationRequest>, CreateOrganizationValidator>();
+        services.AddScoped<IValidator<CreateCardiMemberRequest>, CreateCardiMemberValidator>();
+        services.AddScoped<IValidator<NotificationPreferencesRequest>, NotificationPreferencesValidator>();
+        return services;
+    }
+
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<CardiTrack.Application.Interfaces.Services.IOrganizationService, CardiTrack.Application.Services.OrganizationService>();

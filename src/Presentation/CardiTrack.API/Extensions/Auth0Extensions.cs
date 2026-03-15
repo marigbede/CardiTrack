@@ -1,7 +1,7 @@
+using System.Security.Claims;
 using CardiTrack.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 using Serilog;
 
 namespace CardiTrack.API.Extensions;
@@ -13,7 +13,7 @@ public static class Auth0Extensions
         IConfiguration configuration)
     {
         var loader = new ConfigurationLoader(configuration);
-        var domain   = loader.GetRequired(ConfigurationKeys.Auth0.Domain);
+        var domain = loader.GetRequired(ConfigurationKeys.Auth0.Domain);
         var audience = loader.GetRequired(ConfigurationKeys.Auth0.Audience);
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

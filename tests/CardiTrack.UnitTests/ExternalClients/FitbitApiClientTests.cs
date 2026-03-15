@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text;
 using CardiTrack.Infrastructure.ExternalClients;
 using NSubstitute;
 

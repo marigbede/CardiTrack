@@ -1,7 +1,8 @@
+using CardiTrack.API.Infrastructure.UserContext;
 using CardiTrack.Application.DTOs.Requests;
 using CardiTrack.Application.DTOs.Responses;
-using CardiTrack.API.Infrastructure.UserContext;
 using CardiTrack.Application.Interfaces.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,18 +19,24 @@ public class OnboardingController : BaseApiController
     private readonly IOrganizationService _organizationService;
     private readonly IUserService _userService;
     private readonly ICardiMemberService _cardiMemberService;
+    private readonly IValidator<CreateOrganizationRequest> _organizationValidator;
+    private readonly IValidator<CreateCardiMemberRequest> _cardiMemberValidator;
 
     public OnboardingController(
         IUserContext userContext,
         ILogger<OnboardingController> logger,
         IOrganizationService organizationService,
         IUserService userService,
-        ICardiMemberService cardiMemberService)
+        ICardiMemberService cardiMemberService,
+        IValidator<CreateOrganizationRequest> organizationValidator,
+        IValidator<CreateCardiMemberRequest> cardiMemberValidator)
         : base(userContext, logger)
     {
         _organizationService = organizationService;
         _userService = userService;
         _cardiMemberService = cardiMemberService;
+        _organizationValidator = organizationValidator;
+        _cardiMemberValidator = cardiMemberValidator;
     }
 
     /// <summary>
@@ -41,6 +48,10 @@ public class OnboardingController : BaseApiController
     public async Task<ActionResult<ApiResponse<OrganizationResponse>>> CreateOrganization(
         [FromBody] CreateOrganizationRequest request)
     {
+        var validation = await _organizationValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return ValidationFailed(validation);
+
         Logger.LogInformation("Creating organization: {Name}, Type: {Type}", request.Name, request.Type);
 
         var response = await _organizationService.CreateOrganizationAsync(request);
@@ -80,6 +91,10 @@ public class OnboardingController : BaseApiController
     public async Task<ActionResult<ApiResponse<CardiMemberResponse>>> CreateCardiMember(
         [FromBody] CreateCardiMemberRequest request)
     {
+        var validation = await _cardiMemberValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return ValidationFailed(validation);
+
         if (!UserContext.IsAuthenticated || UserContext.OrganizationId == Guid.Empty)
         {
             return Error("User must have an organization to create a CardiMember", 403);

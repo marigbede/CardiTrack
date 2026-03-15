@@ -1,3 +1,4 @@
+using CardiTrack.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -11,17 +12,10 @@ public class CardiTrackDbContextFactory : IDesignTimeDbContextFactory<CardiTrack
 {
     public CardiTrackDbContext CreateDbContext(string[] args)
     {
-        // Build configuration
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../../Presentation/CardiTrack.API"))
-            .AddJsonFile("appsettings.json", optional: false)
-            .AddJsonFile("appsettings.Development.json", optional: true)
-            .Build();
+        var loader = new ConfigurationLoader(new ConfigurationBuilder().Build());
+        var connectionString = loader.GetRequired(ConfigurationKeys.ConnectionStrings.DefaultConnection);
 
-        // Create DbContext options
         var optionsBuilder = new DbContextOptionsBuilder<CardiTrackDbContext>();
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-
         optionsBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("CardiTrack.Infrastructure"));
 
         return new CardiTrackDbContext(optionsBuilder.Options);
