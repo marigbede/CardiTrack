@@ -2,6 +2,7 @@ using AspNetCoreRateLimit;
 using CardiTrack.API.Extensions;
 using CardiTrack.API.Middleware;
 using CardiTrack.Infrastructure.Persistence;
+using CardiTrack.Shared;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -99,7 +100,17 @@ try
     app.UseMiddleware<UserContextMiddleware>();
     app.UseAuthorization();
     app.MapControllers();
-    app.MapHealthChecks("/health");
+    app.MapHealthChecks("/health")
+        .AllowAnonymous()
+        .AddEndpointFilter(async (context, next) =>
+        {
+            var loader = context.HttpContext.RequestServices.GetRequiredService<ConfigurationLoader>();
+            var expected = loader.GetRequired(ConfigurationKeys.Health.Token);
+            var provided = context.HttpContext.Request.Headers["X-Health-Token"].ToString();
+            if (provided != expected)
+                return Results.Unauthorized();
+            return await next(context);
+        });
 
     Log.Information("CardiTrack API started successfully");
     app.Run();

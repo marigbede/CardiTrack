@@ -84,6 +84,27 @@ resource "google_secret_manager_secret_version" "app_secrets" {
   }
 }
 
+# ── Health check token (Terraform-owned, auto-rotated) ────────────────────────
+
+resource "random_password" "health_token" {
+  length  = 40
+  special = false
+}
+
+resource "google_secret_manager_secret" "health_token" {
+  secret_id = "${var.secret_id_prefix}-health-token"
+  replication {
+    auto {}
+  }
+  labels     = var.secret_labels
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "health_token" {
+  secret      = google_secret_manager_secret.health_token.id
+  secret_data = random_password.health_token.result
+}
+
 # ── IAM — Cloud Run default compute SA can read all app secrets ───────────────
 
 resource "google_secret_manager_secret_iam_member" "db_conn_accessor" {
@@ -97,6 +118,19 @@ resource "google_secret_manager_secret_iam_member" "app_secrets_accessor" {
   secret_id = google_secret_manager_secret.app_secrets[each.key].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_secret_manager_secret_iam_member" "health_token_compute_accessor" {
+  secret_id = google_secret_manager_secret.health_token.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
+}
+
+# Deploy SA needs read access so GitHub Actions can fetch the token during smoke tests
+resource "google_secret_manager_secret_iam_member" "health_token_deploy_accessor" {
+  secret_id = google_secret_manager_secret.health_token.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.deploy_service_account}"
 }
 
 # ── Variables ─────────────────────────────────────────────────────────────────
@@ -115,4 +149,9 @@ variable "secret_labels" {
   description = "Labels for Secret Manager resources"
   type        = map(string)
   default     = {}
+}
+
+variable "deploy_service_account" {
+  description = "Service account email used by CI/CD to deploy (granted read access to health token secret)"
+  type        = string
 }

@@ -51,6 +51,7 @@ module "deployments" {
     "Auth0__ClientId"                      = "${var.project_name}-${local.environment}-auth0-client-id"
     "Auth0__ClientSecret"                  = "${var.project_name}-${local.environment}-auth0-client-secret"
     "Encryption__Key"                      = "${var.project_name}-${local.environment}-encryption-key"
+    "Health__Token"                        = "${var.project_name}-${local.environment}-health-token"
   }
   cloud_run_location      = local.region
   cloud_run_min_instances = local.is_prod ? 1 : 0
@@ -99,9 +100,10 @@ module "deployments" {
   storage_labels        = local.common_labels
 
   # Secret Manager
-  db_password_secret_id = "${var.project_name}-${local.environment}-db-password"
-  secret_id_prefix      = "${var.project_name}-${local.environment}"
-  secret_labels         = local.common_labels
+  db_password_secret_id  = "${var.project_name}-${local.environment}-db-password"
+  secret_id_prefix       = "${var.project_name}-${local.environment}"
+  secret_labels          = local.common_labels
+  deploy_service_account = "carditrack-deploy@${var.project_id}.iam.gserviceaccount.com"
 
   # Cloud Pub/Sub (real-time messaging)
   pubsub_topic_name = local.pubsub_topic_name

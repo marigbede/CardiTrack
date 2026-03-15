@@ -667,8 +667,16 @@ jobs:
             --add-cloudsql-instances carditrack-490120:europe-west2:carditrack-dev-sql \
             --quiet
       - name: Smoke test
+        env:
+          SECRET_ID: carditrack-dev-health-token
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ needs.changes.outputs.api_url_dev }}/health")
+          HEALTH_TOKEN=$(gcloud secrets versions access latest \
+            --secret="$SECRET_ID" \
+            --project="$PROJECT")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "X-Health-Token: $HEALTH_TOKEN" \
+            "${{ needs.changes.outputs.api_url_dev }}/health")
           [ "$STATUS" = "200" ] || (echo "::error::Health check failed: HTTP $STATUS" && exit 1)
 
   deploy-web-dev:

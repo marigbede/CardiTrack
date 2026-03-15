@@ -34,6 +34,11 @@ public static class ConfigurationKeys
         public const string IV = "Encryption:IV";
     }
 
+    public static class Health
+    {
+        public const string Token = "Health:Token";
+    }
+
     public static class Workers
     {
         public static class WearableSyncWorker
