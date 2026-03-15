@@ -12,8 +12,12 @@ public class CardiTrackDbContextFactory : IDesignTimeDbContextFactory<CardiTrack
 {
     public CardiTrackDbContext CreateDbContext(string[] args)
     {
-        var loader = new ConfigurationLoader(new ConfigurationBuilder().Build());
-        var connectionString = loader.GetRequired(ConfigurationKeys.ConnectionStrings.DefaultConnection);
+        var configuration = new ConfigurationBuilder()
+            .AddEnvironmentVariables()
+            .Build();
+        var loader = new ConfigurationLoader(configuration);
+        var connectionString = loader.Get(ConfigurationKeys.ConnectionStrings.DefaultConnection)
+            ?? throw new ArgumentNullException(ConfigurationKeys.ConnectionStrings.DefaultConnection);
 
         var optionsBuilder = new DbContextOptionsBuilder<CardiTrackDbContext>();
         optionsBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("CardiTrack.Infrastructure"));

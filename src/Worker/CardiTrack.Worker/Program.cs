@@ -7,6 +7,7 @@ using CardiTrack.Infrastructure.Security;
 using CardiTrack.Infrastructure.Settings;
 using CardiTrack.Shared;
 using CardiTrack.Worker;
+using CardiTrack.Worker.Workers;
 using Microsoft.EntityFrameworkCore;
 
 // Enforce UTC for all DateTime values read from PostgreSQL timestamptz columns
