@@ -1,6 +1,8 @@
 using AspNetCoreRateLimit;
 using CardiTrack.API.Extensions;
 using CardiTrack.API.Middleware;
+using CardiTrack.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 // Enforce UTC for all DateTime values read from PostgreSQL timestamptz columns
@@ -72,7 +74,7 @@ try
     // .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379", "redis");
 
     // 12. AUTOMAPPER
-    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+    builder.Services.AddAutoMapper(cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
 
     var app = builder.Build();
 
