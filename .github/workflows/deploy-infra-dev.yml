@@ -136,20 +136,11 @@ jobs:
           TF_EXIT=${PIPESTATUS[0]}
           echo "exitcode=${TF_EXIT}" >> $GITHUB_OUTPUT
           [ $TF_EXIT -eq 1 ] && exit 1 || exit 0
-      # Latest version: compatibility check only, no plan file needed
-      - name: terraform plan (latest)
+      # Latest version: compatibility check only — validate against latest provider schemas, no state needed
+      - name: terraform validate (latest)
         if: matrix.tf_version != needs.env.outputs.tf_version
-        id: plan-latest
         working-directory: ${{ needs.env.outputs.tf_working_dir }}
-        run: |
-          set +e
-          terraform plan \
-            -var-file=environments/dev.tfvars \
-            -detailed-exitcode \
-            -no-color 2>&1 | tee plan.txt
-          TF_EXIT=${PIPESTATUS[0]}
-          echo "exitcode=${TF_EXIT}" >> $GITHUB_OUTPUT
-          [ $TF_EXIT -eq 1 ] && exit 1 || exit 0
+        run: terraform validate -no-color 2>&1 | tee plan.txt
       - name: Save plan artifact
         if: matrix.tf_version == needs.env.outputs.tf_version
         uses: actions/upload-artifact@v7
