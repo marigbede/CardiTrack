@@ -85,9 +85,15 @@ jobs:
           echo "bucket=${BUCKET}" >> $GITHUB_OUTPUT
 
   plan-dev:
-    name: Plan (Dev)
+    name: Plan (Dev) — ${{ matrix.tf_version }}
     needs: [env, validate, bootstrap-state-bucket]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tf_version:
+          - ${{ needs.env.outputs.tf_version }}
+          - latest
+      fail-fast: false
     permissions:
       id-token: write
       contents: read
@@ -100,7 +106,7 @@ jobs:
           service_account: ${{ needs.env.outputs.gcp_service_account }}
       - uses: hashicorp/setup-terraform@v4
         with:
-          terraform_version: ${{ needs.env.outputs.tf_version }}
+          terraform_version: ${{ matrix.tf_version }}
       - name: terraform init
         working-directory: ${{ needs.env.outputs.tf_working_dir }}
         run: |
@@ -121,6 +127,7 @@ jobs:
           echo "exitcode=${TF_EXIT}" >> $GITHUB_OUTPUT
           [ $TF_EXIT -eq 1 ] && exit 1 || exit 0
       - name: Save plan artifact
+        if: matrix.tf_version == needs.env.outputs.tf_version
         uses: actions/upload-artifact@v7
         with:
           name: dev-tfplan
@@ -128,19 +135,19 @@ jobs:
           retention-days: 1
       - name: Plan summary
         run: |
-          echo "### Terraform Plan — Dev" >> $GITHUB_STEP_SUMMARY
+          echo "### Terraform Plan — Dev (${{ matrix.tf_version }})" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           cat ${{ needs.env.outputs.tf_working_dir }}/plan.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
       - name: Post plan to PR
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && matrix.tf_version == needs.env.outputs.tf_version
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const plan = fs.readFileSync('${{ needs.env.outputs.tf_working_dir }}/plan.txt', 'utf8');
             const truncated = plan.length > 60000 ? plan.slice(0, 60000) + '\n\n... (truncated)' : plan;
-            const body = `### Terraform Plan — Dev\n\`\`\`hcl\n${truncated}\n\`\`\``;
+            const body = `### Terraform Plan — Dev (${{ needs.env.outputs.tf_version }})\n\`\`\`hcl\n${truncated}\n\`\`\``;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
