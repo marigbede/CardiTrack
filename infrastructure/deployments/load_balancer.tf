@@ -52,7 +52,7 @@ resource "google_compute_security_policy" "waf" {
     action   = "deny(403)"
     priority = 50
     match {
-      expr { expression = "request.headers['user-agent'].matches(\"(?i)curl.*\")" }
+      expr { expression = "request.headers['user-agent'].matches('(?i)curl.*')" }
     }
     description = "Block curl user agents"
   }
@@ -62,7 +62,7 @@ resource "google_compute_security_policy" "waf" {
     action   = "deny(403)"
     priority = 60
     match {
-      expr { expression = "request.path.matches(\"(?i).*\\.(config|xml|php|env|yaml|toml|cfg|conf|gpg)$\")" }
+      expr { expression = "request.path.matches('(?i).*[.](config|xml|php|env|yaml|toml|cfg|conf|gpg)$')" }
     }
     description = "Block requests to sensitive file extensions"
   }
