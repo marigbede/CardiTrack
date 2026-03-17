@@ -95,6 +95,12 @@ variable "migrator_container_image" {
   default     = "us-docker.pkg.dev/cloudrun/container/hello"
 }
 
+variable "worker_container_image" {
+  description = "Container image for the Worker service"
+  type        = string
+  default     = "us-docker.pkg.dev/cloudrun/container/hello"
+}
+
 # Storage Configuration
 variable "storage_location" {
   description = "GCS bucket location (US, EU, ASIA, or specific region)"

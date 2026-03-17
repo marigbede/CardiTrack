@@ -69,6 +69,9 @@ resource "google_cloud_run_v2_service" "api" {
   }
 
   labels = var.cloud_run_labels
+  lifecycle {
+    ignore_changes = [template[0].containers[0].image]
+  }
   depends_on = [
     google_project_service.run,
     google_secret_manager_secret_version.app_secrets,
@@ -144,6 +147,9 @@ resource "google_cloud_run_v2_service" "web" {
   }
 
   labels = var.cloud_run_labels
+  lifecycle {
+    ignore_changes = [template[0].containers[0].image]
+  }
   depends_on = [
     google_project_service.run,
     google_secret_manager_secret_version.app_secrets,
@@ -208,6 +214,84 @@ resource "google_cloud_run_v2_job" "migrator" {
 
   depends_on = [
     google_project_service.run,
+    google_secret_manager_secret_version.db_connection_string,
+  ]
+}
+
+resource "google_cloud_run_v2_service" "worker" {
+  name     = var.worker_service_name
+  location = var.cloud_run_location
+  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+  client   = "terraform"
+
+  template {
+    vpc_access {
+      network_interfaces {
+        network    = google_compute_network.main.id
+        subnetwork = google_compute_subnetwork.main.id
+      }
+      egress = "PRIVATE_RANGES_ONLY"
+    }
+
+    volumes {
+      name = "cloudsql"
+      cloud_sql_instance {
+        instances = [google_sql_database_instance.main.connection_name]
+      }
+    }
+
+    containers {
+      image = var.worker_container_image
+
+      dynamic "env" {
+        for_each = var.worker_env_vars
+        iterator = item
+        content {
+          name  = item.key
+          value = item.value
+        }
+      }
+
+      dynamic "env" {
+        for_each = var.worker_secret_env_vars
+        iterator = item
+        content {
+          name = item.key
+          value_source {
+            secret_key_ref {
+              secret  = item.value
+              version = "latest"
+            }
+          }
+        }
+      }
+
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
+      }
+
+      resources {
+        limits = {
+          cpu    = var.cloud_run_cpu
+          memory = var.cloud_run_memory
+        }
+      }
+    }
+
+    scaling {
+      min_instance_count = var.cloud_run_min_instances
+      max_instance_count = var.cloud_run_max_instances
+    }
+  }
+
+  labels = var.cloud_run_labels
+  lifecycle {
+    ignore_changes = [template[0].containers[0].image]
+  }
+  depends_on = [
+    google_project_service.run,
+    google_secret_manager_secret_version.app_secrets,
     google_secret_manager_secret_version.db_connection_string,
   ]
 }
@@ -325,4 +409,27 @@ variable "migrator_container_image" {
   description = "Container image for the DB migrator Cloud Run Job"
   type        = string
   default     = "us-docker.pkg.dev/cloudrun/container/hello"
+}
+
+variable "worker_service_name" {
+  description = "Name of the Worker Cloud Run service"
+  type        = string
+}
+
+variable "worker_container_image" {
+  description = "Container image for the Worker service"
+  type        = string
+  default     = "us-docker.pkg.dev/cloudrun/container/hello"
+}
+
+variable "worker_env_vars" {
+  description = "Environment variables for Worker service"
+  type        = map(string)
+  default     = {}
+}
+
+variable "worker_secret_env_vars" {
+  description = "Secret Manager-backed env vars for Worker service (key=env var name, value=secret ID)"
+  type        = map(string)
+  default     = {}
 }

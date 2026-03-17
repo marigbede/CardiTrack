@@ -19,6 +19,7 @@ locals {
   # Resource naming
   api_service_name    = "${var.project_name}-${local.environment}-api"
   web_service_name    = "${var.project_name}-${local.environment}-web"
+  worker_service_name = "${var.project_name}-${local.environment}-worker"
   cloud_sql_name      = "${var.project_name}-${local.environment}-sql"
   cloud_sql_db_name   = "${var.project_name}-${local.environment}-db"
   storage_bucket_name = "${var.project_id}-${var.project_name}-${local.environment}"
@@ -35,9 +36,19 @@ module "deployments" {
   project_id = var.project_id
   region     = local.region
 
-  # Cloud Run - API Service
-  api_custom_domain   = var.api_custom_domain
-  web_custom_domain   = var.web_custom_domain
+  # Cloud Run - Custom domains
+  api_custom_domain = var.api_custom_domain
+  web_custom_domain = var.web_custom_domain
+
+  # Cloud Run - Shared
+  cloud_run_location      = local.region
+  cloud_run_min_instances = local.is_prod ? 1 : 0
+  cloud_run_max_instances = local.is_prod ? 3 : 1
+  cloud_run_cpu           = var.cloud_run_cpu
+  cloud_run_memory        = var.cloud_run_memory
+  cloud_run_labels        = local.common_labels
+
+  # Cloud Run - API
   api_service_name    = local.api_service_name
   api_container_image = var.api_container_image
   api_env_vars = {
@@ -53,26 +64,29 @@ module "deployments" {
     "Encryption__Key"                      = "${var.project_name}-${local.environment}-encryption-key"
     "Health__Token"                        = "${var.project_name}-${local.environment}-health-token"
   }
-  cloud_run_location      = local.region
-  cloud_run_min_instances = local.is_prod ? 1 : 0
-  cloud_run_max_instances = local.is_prod ? 3 : 1
 
-  # Cloud Run - Web Service
-  web_service_name    = local.web_service_name
-  web_container_image = var.web_container_image
-  web_env_vars        = { "ASPNETCORE_ENVIRONMENT" = title(var.environment) }
-  web_secret_env_vars = {
+  # Cloud Run - Worker
+  worker_service_name    = local.worker_service_name
+  worker_container_image = var.worker_container_image
+  worker_env_vars = {
+    "ASPNETCORE_ENVIRONMENT" = title(var.environment)
+    "GCP_PROJECT_ID"         = var.project_id
+  }
+  worker_secret_env_vars = {
     "ConnectionStrings__DefaultConnection" = "${var.project_name}-${local.environment}-db-connection-string"
     "Auth0__Domain"                        = "${var.project_name}-${local.environment}-auth0-domain"
     "Auth0__Audience"                      = "${var.project_name}-${local.environment}-auth0-audience"
     "Auth0__ClientId"                      = "${var.project_name}-${local.environment}-auth0-client-id"
     "Auth0__ClientSecret"                  = "${var.project_name}-${local.environment}-auth0-client-secret"
     "Encryption__Key"                      = "${var.project_name}-${local.environment}-encryption-key"
+    "Health__Token"                        = "${var.project_name}-${local.environment}-health-token"
   }
 
-  cloud_run_cpu    = var.cloud_run_cpu
-  cloud_run_memory = var.cloud_run_memory
-  cloud_run_labels = local.common_labels
+  # Cloud Run - Web
+  web_service_name    = local.web_service_name
+  web_container_image = var.web_container_image
+  web_env_vars        = { "ASPNETCORE_ENVIRONMENT" = title(var.environment) }
+  web_secret_env_vars = {}
 
   # Networking
   vpc_name    = "${var.project_name}-${local.environment}-vpc"
