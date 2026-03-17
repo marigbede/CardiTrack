@@ -101,26 +101,50 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: google-github-actions/auth@v3
+        if: matrix.tf_version == needs.env.outputs.tf_version
         with:
           workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
           service_account: ${{ needs.env.outputs.gcp_service_account }}
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ matrix.tf_version }}
-      - name: terraform init
+      # Pinned version: full init with remote state (produces the plan artifact used by apply)
+      - name: terraform init (pinned)
+        if: matrix.tf_version == needs.env.outputs.tf_version
         working-directory: ${{ needs.env.outputs.tf_working_dir }}
         run: |
           terraform init \
             -backend-config="bucket=${{ needs.env.outputs.tf_state_bucket_dev }}" \
             -backend-config="prefix=carditrack/dev"
-      - name: terraform plan
-        id: plan
+      # Latest version: no-backend init — validates compatibility without acquiring a state lock
+      - name: terraform init (latest, no backend)
+        if: matrix.tf_version != needs.env.outputs.tf_version
+        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        run: terraform init -backend=false
+      # Pinned version: save plan file for apply
+      - name: terraform plan (pinned)
+        if: matrix.tf_version == needs.env.outputs.tf_version
+        id: plan-pinned
         working-directory: ${{ needs.env.outputs.tf_working_dir }}
         run: |
           set +e
           terraform plan \
             -var-file=environments/dev.tfvars \
             -out=dev.tfplan \
+            -detailed-exitcode \
+            -no-color 2>&1 | tee plan.txt
+          TF_EXIT=${PIPESTATUS[0]}
+          echo "exitcode=${TF_EXIT}" >> $GITHUB_OUTPUT
+          [ $TF_EXIT -eq 1 ] && exit 1 || exit 0
+      # Latest version: compatibility check only, no plan file needed
+      - name: terraform plan (latest)
+        if: matrix.tf_version != needs.env.outputs.tf_version
+        id: plan-latest
+        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        run: |
+          set +e
+          terraform plan \
+            -var-file=environments/dev.tfvars \
             -detailed-exitcode \
             -no-color 2>&1 | tee plan.txt
           TF_EXIT=${PIPESTATUS[0]}
