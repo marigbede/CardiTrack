@@ -52,8 +52,9 @@ module "deployments" {
   api_service_name    = local.api_service_name
   api_container_image = var.api_container_image
   api_env_vars = {
-    "ASPNETCORE_ENVIRONMENT" = title(var.environment)
-    "GCP_PROJECT_ID"         = var.project_id
+    "ASPNETCORE_ENVIRONMENT"              = title(var.environment)
+    "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true"
+    "GCP_PROJECT_ID"                      = var.project_id
   }
   api_secret_env_vars = {
     "ConnectionStrings__DefaultConnection" = "${var.project_name}-${local.environment}-db-connection-string"
