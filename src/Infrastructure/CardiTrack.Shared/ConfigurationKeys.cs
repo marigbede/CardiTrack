@@ -47,6 +47,11 @@ public static class ConfigurationKeys
         }
     }
 
+    public static class Api
+    {
+        public const string BaseUrl = "Api:BaseUrl";
+    }
+
     /// <summary>Array section — use with IConfiguration.GetSection(), not ConfigurationLoader.Get().</summary>
     public static class DeviceProviders
     {

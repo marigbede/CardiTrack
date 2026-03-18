@@ -77,6 +77,7 @@ try
     // 12. AUTOMAPPER
     builder.Services.AddAutoMapper(cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
 
+
     var app = builder.Build();
 
     // MIDDLEWARE PIPELINE

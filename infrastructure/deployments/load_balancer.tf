@@ -2,8 +2,10 @@
 # Architecture: Internet → Cloud Armor (WAF) → GCLB + Cloud CDN → Cloud Run
 
 locals {
-  has_any_domain = var.api_custom_domain != "" || var.web_custom_domain != ""
-  lb_name_prefix = trimsuffix(var.api_service_name, "-api")
+  has_any_domain     = var.api_custom_domain != "" || var.web_custom_domain != ""
+  lb_name_prefix     = trimsuffix(var.api_service_name, "-api")
+  configured_domains = compact([var.web_custom_domain, var.api_custom_domain])
+  domain_pattern     = join("|", [for d in local.configured_domains : "^${replace(d, ".", "\\.")}(:[0-9]+)?$"])
 }
 
 # ── Global static IP ───────────────────────────────────────────────────────────
@@ -46,6 +48,16 @@ resource "google_compute_ssl_policy" "main" {
 resource "google_compute_security_policy" "waf" {
   count = local.has_any_domain ? 1 : 0
   name  = "${local.lb_name_prefix}-waf"
+
+  # Block requests not using a configured domain name (prevents direct IP access)
+  rule {
+    action   = "deny(403)"
+    priority = 40
+    match {
+      expr { expression = "!request.headers['host'].lower().matches('${local.domain_pattern}')" }
+    }
+    description = "Block requests that do not use a configured domain name"
+  }
 
   # Block curl user agents
   rule {

@@ -15,6 +15,13 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
+        // HTTP CLIENT FACTORY — named client targeting the CardiTrack API
+        builder.Services.AddHttpClient("CardiTrackApiClient", client =>
+        {
+            client.BaseAddress = new Uri(ApiConstants.BaseUrl);
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+        });
+
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
