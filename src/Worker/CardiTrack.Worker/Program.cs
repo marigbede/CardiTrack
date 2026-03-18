@@ -5,6 +5,7 @@ using CardiTrack.Infrastructure.Persistence;
 using CardiTrack.Infrastructure.Repositories;
 using CardiTrack.Infrastructure.Security;
 using CardiTrack.Infrastructure.Settings;
+using CardiTrack.Shared;
 using CardiTrack.Worker;
 using CardiTrack.Worker.Workers;
 using Microsoft.EntityFrameworkCore;
