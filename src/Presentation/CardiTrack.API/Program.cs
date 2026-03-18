@@ -86,13 +86,13 @@ try
     app.UseMiddleware<ExceptionHandlingMiddleware>();
     app.UseIpRateLimiting();
 
-    if (app.Environment.IsDevelopment())
+    if (!app.Environment.IsProduction())
     {
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "CardiTrack API V1");
-            c.RoutePrefix = string.Empty;  // Serve Swagger at root
+            c.RoutePrefix = "swagger";
         });
     }
 
