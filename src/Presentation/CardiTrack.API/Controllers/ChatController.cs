@@ -1,0 +1,71 @@
+using CardiTrack.API.Infrastructure.UserContext;
+using CardiTrack.Application.DTOs.Common;
+using CardiTrack.Application.DTOs.Requests;
+using CardiTrack.Application.DTOs.Responses;
+using CardiTrack.Application.Interfaces.Repositories;
+using CardiTrack.Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace CardiTrack.API.Controllers;
+
+[Authorize]
+[Route("api/v1/chat")]
+public class ChatController : BaseApiController
+{
+    private readonly IGenerativeAiService _generativeAi;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ChatController(
+        IUserContext userContext,
+        ILogger<ChatController> logger,
+        IGenerativeAiService generativeAi,
+        IUnitOfWork unitOfWork)
+        : base(userContext, logger)
+    {
+        _generativeAi = generativeAi;
+        _unitOfWork = unitOfWork;
+    }
+
+    /// <summary>Send a message to the AI, with the CardiMember's recent health data injected as context.</summary>
+    [HttpPost]
+    [ProducesResponseType(typeof(ApiResponse<ChatResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<ChatResponse>>> Chat(
+        [FromBody] ChatRequest request, CancellationToken ct)
+    {
+        var to = DateOnly.FromDateTime(DateTime.UtcNow);
+        var from = to.AddDays(-3);
+        var logs = await _unitOfWork.ActivityLogs
+            .GetByCardiMemberAndDateRangeAsync(request.CardiMemberId, from, to);
+
+        var systemContext = BuildSystemContext(request.CardiMemberId, logs);
+        var history = request.History.Prepend(systemContext).ToList();
+
+        var reply = await _generativeAi.ChatAsync(history, request.Message, ct);
+
+        return Success(new ChatResponse
+        {
+            Reply = reply,
+            ConversationId = Guid.NewGuid().ToString("N")
+        });
+    }
+
+    private static ChatMessage BuildSystemContext(
+        Guid cardiMemberId,
+        IEnumerable<Domain.Entities.ActivityLog> logs)
+    {
+        var summary = logs.Any()
+            ? string.Join(", ", logs.OrderBy(l => l.Date).Select(l =>
+                $"{l.Date}: steps={l.Steps}, HR={l.RestingHeartRate}, sleep={l.SleepMinutes}min"))
+            : "No recent activity data available.";
+
+        return new ChatMessage
+        {
+            Role = ChatRole.User,
+            Content = $"[System context] CardiMember ID: {cardiMemberId}. " +
+                      $"Recent health data (last 3 days): {summary}. " +
+                      "You are a helpful health assistant. Answer questions about this patient's health data accurately and concisely."
+        };
+    }
+}

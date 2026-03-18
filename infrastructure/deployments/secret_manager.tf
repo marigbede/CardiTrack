@@ -1,6 +1,29 @@
 # Secret Manager
 # Manages Google Cloud Secret Manager secrets
 
+# Variables
+variable "db_password_secret_id" {
+  description = "Secret Manager secret ID for database password"
+  type        = string
+}
+
+variable "secret_id_prefix" {
+  description = "Prefix for app secret IDs (e.g. carditrack-dev)"
+  type        = string
+}
+
+variable "secret_labels" {
+  description = "Labels for Secret Manager resources"
+  type        = map(string)
+  default     = {}
+}
+
+variable "deploy_service_account" {
+  description = "Service account email used by CI/CD to deploy (granted read access to health token secret)"
+  type        = string
+}
+
+# Locals
 locals {
   # Cloud Run connects via the Cloud SQL Auth Proxy Unix socket — no public IP needed.
   # The proxy handles TLS; SSL Mode=Disable applies to the local socket only.
@@ -133,25 +156,59 @@ resource "google_secret_manager_secret_iam_member" "health_token_deploy_accessor
   member    = "serviceAccount:${var.deploy_service_account}"
 }
 
-# ── Variables ─────────────────────────────────────────────────────────────────
+# ── AI secrets (placeholder values, operator/CI-overwritten) ─────────────────
 
-variable "db_password_secret_id" {
-  description = "Secret Manager secret ID for database password"
-  type        = string
+resource "google_secret_manager_secret" "gemini_api_key" {
+  secret_id = "${var.secret_id_prefix}-gemini-api-key"
+  replication {
+    auto {}
+  }
+  labels     = var.secret_labels
+  depends_on = [google_project_service.secretmanager]
 }
 
-variable "secret_id_prefix" {
-  description = "Prefix for app secret IDs (e.g. carditrack-dev)"
-  type        = string
+resource "google_secret_manager_secret_version" "gemini_api_key" {
+  secret      = google_secret_manager_secret.gemini_api_key.id
+  secret_data = "placeholder"
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
-variable "secret_labels" {
-  description = "Labels for Secret Manager resources"
-  type        = map(string)
-  default     = {}
+resource "google_secret_manager_secret_iam_member" "gemini_api_key_accessor" {
+  secret_id = google_secret_manager_secret.gemini_api_key.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
 }
 
-variable "deploy_service_account" {
-  description = "Service account email used by CI/CD to deploy (granted read access to health token secret)"
-  type        = string
+# MedGemma internal service URL — CI/CD writes the value after each deployment;
+# Terraform only creates the shell. API reads it at startup via Secret Manager binding.
+resource "google_secret_manager_secret" "medgemma_service_url" {
+  secret_id = "${var.secret_id_prefix}-medgemma-service-url"
+  replication {
+    auto {}
+  }
+  labels     = var.secret_labels
+  depends_on = [google_project_service.secretmanager]
+}
+
+resource "google_secret_manager_secret_version" "medgemma_service_url" {
+  secret      = google_secret_manager_secret.medgemma_service_url.id
+  secret_data = "placeholder"
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
+resource "google_secret_manager_secret_iam_member" "medgemma_url_accessor" {
+  secret_id = google_secret_manager_secret.medgemma_service_url.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
+}
+
+# Deploy SA needs secretVersionManager to write the URL after each MedGemma deployment
+resource "google_secret_manager_secret_iam_member" "deploy_sa_medgemma_url_manager" {
+  secret_id = google_secret_manager_secret.medgemma_service_url.id
+  role      = "roles/secretmanager.secretVersionManager"
+  member    = "serviceAccount:${var.deploy_service_account}"
 }

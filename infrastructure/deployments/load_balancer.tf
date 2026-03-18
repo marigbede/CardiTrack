@@ -1,6 +1,7 @@
 # Global Load Balancer + Cloud CDN + Cloud Armor (WAF)
 # Architecture: Internet → Cloud Armor (WAF) → GCLB + Cloud CDN → Cloud Run
 
+# Locals
 locals {
   has_any_domain     = var.api_custom_domain != "" || var.web_custom_domain != ""
   lb_name_prefix     = trimsuffix(var.api_service_name, "-api")

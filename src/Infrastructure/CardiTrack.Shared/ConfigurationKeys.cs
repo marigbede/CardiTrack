@@ -57,4 +57,16 @@ public static class ConfigurationKeys
     {
         public const string SectionName = "DeviceProviders";
     }
+
+    public static class AI
+    {
+        /// <summary>Name of the active provider for generative tasks (reports, chat). E.g. "Gemini"</summary>
+        public const string GeneralProvider = "AI:GeneralProvider";
+
+        /// <summary>Name of the active provider for medical analysis tasks. E.g. "MedGemma"</summary>
+        public const string MedicalProvider = "AI:MedicalProvider";
+
+        /// <summary>Array section — use with IConfiguration.GetSection(), not ConfigurationLoader.Get().</summary>
+        public const string ProvidersSectionName = "AI:Providers";
+    }
 }

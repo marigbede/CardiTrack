@@ -34,6 +34,28 @@ services:
         condition: service_healthy
     restart: "no"
 
+  ollama:
+    image: ollama/ollama:latest
+    expose:
+      - "11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    profiles: ["full"]
+
+  medgemma-init:
+    image: ollama/ollama:latest
+    entrypoint: ["/bin/sh", "-c", "OLLAMA_HOST=http://ollama:11434 ollama pull medgemma:4b"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+    profiles: ["full"]
+
   api:
     build:
       context: .
@@ -42,6 +64,16 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=carditrack;Username=postgres;Password=postgres"
       ConnectionStrings__Redis: "redis:6379"
+      AI__GeneralProvider: "Gemini"
+      AI__MedicalProvider: "MedGemma"
+      AI__Providers__0__Name: "MedGemma"
+      AI__Providers__0__BaseUrl: "http://ollama:11434"
+      AI__Providers__0__Model: "medgemma:4b"
+      AI__Providers__0__TimeoutSeconds: "120"
+      AI__Providers__1__Name: "Gemini"
+      AI__Providers__1__BaseUrl: "https://generativelanguage.googleapis.com"
+      AI__Providers__1__Model: "gemini-2.0-flash"
+      AI__Providers__1__ApiKey: ""
     ports:
       - "8080:8080"
     depends_on:
@@ -49,6 +81,8 @@ services:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
+      medgemma-init:
+        condition: service_completed_successfully
     profiles: ["full"]
 
   worker:
@@ -65,3 +99,6 @@ services:
       redis:
         condition: service_healthy
     profiles: ["full"]
+
+volumes:
+  ollama_data:

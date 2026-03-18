@@ -1,6 +1,18 @@
 # GCP API Enablement
 # Enables required Google Cloud APIs for CardiTrack
 
+# Variables
+variable "project_id" {
+  description = "GCP project ID"
+  type        = string
+}
+
+variable "region" {
+  description = "GCP region"
+  type        = string
+}
+
+# Resources
 resource "google_project_service" "run" {
   service            = "run.googleapis.com"
   disable_on_destroy = false
@@ -45,15 +57,4 @@ resource "google_project_service" "compute" {
 resource "google_project_service" "servicenetworking" {
   service            = "servicenetworking.googleapis.com"
   disable_on_destroy = false
-}
-
-# Variables
-variable "project_id" {
-  description = "GCP project ID"
-  type        = string
-}
-
-variable "region" {
-  description = "GCP region"
-  type        = string
 }

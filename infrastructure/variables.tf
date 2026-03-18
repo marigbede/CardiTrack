@@ -59,6 +59,12 @@ variable "web_container_image" {
 }
 
 # Cloud SQL Configuration
+variable "cloud_sql_edition" {
+  description = "Cloud SQL edition (ENTERPRISE or ENTERPRISE_PLUS)"
+  type        = string
+  default     = "ENTERPRISE"
+}
+
 variable "cloud_sql_tier" {
   description = "Cloud SQL machine tier (db-f1-micro for dev, db-custom-2-7680 for prod)"
   type        = string
@@ -151,4 +157,30 @@ variable "additional_labels" {
   description = "Additional labels to apply to all resources"
   type        = map(string)
   default     = {}
+}
+
+# Networking
+variable "subnet_cidr" {
+  description = "CIDR range for the primary subnet"
+  type        = string
+  default     = "10.0.0.0/24"
+}
+
+# MedGemma (Ollama)
+variable "medgemma_image" {
+  description = "Container image for MedGemma (empty string disables the service)"
+  type        = string
+  default     = ""
+}
+
+variable "medgemma_cpu" {
+  description = "CPU allocation for the MedGemma Cloud Run service"
+  type        = string
+  default     = "8"
+}
+
+variable "medgemma_memory" {
+  description = "Memory allocation for the MedGemma Cloud Run service"
+  type        = string
+  default     = "16Gi"
 }

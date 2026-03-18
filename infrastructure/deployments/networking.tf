@@ -1,6 +1,24 @@
 # Networking
 # VPC network, subnet, and private services access for Cloud SQL private IP
 
+# Variables
+variable "vpc_name" {
+  description = "Name of the VPC network"
+  type        = string
+}
+
+variable "subnet_name" {
+  description = "Name of the subnet"
+  type        = string
+}
+
+variable "subnet_cidr" {
+  description = "CIDR range for the subnet"
+  type        = string
+  default     = "10.0.0.0/24"
+}
+
+# Resources
 resource "google_compute_network" "main" {
   name                    = var.vpc_name
   auto_create_subnetworks = false
@@ -28,21 +46,4 @@ resource "google_service_networking_connection" "private_services" {
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_services_range.name]
   depends_on              = [google_project_service.servicenetworking]
-}
-
-# Variables
-variable "vpc_name" {
-  description = "Name of the VPC network"
-  type        = string
-}
-
-variable "subnet_name" {
-  description = "Name of the subnet"
-  type        = string
-}
-
-variable "subnet_cidr" {
-  description = "CIDR range for the subnet"
-  type        = string
-  default     = "10.0.0.0/24"
 }

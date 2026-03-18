@@ -68,6 +68,10 @@ jobs:
           check_image web
           check_image worker
           check_image migrator
+          # MedGemma image is optional — only check if the stable tag exists
+          gcloud artifacts docker images describe $REGISTRY/medgemma:$TAG \
+            --project ${{ needs.env.outputs.gcp_project_id }} \
+            --quiet > /dev/null 2>&1 && echo "✓ medgemma:$TAG found" || echo "⚠ medgemma:$TAG not found — skipping"
       - name: Verify mobile artifacts exist in GCS
         run: |
           TAG="${{ inputs.tag }}"
@@ -213,6 +217,45 @@ jobs:
         run: |
           echo '${{ steps.secrets.outputs.play_store_key }}' > play-store-key.json
           echo "### Android deployed @ \`${{ needs.validate-tag.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ── MedGemma ─────────────────────────────────────────────────────────────────
+  deploy-medgemma:
+    name: Deploy MedGemma → Prod
+    needs: [env, validate-tag]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ needs.env.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.env.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - name: Deploy MedGemma service
+        env:
+          SERVICE: carditrack-prod-medgemma
+          IMAGE: ${{ needs.env.outputs.registry }}/medgemma:${{ needs.validate-tag.outputs.tag }}
+          REGION: ${{ needs.env.outputs.gcp_region }}
+          PROJECT: ${{ needs.env.outputs.gcp_project_id }}
+        run: |
+          gcloud run deploy $SERVICE \
+            --image $IMAGE \
+            --region $REGION \
+            --project $PROJECT \
+            --quiet
+      - name: Update MedGemma URL secret
+        env:
+          SERVICE: carditrack-prod-medgemma
+          SECRET_ID: carditrack-prod-medgemma-service-url
+          REGION: ${{ needs.env.outputs.gcp_region }}
+          PROJECT: ${{ needs.env.outputs.gcp_project_id }}
+        run: |
+          URL=$(gcloud run services describe $SERVICE \
+            --region $REGION \
+            --project $PROJECT \
+            --format='value(status.url)')
+          echo -n "$URL" | gcloud secrets versions add $SECRET_ID \
+            --data-file=- \
+            --project $PROJECT
+          echo "### MedGemma deployed @ \`${{ needs.validate-tag.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
 
   # ── Mobile: iOS ──────────────────────────────────────────────────────────────
   deploy-mobile-ios:

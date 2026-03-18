@@ -1,6 +1,37 @@
 # Cloud Monitoring & Audit Logging
 # Enables Cloud Monitoring and creates audit log sink for HIPAA compliance
 
+# Variables
+variable "log_sink_name" {
+  description = "Name of the Cloud Logging sink for audit logs"
+  type        = string
+}
+
+variable "audit_bucket_name" {
+  description = "Name of the GCS bucket for audit logs"
+  type        = string
+}
+
+variable "enable_hipaa_compliance" {
+  description = "Enable HIPAA compliance features (audit log sink)"
+  type        = bool
+  default     = false
+}
+
+variable "audit_retention_days" {
+  description = "Audit log retention in days"
+  type        = number
+  default     = 90
+}
+
+variable "monitoring_labels" {
+  description = "Labels for monitoring resources"
+  type        = map(string)
+  default     = {}
+}
+
+# Resources
+
 # Dedicated audit log bucket (HIPAA compliance)
 resource "google_storage_bucket" "audit" {
   count         = var.enable_hipaa_compliance ? 1 : 0
@@ -35,33 +66,4 @@ resource "google_storage_bucket_iam_member" "audit_writer" {
   bucket = google_storage_bucket.audit[0].name
   role   = "roles/storage.objectCreator"
   member = google_logging_project_sink.audit[0].writer_identity
-}
-
-# Variables
-variable "log_sink_name" {
-  description = "Name of the Cloud Logging sink for audit logs"
-  type        = string
-}
-
-variable "audit_bucket_name" {
-  description = "Name of the GCS bucket for audit logs"
-  type        = string
-}
-
-variable "enable_hipaa_compliance" {
-  description = "Enable HIPAA compliance features (audit log sink)"
-  type        = bool
-  default     = false
-}
-
-variable "audit_retention_days" {
-  description = "Audit log retention in days"
-  type        = number
-  default     = 90
-}
-
-variable "monitoring_labels" {
-  description = "Labels for monitoring resources"
-  type        = map(string)
-  default     = {}
 }

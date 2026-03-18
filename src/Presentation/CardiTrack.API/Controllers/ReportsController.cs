@@ -1,0 +1,72 @@
+using CardiTrack.API.Infrastructure.UserContext;
+using CardiTrack.Application.DTOs.Requests;
+using CardiTrack.Application.DTOs.Responses;
+using CardiTrack.Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace CardiTrack.API.Controllers;
+
+[Authorize]
+[Route("api/v1/reports")]
+public class ReportsController : BaseApiController
+{
+    private readonly IReportGenerationService _reportService;
+
+    public ReportsController(
+        IUserContext userContext,
+        ILogger<ReportsController> logger,
+        IReportGenerationService reportService)
+        : base(userContext, logger)
+    {
+        _reportService = reportService;
+    }
+
+    /// <summary>Enqueue a report for generation. Returns 202 immediately with a report ID to poll.</summary>
+    [HttpPost]
+    [ProducesResponseType(typeof(ApiResponse<ReportQueuedResponse>), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApiResponse<ReportQueuedResponse>>> Generate(
+        [FromBody] GenerateReportRequest request)
+    {
+        if (!UserContext.IsAuthenticated)
+            return Error("Unauthorized", StatusCodes.Status401Unauthorized);
+
+        var result = await _reportService.GenerateAsync(UserContext.UserId, request);
+        return Accepted(Success(result, "Report queued successfully").Value);
+    }
+
+    /// <summary>Get current status of a queued or completed report.</summary>
+    [HttpGet("{reportId}")]
+    [ProducesResponseType(typeof(ApiResponse<ReportStatusResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<ReportStatusResponse>>> GetStatus(string reportId)
+    {
+        var status = await _reportService.GetStatusAsync(UserContext.UserId, reportId);
+        if (status is null)
+            return Error("Report not found or has expired.", StatusCodes.Status404NotFound);
+
+        return Success(status);
+    }
+
+    /// <summary>Download a completed report.</summary>
+    [HttpGet("{reportId}/download")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Download(string reportId)
+    {
+        try
+        {
+            var (content, contentType, fileName) = await _reportService.DownloadAsync(UserContext.UserId, reportId);
+            return File(content, contentType, fileName);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Error(ex.Message, StatusCodes.Status404NotFound);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Error(ex.Message, StatusCodes.Status409Conflict);
+        }
+    }
+}

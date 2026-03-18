@@ -10,6 +10,8 @@ public interface IUnitOfWork : IDisposable
     IDeviceConnectionRepository DeviceConnections { get; }
     IActivityLogRepository ActivityLogs { get; }
     IDeviceRepository Devices { get; }
+    IAlertRepository Alerts { get; }
+    IPatternBaselineRepository PatternBaselines { get; }
 
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();

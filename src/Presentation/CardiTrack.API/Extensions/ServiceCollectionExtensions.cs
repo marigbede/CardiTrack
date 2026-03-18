@@ -59,9 +59,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDeviceConnectionRepository, CardiTrack.Infrastructure.Repositories.DeviceConnectionRepository>();
         services.AddScoped<IActivityLogRepository, CardiTrack.Infrastructure.Repositories.ActivityLogRepository>();
         services.AddScoped<IDeviceRepository, DeviceRepository>();
+        services.AddScoped<IAlertRepository, CardiTrack.Infrastructure.Repositories.AlertRepository>();
+        services.AddScoped<IPatternBaselineRepository, CardiTrack.Infrastructure.Repositories.PatternBaselineRepository>();
 
         // Unit of Work
         services.AddScoped<IUnitOfWork, CardiTrack.Infrastructure.Repositories.UnitOfWork>();
+
+        // AI services
+        var configLoader = new ConfigurationLoader(configuration);
+        services.AddAiServices(configuration, configLoader);
 
         // External clients
         services.AddScoped<IOAuthTokenRefreshService, OAuthTokenRefreshService>();

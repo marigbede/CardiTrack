@@ -23,6 +23,10 @@ on:
         description: 'Mobile'
         type: boolean
         default: true
+      medgemma:
+        description: 'MedGemma'
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
@@ -45,10 +49,11 @@ jobs:
     needs: env
     runs-on: ubuntu-latest
     outputs:
-      api:            ${{ steps.manual.outputs.api    || steps.filter.outputs.api }}
-      web:            ${{ steps.manual.outputs.web    || steps.filter.outputs.web }}
-      worker:         ${{ steps.manual.outputs.worker || steps.filter.outputs.worker }}
-      mobile:         ${{ steps.manual.outputs.mobile || steps.filter.outputs.mobile }}
+      api:            ${{ steps.manual.outputs.api      || steps.filter.outputs.api }}
+      web:            ${{ steps.manual.outputs.web      || steps.filter.outputs.web }}
+      worker:         ${{ steps.manual.outputs.worker   || steps.filter.outputs.worker }}
+      mobile:         ${{ steps.manual.outputs.mobile   || steps.filter.outputs.mobile }}
+      medgemma:       ${{ steps.manual.outputs.medgemma || steps.filter.outputs.medgemma }}
       dotnet_version:      ${{ needs.env.outputs.dotnet_version }}
       registry:            ${{ needs.env.outputs.registry }}
       gcp_project_id:      ${{ needs.env.outputs.gcp_project_id }}
@@ -63,10 +68,11 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         id: manual
         run: |
-          echo "api=${{ inputs.api }}"       >> $GITHUB_OUTPUT
-          echo "web=${{ inputs.web }}"       >> $GITHUB_OUTPUT
-          echo "worker=${{ inputs.worker }}" >> $GITHUB_OUTPUT
-          echo "mobile=${{ inputs.mobile }}" >> $GITHUB_OUTPUT
+          echo "api=${{ inputs.api }}"           >> $GITHUB_OUTPUT
+          echo "web=${{ inputs.web }}"           >> $GITHUB_OUTPUT
+          echo "worker=${{ inputs.worker }}"     >> $GITHUB_OUTPUT
+          echo "mobile=${{ inputs.mobile }}"     >> $GITHUB_OUTPUT
+          echo "medgemma=${{ inputs.medgemma }}" >> $GITHUB_OUTPUT
       - uses: dorny/paths-filter@v4
         if: github.event_name != 'workflow_dispatch'
         id: filter
@@ -102,6 +108,8 @@ jobs:
               - 'src/Core/CardiTrack.Domain/**'
               - 'src/Core/CardiTrack.Application/**'
               - 'CardiTrack.sln'
+            medgemma:
+              - 'src/Infrastructure/MedGemma/**'
 
   # ── Compute next semver (main only) ─────────────────────────────────────────
   compute-version:
@@ -717,6 +725,85 @@ jobs:
             --add-cloudsql-instances carditrack-490120:europe-west2:carditrack-dev-sql \
             --quiet
 
+  # ── MedGemma ─────────────────────────────────────────────────────────────────
+  build-and-push-medgemma:
+    name: Build & Push MedGemma Image
+    needs: [changes, compute-version]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.medgemma == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.resolve.outputs.image }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.changes.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - run: gcloud auth configure-docker ${{ needs.changes.outputs.gcp_region }}-docker.pkg.dev --quiet
+      - name: Read model version
+        id: model
+        run: echo "tag=$(cat src/Infrastructure/MedGemma/.model-version | tr -d '[:space:]')" >> $GITHUB_OUTPUT
+      - name: Build and push
+        env:
+          IMAGE: ${{ needs.changes.outputs.registry }}/medgemma
+          TAG: ${{ needs.compute-version.outputs.version }}
+        run: |
+          docker build \
+            --build-arg MODEL_TAG=${{ steps.model.outputs.tag }} \
+            -t $IMAGE:$TAG \
+            -f src/Infrastructure/MedGemma/Dockerfile .
+          docker push $IMAGE:$TAG
+          docker tag $IMAGE:$TAG $IMAGE:stable
+          docker push $IMAGE:stable
+          echo "image=$IMAGE:$TAG" >> $GITHUB_OUTPUT
+        id: push
+      - name: Resolve image
+        id: resolve
+        env:
+          IMAGE: ${{ needs.changes.outputs.registry }}/medgemma
+        run: echo "image=$IMAGE:${{ needs.compute-version.outputs.version }}" >> $GITHUB_OUTPUT
+
+  deploy-medgemma-dev:
+    name: Deploy MedGemma → Dev
+    needs: [changes, build-and-push-medgemma]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.medgemma == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.changes.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - name: Deploy MedGemma service
+        env:
+          SERVICE: carditrack-dev-medgemma
+          IMAGE: ${{ needs.build-and-push-medgemma.outputs.image }}
+          REGION: ${{ needs.changes.outputs.gcp_region }}
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
+        run: |
+          gcloud run deploy $SERVICE \
+            --image $IMAGE \
+            --region $REGION \
+            --project $PROJECT \
+            --quiet
+      - name: Update MedGemma URL secret
+        env:
+          SERVICE: carditrack-dev-medgemma
+          SECRET_ID: carditrack-dev-medgemma-service-url
+          REGION: ${{ needs.changes.outputs.gcp_region }}
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
+        run: |
+          URL=$(gcloud run services describe $SERVICE \
+            --region $REGION \
+            --project $PROJECT \
+            --format='value(status.url)')
+          echo -n "$URL" | gcloud secrets versions add $SECRET_ID \
+            --data-file=- \
+            --project $PROJECT
+
   # ── Main only: Create patch tag ──────────────────────────────────────────────
   patch-tag:
     name: Create Patch Tag
@@ -726,6 +813,7 @@ jobs:
       - deploy-api-dev
       - deploy-web-dev
       - deploy-worker-dev
+      - deploy-medgemma-dev
       - upload-mobile-artifacts
     permissions:
       contents: write

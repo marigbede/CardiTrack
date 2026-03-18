@@ -55,6 +55,14 @@ module "deployments" {
     "ASPNETCORE_ENVIRONMENT"              = title(var.environment)
     "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true"
     "GCP_PROJECT_ID"                      = var.project_id
+    "AI__GeneralProvider"                 = "Gemini"
+    "AI__MedicalProvider"                 = "MedGemma"
+    "AI__Providers__0__Name"              = "MedGemma"
+    "AI__Providers__0__Model"             = "medgemma:4b"
+    "AI__Providers__0__TimeoutSeconds"    = "120"
+    "AI__Providers__1__Name"              = "Gemini"
+    "AI__Providers__1__BaseUrl"           = "https://generativelanguage.googleapis.com"
+    "AI__Providers__1__Model"             = "gemini-2.0-flash"
   }
   api_secret_env_vars = {
     "ConnectionStrings__DefaultConnection" = "${var.project_name}-${local.environment}-db-connection-string"
@@ -64,6 +72,8 @@ module "deployments" {
     "Auth0__ClientSecret"                  = "${var.project_name}-${local.environment}-auth0-client-secret"
     "Encryption__Key"                      = "${var.project_name}-${local.environment}-encryption-key"
     "Health__Token"                        = "${var.project_name}-${local.environment}-health-token"
+    "AI__Providers__0__BaseUrl"            = "${var.project_name}-${local.environment}-medgemma-service-url"
+    "AI__Providers__1__ApiKey"             = "${var.project_name}-${local.environment}-gemini-api-key"
   }
 
   # Cloud Run - Worker
@@ -92,12 +102,14 @@ module "deployments" {
   # Networking
   vpc_name    = "${var.project_name}-${local.environment}-vpc"
   subnet_name = "${var.project_name}-${local.environment}-subnet"
+  subnet_cidr = var.subnet_cidr
 
   # Cloud SQL (PostgreSQL)
   cloud_sql_instance_name       = local.cloud_sql_name
   cloud_sql_database_name       = local.cloud_sql_db_name
   cloud_sql_region              = local.region
   db_admin_username             = var.db_admin_username
+  cloud_sql_edition             = var.cloud_sql_edition
   cloud_sql_tier                = var.cloud_sql_tier
   cloud_sql_disk_size_gb        = var.cloud_sql_disk_size_gb
   cloud_sql_ha_enabled          = var.cloud_sql_ha_enabled
@@ -132,4 +144,11 @@ module "deployments" {
   enable_hipaa_compliance = var.enable_hipaa_compliance
   audit_retention_days    = var.audit_retention_days
   monitoring_labels       = local.common_labels
+
+  # MedGemma (Ollama)
+  medgemma_service_name  = "${var.project_name}-${local.environment}-medgemma"
+  medgemma_image         = var.medgemma_image
+  medgemma_cpu           = var.medgemma_cpu
+  medgemma_memory        = var.medgemma_memory
+  medgemma_max_instances = 1
 }
