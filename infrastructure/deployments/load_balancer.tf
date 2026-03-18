@@ -5,7 +5,7 @@ locals {
   has_any_domain     = var.api_custom_domain != "" || var.web_custom_domain != ""
   lb_name_prefix     = trimsuffix(var.api_service_name, "-api")
   configured_domains = compact([var.web_custom_domain, var.api_custom_domain])
-  domain_pattern     = join("|", [for d in local.configured_domains : "^${replace(d, ".", "\\.")}(:[0-9]+)?$"])
+  domain_expression  = "!(${join(" || ", [for d in local.configured_domains : "request.headers['host'].lower() == '${d}'"])})"
 }
 
 # ── Global static IP ───────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ resource "google_compute_security_policy" "waf" {
     action   = "deny(403)"
     priority = 40
     match {
-      expr { expression = "!request.headers['host'].lower().matches('${local.domain_pattern}')" }
+      expr { expression = local.domain_expression }
     }
     description = "Block requests that do not use a configured domain name"
   }
