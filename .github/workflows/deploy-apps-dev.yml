@@ -377,20 +377,19 @@ jobs:
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet workload install maui-ios
-      - run: dotnet restore src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj -p:TargetFrameworks=net10.0-ios
-      - run: dotnet restore src/Core/CardiTrack.Application/CardiTrack.Application.csproj
-      - run: dotnet restore src/Core/CardiTrack.Domain/CardiTrack.Domain.csproj
       - run: |
-          dotnet build src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
+          dotnet publish src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
             -f net10.0-ios \
             -c Release \
-            --no-restore \
-            -p:TargetFrameworks=net10.0-ios \
-            /p:ArchiveOnBuild=false
+            -p:ArchiveOnBuild=false
+      - name: Zip .app bundle
+        run: |
+          APP=$(find . -type d -name '*.app' -path '*/net10.0-ios/*' | head -1)
+          zip -r ios-app.zip "$APP"
       - uses: actions/upload-artifact@v7
         with:
           name: mobile-ios-build
-          path: '**/bin/Release/net10.0-ios/**'
+          path: ios-app.zip
           retention-days: 7
 
   build-mobile-windows:
@@ -581,21 +580,13 @@ jobs:
           name: mobile-ios-build
           path: artifacts/ios
 
-      - name: Zip .app for Appetize
-        id: zip
-        if: steps.token.outputs.available == 'true'
-        run: |
-          APP=$(find artifacts/ios -name '*.app' -maxdepth 6 | head -1)
-          zip -r artifacts/ios/app.zip "$APP"
-          echo "path=artifacts/ios/app.zip" >> $GITHUB_OUTPUT
-
       - uses: appetizeio/github-action-appetize@v1.0.5
         id: appetize
         if: steps.token.outputs.available == 'true'
         with:
           apiToken: ${{ steps.token.outputs.token }}
           platform: ios
-          appFile: ${{ steps.zip.outputs.path }}
+          appFile: artifacts/ios/ios-app.zip
           fileType: zip
           publicKey: ${{ steps.pubkey.outputs.key }}
           note: ${{ needs.compute-version.outputs.version }}
