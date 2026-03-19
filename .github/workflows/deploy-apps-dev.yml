@@ -515,10 +515,11 @@ jobs:
           APK: ${{ steps.apk.outputs.path }}
           NOTE: ${{ needs.compute-version.outputs.version }}
         run: |
-          BASE="https://api.appetize.io/v2/apps"
+          LIST_V2="https://api.appetize.io/v2/apps"
+          UPLOAD_V1="https://api.appetize.io/v1/apps"
 
-          # 1. List apps — verify token and find existing app
-          LIST_RESP=$(curl -s -w "\n%{http_code}" -H "X-API-KEY: $TOKEN" "$BASE")
+          # 1. List apps (v2) — verify token and find existing app
+          LIST_RESP=$(curl -s -w "\n%{http_code}" -H "X-API-KEY: $TOKEN" "$LIST_V2")
           LIST_CODE=$(echo "$LIST_RESP" | tail -1)
           LIST_BODY=$(echo "$LIST_RESP" | head -n -1)
           echo "List HTTP $LIST_CODE"
@@ -527,7 +528,7 @@ jobs:
             exit 1
           fi
 
-          # 2. Determine endpoint: update if key exists in list, else create
+          # 2. Determine upload URL (v1): update if key found in list, else create
           FOUND_KEY=""
           if [ -n "$STORED_KEY" ]; then
             FOUND_KEY=$(echo "$LIST_BODY" | jq -r --arg k "$STORED_KEY" '.data[] | select(.publicKey == $k) | .publicKey' 2>/dev/null || true)
@@ -535,13 +536,13 @@ jobs:
 
           if [ -n "$FOUND_KEY" ]; then
             echo "App found — updating $FOUND_KEY"
-            URL="$BASE/$FOUND_KEY"
+            URL="$UPLOAD_V1/$FOUND_KEY"
           else
             echo "App not found — creating new"
-            URL="$BASE"
+            URL="$UPLOAD_V1"
           fi
 
-          # 3. Upload
+          # 3. Upload (v1)
           PAYLOAD=$(jq -n \
             --arg platform "android" \
             --arg buildFile "$(base64 -w 0 "$APK")" \
@@ -563,7 +564,6 @@ jobs:
 
           PUBLIC_KEY=$(echo "$BODY" | jq -r '.publicKey // empty')
           echo "publicKey=$PUBLIC_KEY" >> $GITHUB_OUTPUT
-          # Signal whether Secret Manager needs updating
           [ "$FOUND_KEY" != "$PUBLIC_KEY" ] && echo "store=true" >> $GITHUB_OUTPUT || true
 
       - name: Store Android public key
