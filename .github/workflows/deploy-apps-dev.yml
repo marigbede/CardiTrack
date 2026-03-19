@@ -381,7 +381,7 @@ jobs:
           dotnet build src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
             -f net10.0-ios \
             -c Release \
-            -r iossimulator-x64 \
+            -r iossimulator-arm64 \
             -p:ArchiveOnBuild=false
       - name: Zip .app bundle
         run: |
