@@ -36,10 +36,14 @@ services:
 
   ollama:
     image: ollama/ollama:latest
-    expose:
-      - "11434"
+    ports:
+      - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_VULKAN=1
+    devices:
+      - /dev/dxg:/dev/dxg
     healthcheck:
       test: ["CMD-SHELL", "ollama list || exit 1"]
       interval: 10s
@@ -49,7 +53,7 @@ services:
 
   medgemma-init:
     image: ollama/ollama:latest
-    entrypoint: ["/bin/sh", "-c", "OLLAMA_HOST=http://ollama:11434 ollama pull medgemma:4b"]
+    entrypoint: ["/bin/sh", "-c", "OLLAMA_HOST=http://ollama:11434 ollama pull hf.co/unsloth/medgemma-1.5-4b-it-GGUF:Q4_K_M"]
     depends_on:
       ollama:
         condition: service_healthy
@@ -67,8 +71,8 @@ services:
       AI__GeneralProvider: "Gemini"
       AI__MedicalProvider: "MedGemma"
       AI__Providers__0__Name: "MedGemma"
-      AI__Providers__0__BaseUrl: "http://ollama:11434"
-      AI__Providers__0__Model: "medgemma:4b"
+      AI__Providers__0__BaseUrl: "http://host.docker.internal:11434"
+      AI__Providers__0__Model: "hf.co/unsloth/medgemma-1.5-4b-it-GGUF:Q4_K_M"
       AI__Providers__0__TimeoutSeconds: "120"
       AI__Providers__1__Name: "Gemini"
       AI__Providers__1__BaseUrl: "https://generativelanguage.googleapis.com"
@@ -81,8 +85,6 @@ services:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
-      medgemma-init:
-        condition: service_completed_successfully
     profiles: ["full"]
 
   worker:

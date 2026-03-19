@@ -231,6 +231,7 @@ resource "google_cloud_run_v2_service" "api" {
     google_secret_manager_secret_version.db_connection_string,
     google_secret_manager_secret_version.gemini_api_key,
     google_secret_manager_secret_version.medgemma_service_url,
+    google_secret_manager_secret_iam_member.medgemma_url_accessor,
   ]
 }
 

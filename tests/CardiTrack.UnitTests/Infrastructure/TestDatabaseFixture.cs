@@ -32,6 +32,8 @@ public class TestDatabaseFixture : IAsyncLifetime
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
         services.AddScoped<IUserCardiMemberRepository, UserCardiMemberRepository>();
         services.AddScoped<IDeviceRepository, DeviceRepository>();
+        services.AddScoped<IAlertRepository, AlertRepository>();
+        services.AddScoped<IPatternBaselineRepository, PatternBaselineRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         _serviceProvider = services.BuildServiceProvider();
