@@ -37,10 +37,25 @@ resource "google_secret_manager_secret_version" "appetize" {
   }
 }
 
+locals {
+  appetize_public_key_secrets = {
+    for k, v in local.appetize_secrets : k => v
+    if k != "appetize-api-token"
+  }
+}
+
 # CI/CD service account — read Appetize credentials at deploy time
 resource "google_secret_manager_secret_iam_member" "appetize_deploy_accessor" {
   for_each  = local.appetize_secrets
   secret_id = google_secret_manager_secret.appetize[each.key].id
   role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:carditrack-deploy@${var.project_id}.iam.gserviceaccount.com"
+}
+
+# CI/CD service account — write back auto-discovered public keys on first upload
+resource "google_secret_manager_secret_iam_member" "appetize_deploy_version_adder" {
+  for_each  = local.appetize_public_key_secrets
+  secret_id = google_secret_manager_secret.appetize[each.key].id
+  role      = "roles/secretmanager.secretVersionAdder"
   member    = "serviceAccount:carditrack-deploy@${var.project_id}.iam.gserviceaccount.com"
 }

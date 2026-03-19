@@ -466,53 +466,71 @@ jobs:
           workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
           service_account: ${{ needs.changes.outputs.gcp_service_account }}
       - uses: google-github-actions/setup-gcloud@v3
-      - name: Check Appetize secrets
-        id: check
+
+      # Gate only on the API token — public key is optional (bootstrapped on first run)
+      - name: Fetch Appetize token
+        id: token
         env:
           PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
         run: |
-          if gcloud secrets describe carditrack-appetize-api-token --project="$PROJECT" > /dev/null 2>&1 && \
-             gcloud secrets describe carditrack-appetize-android-public-key --project="$PROJECT" > /dev/null 2>&1; then
-            echo "available=true" >> $GITHUB_OUTPUT
-          else
+          if ! gcloud secrets describe carditrack-appetize-api-token --project="$PROJECT" > /dev/null 2>&1; then
+            echo "::warning::carditrack-appetize-api-token not found — skipping Android upload. Set the token in Secret Manager after running Deploy Infrastructure → Common."
+            echo "### Appetize upload skipped (Android)" >> $GITHUB_STEP_SUMMARY
+            echo "\`carditrack-appetize-api-token\` not found. Add the token to Secret Manager to enable Appetize uploads." >> $GITHUB_STEP_SUMMARY
             echo "available=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
-      - name: Warn — secrets unavailable
-        if: steps.check.outputs.available == 'false'
-        run: |
-          echo "::warning::Appetize secrets not found in Secret Manager — skipping Android upload. Run the Deploy Infrastructure → Common workflow to provision them."
-          echo "### Appetize upload skipped (Android)" >> $GITHUB_STEP_SUMMARY
-          echo "Secrets \`carditrack-appetize-api-token\` or \`carditrack-appetize-android-public-key\` not found." >> $GITHUB_STEP_SUMMARY
-          echo "Run **Deploy Infrastructure → Common** to provision them." >> $GITHUB_STEP_SUMMARY
-      - name: Fetch Appetize credentials
-        id: creds
-        if: steps.check.outputs.available == 'true'
+          TOKEN=$(gcloud secrets versions access latest --secret="carditrack-appetize-api-token" --project="$PROJECT")
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+          echo "available=true" >> $GITHUB_OUTPUT
+
+      - name: Fetch Android public key (if known)
+        id: pubkey
+        if: steps.token.outputs.available == 'true'
         env:
           PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
         run: |
-          TOKEN=$(gcloud secrets versions access latest --secret="carditrack-appetize-api-token" --project="$PROJECT")
-          KEY=$(gcloud secrets versions access latest --secret="carditrack-appetize-android-public-key" --project="$PROJECT")
-          echo "::add-mask::$TOKEN"
-          echo "::add-mask::$KEY"
-          echo "token=$TOKEN" >> $GITHUB_OUTPUT
-          echo "key=$KEY" >> $GITHUB_OUTPUT
+          KEY=$(gcloud secrets versions access latest --secret="carditrack-appetize-android-public-key" --project="$PROJECT" 2>/dev/null || true)
+          if [ -z "$KEY" ] || [ "$KEY" = "REPLACE_ME" ]; then
+            echo "key=" >> $GITHUB_OUTPUT
+          else
+            echo "::add-mask::$KEY"
+            echo "key=$KEY" >> $GITHUB_OUTPUT
+          fi
+
       - uses: actions/download-artifact@v8
-        if: steps.check.outputs.available == 'true'
+        if: steps.token.outputs.available == 'true'
         with:
           name: mobile-android
           path: artifacts/android
+
       - name: Find APK
         id: apk
-        if: steps.check.outputs.available == 'true'
+        if: steps.token.outputs.available == 'true'
         run: echo "path=$(find artifacts/android -name '*.apk' | head -1)" >> $GITHUB_OUTPUT
+
       - uses: appetizeio/github-action-appetize@v1.0.5
-        if: steps.check.outputs.available == 'true'
+        id: appetize
+        if: steps.token.outputs.available == 'true'
         with:
-          apiToken: ${{ steps.creds.outputs.token }}
+          apiToken: ${{ steps.token.outputs.token }}
           platform: android
           appFile: ${{ steps.apk.outputs.path }}
-          publicKey: ${{ steps.creds.outputs.key }}
+          publicKey: ${{ steps.pubkey.outputs.key }}
           note: ${{ needs.compute-version.outputs.version }}
+
+      # Store the returned public key when it was unknown (first upload)
+      - name: Store Android public key
+        if: steps.token.outputs.available == 'true' && steps.pubkey.outputs.key == ''
+        env:
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
+          KEY: ${{ steps.appetize.outputs.publicKey }}
+        run: |
+          echo -n "$KEY" | gcloud secrets versions add carditrack-appetize-android-public-key \
+            --project="$PROJECT" \
+            --data-file=-
+          echo "Android public key stored in Secret Manager for future runs."
 
   deploy-appetize-ios:
     name: Deploy → Appetize (iOS)
@@ -529,57 +547,75 @@ jobs:
           workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
           service_account: ${{ needs.changes.outputs.gcp_service_account }}
       - uses: google-github-actions/setup-gcloud@v3
-      - name: Check Appetize secrets
-        id: check
+
+      # Gate only on the API token — public key is optional (bootstrapped on first run)
+      - name: Fetch Appetize token
+        id: token
         env:
           PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
         run: |
-          if gcloud secrets describe carditrack-appetize-api-token --project="$PROJECT" > /dev/null 2>&1 && \
-             gcloud secrets describe carditrack-appetize-ios-public-key --project="$PROJECT" > /dev/null 2>&1; then
-            echo "available=true" >> $GITHUB_OUTPUT
-          else
+          if ! gcloud secrets describe carditrack-appetize-api-token --project="$PROJECT" > /dev/null 2>&1; then
+            echo "::warning::carditrack-appetize-api-token not found — skipping iOS upload. Set the token in Secret Manager after running Deploy Infrastructure → Common."
+            echo "### Appetize upload skipped (iOS)" >> $GITHUB_STEP_SUMMARY
+            echo "\`carditrack-appetize-api-token\` not found. Add the token to Secret Manager to enable Appetize uploads." >> $GITHUB_STEP_SUMMARY
             echo "available=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
-      - name: Warn — secrets unavailable
-        if: steps.check.outputs.available == 'false'
-        run: |
-          echo "::warning::Appetize secrets not found in Secret Manager — skipping iOS upload. Run the Deploy Infrastructure → Common workflow to provision them."
-          echo "### Appetize upload skipped (iOS)" >> $GITHUB_STEP_SUMMARY
-          echo "Secrets \`carditrack-appetize-api-token\` or \`carditrack-appetize-ios-public-key\` not found." >> $GITHUB_STEP_SUMMARY
-          echo "Run **Deploy Infrastructure → Common** to provision them." >> $GITHUB_STEP_SUMMARY
-      - name: Fetch Appetize credentials
-        id: creds
-        if: steps.check.outputs.available == 'true'
+          TOKEN=$(gcloud secrets versions access latest --secret="carditrack-appetize-api-token" --project="$PROJECT")
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+          echo "available=true" >> $GITHUB_OUTPUT
+
+      - name: Fetch iOS public key (if known)
+        id: pubkey
+        if: steps.token.outputs.available == 'true'
         env:
           PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
         run: |
-          TOKEN=$(gcloud secrets versions access latest --secret="carditrack-appetize-api-token" --project="$PROJECT")
-          KEY=$(gcloud secrets versions access latest --secret="carditrack-appetize-ios-public-key" --project="$PROJECT")
-          echo "::add-mask::$TOKEN"
-          echo "::add-mask::$KEY"
-          echo "token=$TOKEN" >> $GITHUB_OUTPUT
-          echo "key=$KEY" >> $GITHUB_OUTPUT
+          KEY=$(gcloud secrets versions access latest --secret="carditrack-appetize-ios-public-key" --project="$PROJECT" 2>/dev/null || true)
+          if [ -z "$KEY" ] || [ "$KEY" = "REPLACE_ME" ]; then
+            echo "key=" >> $GITHUB_OUTPUT
+          else
+            echo "::add-mask::$KEY"
+            echo "key=$KEY" >> $GITHUB_OUTPUT
+          fi
+
       - uses: actions/download-artifact@v8
-        if: steps.check.outputs.available == 'true'
+        if: steps.token.outputs.available == 'true'
         with:
           name: mobile-ios-build
           path: artifacts/ios
+
       - name: Zip .app for Appetize
         id: zip
-        if: steps.check.outputs.available == 'true'
+        if: steps.token.outputs.available == 'true'
         run: |
           APP=$(find artifacts/ios -name '*.app' -maxdepth 6 | head -1)
           zip -r artifacts/ios/app.zip "$APP"
           echo "path=artifacts/ios/app.zip" >> $GITHUB_OUTPUT
+
       - uses: appetizeio/github-action-appetize@v1.0.5
-        if: steps.check.outputs.available == 'true'
+        id: appetize
+        if: steps.token.outputs.available == 'true'
         with:
-          apiToken: ${{ steps.creds.outputs.token }}
+          apiToken: ${{ steps.token.outputs.token }}
           platform: ios
           appFile: ${{ steps.zip.outputs.path }}
           fileType: zip
-          publicKey: ${{ steps.creds.outputs.key }}
+          publicKey: ${{ steps.pubkey.outputs.key }}
           note: ${{ needs.compute-version.outputs.version }}
+
+      # Store the returned public key when it was unknown (first upload)
+      - name: Store iOS public key
+        if: steps.token.outputs.available == 'true' && steps.pubkey.outputs.key == ''
+        env:
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
+          KEY: ${{ steps.appetize.outputs.publicKey }}
+        run: |
+          echo -n "$KEY" | gcloud secrets versions add carditrack-appetize-ios-public-key \
+            --project="$PROJECT" \
+            --data-file=-
+          echo "iOS public key stored in Secret Manager for future runs."
 
   # ── Main only: Push images ───────────────────────────────────────────────────
   push-api-image:

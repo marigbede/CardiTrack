@@ -21,6 +21,21 @@ resource "google_artifact_registry_repository" "images" {
   vulnerability_scanning_config {
     enablement_config = "DISABLED"
   }
+
+  cleanup_policy_dry_run = false
+
+  cleanup_policies {
+    id     = "keep-last-50"
+    action = "KEEP"
+    most_recent_versions {
+      keep_count = 50
+    }
+  }
+
+  cleanup_policies {
+    id     = "delete-old"
+    action = "DELETE"
+  }
 }
 
 # CI/CD service account — push images

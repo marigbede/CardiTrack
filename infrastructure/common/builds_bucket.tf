@@ -17,6 +17,11 @@ resource "google_storage_bucket" "builds" {
   versioning {
     enabled = false
   }
+
+  lifecycle_rule {
+    action { type = "Delete" }
+    condition { age = 10 }
+  }
 }
 
 # CI/CD service account — upload build artifacts
