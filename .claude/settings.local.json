@@ -29,7 +29,7 @@
       "Bash(gh api:*)",
       "Bash(gh workflow:*)",
       "Bash(docker compose:*)",
-      "Bash(curl -s -w \"\\\\nTotal time: %{time_total}s\\\\n\" http://localhost:11434/api/generate -d \"{\"\"model\"\":\"\"hf.co/unsloth/medgemma-1.5-4b-it-GGUF:Q4_K_M\"\",\"\"prompt\"\":\"\"What are common symptoms of atrial fibrillation?\"\",\"\"stream\"\":false}\")"
+      "WebFetch(domain:docs.appetize.io)"
     ]
   }
 }

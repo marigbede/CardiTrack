@@ -515,22 +515,40 @@ jobs:
           APK: ${{ steps.apk.outputs.path }}
           NOTE: ${{ needs.compute-version.outputs.version }}
         run: |
-          ENDPOINT="https://api.appetize.io/v2/apps"
-          [ -n "$KEY" ] && ENDPOINT="$ENDPOINT/$KEY"
-          PAYLOAD=$(jq -n \
-            --arg platform "android" \
-            --arg buildFile "$(base64 -w 0 "$APK")" \
-            --arg note "$NOTE" \
-            '{platform: $platform, buildFile: $buildFile, note: $note}')
-          RESPONSE=$(curl -s -w "\n%{http_code}" \
-            -H "Content-Type: application/json" \
-            -u "$TOKEN:" \
-            -d "$PAYLOAD" \
-            "$ENDPOINT")
+          appetize_post() {
+            local url="$1" platform="$2" file="$3" note="$4" token="$5"
+            local payload
+            payload=$(jq -n \
+              --arg platform "$platform" \
+              --arg buildFile "$(base64 -w 0 "$file")" \
+              --arg note "$note" \
+              '{platform: $platform, buildFile: $buildFile, note: $note}')
+            curl -s -w "\n%{http_code}" \
+              -X POST \
+              -H "Content-Type: application/json" \
+              -H "X-API-KEY: $token" \
+              -d "$payload" \
+              "$url"
+          }
+
+          BASE="https://api.appetize.io/v2/apps"
+          URL="$BASE"
+          [ -n "$KEY" ] && URL="$BASE/$KEY"
+
+          RESPONSE=$(appetize_post "$URL" "android" "$APK" "$NOTE" "$TOKEN")
           HTTP_CODE=$(echo "$RESPONSE" | tail -1)
           BODY=$(echo "$RESPONSE" | head -n -1)
-          echo "HTTP $HTTP_CODE"
-          echo "$BODY"
+          echo "HTTP $HTTP_CODE: $BODY"
+
+          if [ "$HTTP_CODE" = "404" ] && [ -n "$KEY" ]; then
+            echo "::warning::Stored Android public key not found in Appetize — creating new app and updating Secret Manager"
+            RESPONSE=$(appetize_post "$BASE" "android" "$APK" "$NOTE" "$TOKEN")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | head -n -1)
+            echo "HTTP $HTTP_CODE (create): $BODY"
+            echo "stale=true" >> $GITHUB_OUTPUT
+          fi
+
           if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
             echo "::error::Appetize API error (HTTP $HTTP_CODE): $BODY"
             exit 1
@@ -539,7 +557,7 @@ jobs:
           echo "publicKey=$PUBLIC_KEY" >> $GITHUB_OUTPUT
 
       - name: Store Android public key
-        if: steps.token.outputs.available == 'true' && steps.pubkey.outputs.key == ''
+        if: steps.token.outputs.available == 'true' && (steps.pubkey.outputs.key == '' || steps.appetize.outputs.stale == 'true')
         env:
           PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
           KEY: ${{ steps.appetize.outputs.publicKey }}
@@ -547,7 +565,7 @@ jobs:
           echo -n "$KEY" | gcloud secrets versions add carditrack-appetize-android-public-key \
             --project="$PROJECT" \
             --data-file=-
-          echo "Android public key stored in Secret Manager for future runs."
+          echo "Android public key stored in Secret Manager."
 
   deploy-appetize-ios:
     name: Deploy → Appetize (iOS)
@@ -611,22 +629,40 @@ jobs:
           KEY: ${{ steps.pubkey.outputs.key }}
           NOTE: ${{ needs.compute-version.outputs.version }}
         run: |
-          ENDPOINT="https://api.appetize.io/v2/apps"
-          [ -n "$KEY" ] && ENDPOINT="$ENDPOINT/$KEY"
-          PAYLOAD=$(jq -n \
-            --arg platform "ios" \
-            --arg buildFile "$(base64 -w 0 artifacts/ios/ios-app.zip)" \
-            --arg note "$NOTE" \
-            '{platform: $platform, buildFile: $buildFile, note: $note}')
-          RESPONSE=$(curl -s -w "\n%{http_code}" \
-            -H "Content-Type: application/json" \
-            -u "$TOKEN:" \
-            -d "$PAYLOAD" \
-            "$ENDPOINT")
+          appetize_post() {
+            local url="$1" platform="$2" file="$3" note="$4" token="$5"
+            local payload
+            payload=$(jq -n \
+              --arg platform "$platform" \
+              --arg buildFile "$(base64 -w 0 "$file")" \
+              --arg note "$note" \
+              '{platform: $platform, buildFile: $buildFile, note: $note}')
+            curl -s -w "\n%{http_code}" \
+              -X POST \
+              -H "Content-Type: application/json" \
+              -H "X-API-KEY: $token" \
+              -d "$payload" \
+              "$url"
+          }
+
+          BASE="https://api.appetize.io/v2/apps"
+          URL="$BASE"
+          [ -n "$KEY" ] && URL="$BASE/$KEY"
+
+          RESPONSE=$(appetize_post "$URL" "ios" "artifacts/ios/ios-app.zip" "$NOTE" "$TOKEN")
           HTTP_CODE=$(echo "$RESPONSE" | tail -1)
           BODY=$(echo "$RESPONSE" | head -n -1)
-          echo "HTTP $HTTP_CODE"
-          echo "$BODY"
+          echo "HTTP $HTTP_CODE: $BODY"
+
+          if [ "$HTTP_CODE" = "404" ] && [ -n "$KEY" ]; then
+            echo "::warning::Stored iOS public key not found in Appetize — creating new app and updating Secret Manager"
+            RESPONSE=$(appetize_post "$BASE" "ios" "artifacts/ios/ios-app.zip" "$NOTE" "$TOKEN")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | head -n -1)
+            echo "HTTP $HTTP_CODE (create): $BODY"
+            echo "stale=true" >> $GITHUB_OUTPUT
+          fi
+
           if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
             echo "::error::Appetize API error (HTTP $HTTP_CODE): $BODY"
             exit 1
@@ -635,7 +671,7 @@ jobs:
           echo "publicKey=$PUBLIC_KEY" >> $GITHUB_OUTPUT
 
       - name: Store iOS public key
-        if: steps.token.outputs.available == 'true' && steps.pubkey.outputs.key == ''
+        if: steps.token.outputs.available == 'true' && (steps.pubkey.outputs.key == '' || steps.appetize.outputs.stale == 'true')
         env:
           PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
           KEY: ${{ steps.appetize.outputs.publicKey }}
@@ -643,7 +679,7 @@ jobs:
           echo -n "$KEY" | gcloud secrets versions add carditrack-appetize-ios-public-key \
             --project="$PROJECT" \
             --data-file=-
-          echo "iOS public key stored in Secret Manager for future runs."
+          echo "iOS public key stored in Secret Manager."
 
   # ── Main only: Push images ───────────────────────────────────────────────────
   push-api-image:
