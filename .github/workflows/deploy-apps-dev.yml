@@ -517,10 +517,15 @@ jobs:
         run: |
           ENDPOINT="https://api.appetize.io/v2/apps"
           [ -n "$KEY" ] && ENDPOINT="$ENDPOINT/$KEY"
-          RESPONSE=$(curl -s -w "\n%{http_code}" -u "$TOKEN:" \
-            -F "file=@$APK" \
-            -F "platform=android" \
-            -F "note=$NOTE" \
+          PAYLOAD=$(jq -n \
+            --arg platform "android" \
+            --arg buildFile "$(base64 -w 0 "$APK")" \
+            --arg note "$NOTE" \
+            '{platform: $platform, buildFile: $buildFile, note: $note}')
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Content-Type: application/json" \
+            -u "$TOKEN:" \
+            -d "$PAYLOAD" \
             "$ENDPOINT")
           HTTP_CODE=$(echo "$RESPONSE" | tail -1)
           BODY=$(echo "$RESPONSE" | head -n -1)
@@ -608,10 +613,15 @@ jobs:
         run: |
           ENDPOINT="https://api.appetize.io/v2/apps"
           [ -n "$KEY" ] && ENDPOINT="$ENDPOINT/$KEY"
-          RESPONSE=$(curl -s -w "\n%{http_code}" -u "$TOKEN:" \
-            -F "file=@artifacts/ios/ios-app.zip" \
-            -F "platform=ios" \
-            -F "note=$NOTE" \
+          PAYLOAD=$(jq -n \
+            --arg platform "ios" \
+            --arg buildFile "$(base64 -w 0 artifacts/ios/ios-app.zip)" \
+            --arg note "$NOTE" \
+            '{platform: $platform, buildFile: $buildFile, note: $note}')
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Content-Type: application/json" \
+            -u "$TOKEN:" \
+            -d "$PAYLOAD" \
             "$ENDPOINT")
           HTTP_CODE=$(echo "$RESPONSE" | tail -1)
           BODY=$(echo "$RESPONSE" | head -n -1)
