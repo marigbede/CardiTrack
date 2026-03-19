@@ -149,7 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet restore src/Presentation/CardiTrack.API/CardiTrack.API.csproj
@@ -161,7 +161,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet restore tests/CardiTrack.UnitTests/CardiTrack.UnitTests.csproj
@@ -185,7 +185,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet restore tests/CardiTrack.IntegrationTests/CardiTrack.IntegrationTests.csproj
@@ -208,7 +208,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet tool install --global dotnet-ef
@@ -233,7 +233,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - name: Dependency vulnerability audit
@@ -254,7 +254,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet restore src/Presentation/CardiTrack.Web/CardiTrack.Web.csproj
@@ -270,7 +270,7 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - name: Dependency vulnerability audit
@@ -291,7 +291,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet restore src/Worker/CardiTrack.Worker/CardiTrack.Worker.csproj
@@ -303,7 +303,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet restore tests/CardiTrack.UnitTests/CardiTrack.UnitTests.csproj
@@ -331,7 +331,7 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - name: Dependency vulnerability audit
@@ -352,19 +352,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet workload install maui-android
-      - run: dotnet restore src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj -p:TargetFrameworks=net10.0-android
-      - run: dotnet restore src/Core/CardiTrack.Application/CardiTrack.Application.csproj
-      - run: dotnet restore src/Core/CardiTrack.Domain/CardiTrack.Domain.csproj
       - run: |
           dotnet publish src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
             -f net10.0-android \
-            -c Release \
-            --no-restore \
-            -p:TargetFrameworks=net10.0-android
+            -c Release
       - uses: actions/upload-artifact@v7
         with:
           name: mobile-android
@@ -378,7 +373,7 @@ jobs:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet workload install maui-ios
@@ -405,7 +400,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet workload install maui-windows
@@ -436,7 +431,7 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - name: Dependency vulnerability audit
