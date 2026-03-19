@@ -450,6 +450,137 @@ jobs:
             exit 1
           fi
 
+  # ── Main only: Appetize previews ────────────────────────────────────────────
+  deploy-appetize-android:
+    name: Deploy → Appetize (Android)
+    needs:
+      - changes
+      - compute-version
+      - build-mobile-android
+      - security-mobile
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.changes.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - name: Check Appetize secrets
+        id: check
+        env:
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
+        run: |
+          if gcloud secrets describe carditrack-appetize-api-token --project="$PROJECT" > /dev/null 2>&1 && \
+             gcloud secrets describe carditrack-appetize-android-public-key --project="$PROJECT" > /dev/null 2>&1; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Warn — secrets unavailable
+        if: steps.check.outputs.available == 'false'
+        run: |
+          echo "::warning::Appetize secrets not found in Secret Manager — skipping Android upload. Run the Deploy Infrastructure → Common workflow to provision them."
+          echo "### Appetize upload skipped (Android)" >> $GITHUB_STEP_SUMMARY
+          echo "Secrets \`carditrack-appetize-api-token\` or \`carditrack-appetize-android-public-key\` not found." >> $GITHUB_STEP_SUMMARY
+          echo "Run **Deploy Infrastructure → Common** to provision them." >> $GITHUB_STEP_SUMMARY
+      - name: Fetch Appetize credentials
+        id: creds
+        if: steps.check.outputs.available == 'true'
+        env:
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
+        run: |
+          TOKEN=$(gcloud secrets versions access latest --secret="carditrack-appetize-api-token" --project="$PROJECT")
+          KEY=$(gcloud secrets versions access latest --secret="carditrack-appetize-android-public-key" --project="$PROJECT")
+          echo "::add-mask::$TOKEN"
+          echo "::add-mask::$KEY"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+          echo "key=$KEY" >> $GITHUB_OUTPUT
+      - uses: actions/download-artifact@v8
+        if: steps.check.outputs.available == 'true'
+        with:
+          name: mobile-android
+          path: artifacts/android
+      - name: Find APK
+        id: apk
+        if: steps.check.outputs.available == 'true'
+        run: echo "path=$(find artifacts/android -name '*.apk' | head -1)" >> $GITHUB_OUTPUT
+      - uses: appetizeio/github-action-appetize@v1.0.5
+        if: steps.check.outputs.available == 'true'
+        with:
+          apiToken: ${{ steps.creds.outputs.token }}
+          platform: android
+          appFile: ${{ steps.apk.outputs.path }}
+          publicKey: ${{ steps.creds.outputs.key }}
+          note: ${{ needs.compute-version.outputs.version }}
+
+  deploy-appetize-ios:
+    name: Deploy → Appetize (iOS)
+    needs:
+      - changes
+      - compute-version
+      - build-mobile-ios
+      - security-mobile
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ needs.changes.outputs.gcp_wif_provider }}
+          service_account: ${{ needs.changes.outputs.gcp_service_account }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - name: Check Appetize secrets
+        id: check
+        env:
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
+        run: |
+          if gcloud secrets describe carditrack-appetize-api-token --project="$PROJECT" > /dev/null 2>&1 && \
+             gcloud secrets describe carditrack-appetize-ios-public-key --project="$PROJECT" > /dev/null 2>&1; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Warn — secrets unavailable
+        if: steps.check.outputs.available == 'false'
+        run: |
+          echo "::warning::Appetize secrets not found in Secret Manager — skipping iOS upload. Run the Deploy Infrastructure → Common workflow to provision them."
+          echo "### Appetize upload skipped (iOS)" >> $GITHUB_STEP_SUMMARY
+          echo "Secrets \`carditrack-appetize-api-token\` or \`carditrack-appetize-ios-public-key\` not found." >> $GITHUB_STEP_SUMMARY
+          echo "Run **Deploy Infrastructure → Common** to provision them." >> $GITHUB_STEP_SUMMARY
+      - name: Fetch Appetize credentials
+        id: creds
+        if: steps.check.outputs.available == 'true'
+        env:
+          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
+        run: |
+          TOKEN=$(gcloud secrets versions access latest --secret="carditrack-appetize-api-token" --project="$PROJECT")
+          KEY=$(gcloud secrets versions access latest --secret="carditrack-appetize-ios-public-key" --project="$PROJECT")
+          echo "::add-mask::$TOKEN"
+          echo "::add-mask::$KEY"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+          echo "key=$KEY" >> $GITHUB_OUTPUT
+      - uses: actions/download-artifact@v8
+        if: steps.check.outputs.available == 'true'
+        with:
+          name: mobile-ios-build
+          path: artifacts/ios
+      - name: Zip .app for Appetize
+        id: zip
+        if: steps.check.outputs.available == 'true'
+        run: |
+          APP=$(find artifacts/ios -name '*.app' -maxdepth 6 | head -1)
+          zip -r artifacts/ios/app.zip "$APP"
+          echo "path=artifacts/ios/app.zip" >> $GITHUB_OUTPUT
+      - uses: appetizeio/github-action-appetize@v1.0.5
+        if: steps.check.outputs.available == 'true'
+        with:
+          apiToken: ${{ steps.creds.outputs.token }}
+          platform: ios
+          appFile: ${{ steps.zip.outputs.path }}
+          fileType: zip
+          publicKey: ${{ steps.creds.outputs.key }}
+          note: ${{ needs.compute-version.outputs.version }}
+
   # ── Main only: Push images ───────────────────────────────────────────────────
   push-api-image:
     name: Push API Image
@@ -815,6 +946,8 @@ jobs:
       - deploy-worker-dev
       - deploy-medgemma-dev
       - upload-mobile-artifacts
+      - deploy-appetize-android
+      - deploy-appetize-ios
     permissions:
       contents: write
     if: |

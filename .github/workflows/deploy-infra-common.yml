@@ -1,35 +1,25 @@
-name: Deploy Infrastructure → Dev
+name: Deploy Infrastructure → Common
 
 on:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/deploy-infra-dev.yml'
-      - '.github/workflows/deploy-infra-prod.yml'
-      - 'infrastructure/*.tf'
-      - 'infrastructure/deployments/**'
-      - 'infrastructure/environments/dev.tfvars'
+      - '.github/workflows/deploy-infra-common.yml'
+      - 'infrastructure/common/**'
+      - 'infrastructure/environments/common.tfvars'
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'infrastructure/*.tf'
-      - 'infrastructure/deployments/**'
-      - 'infrastructure/environments/dev.tfvars'
+      - 'infrastructure/common/**'
+      - 'infrastructure/environments/common.tfvars'
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Target environment'
-        required: true
-        type: choice
-        options: [dev]
-        default: dev
 
 permissions:
   id-token: write
   contents: read
 
 concurrency:
-  group: terraform-${{ github.ref }}
+  group: terraform-common-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -47,13 +37,13 @@ jobs:
         with:
           terraform_version: ${{ needs.env.outputs.tf_version }}
       - name: terraform fmt
-        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        working-directory: ${{ needs.env.outputs.tf_working_dir_common }}
         run: terraform fmt -check -recursive
       - name: terraform init (no backend)
-        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        working-directory: ${{ needs.env.outputs.tf_working_dir_common }}
         run: terraform init -backend=false
       - name: terraform validate
-        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        working-directory: ${{ needs.env.outputs.tf_working_dir_common }}
         run: terraform validate
 
   bootstrap-state-bucket:
@@ -71,7 +61,7 @@ jobs:
       - name: Ensure state bucket exists
         id: ensure
         env:
-          BUCKET: ${{ needs.env.outputs.tf_state_bucket_dev }}
+          BUCKET: ${{ needs.env.outputs.tf_state_bucket_common }}
           PROJECT: ${{ needs.env.outputs.gcp_project_id }}
           REGION: ${{ needs.env.outputs.gcp_region }}
         run: |
@@ -88,8 +78,8 @@ jobs:
           fi
           echo "bucket=${BUCKET}" >> $GITHUB_OUTPUT
 
-  plan-dev:
-    name: Plan (Dev) — ${{ matrix.tf_version }}
+  plan:
+    name: Plan — ${{ matrix.tf_version }}
     needs: [env, validate, bootstrap-state-bucket]
     runs-on: ubuntu-latest
     strategy:
@@ -112,51 +102,47 @@ jobs:
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ matrix.tf_version }}
-      # Pinned version: full init with remote state (produces the plan artifact used by apply)
       - name: terraform init (pinned)
         if: matrix.tf_version == needs.env.outputs.tf_version
-        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        working-directory: ${{ needs.env.outputs.tf_working_dir_common }}
         run: |
           terraform init \
-            -backend-config="bucket=${{ needs.env.outputs.tf_state_bucket_dev }}" \
-            -backend-config="prefix=carditrack/dev"
-      # Latest version: no-backend init — validates compatibility without acquiring a state lock
+            -backend-config="bucket=${{ needs.env.outputs.tf_state_bucket_common }}" \
+            -backend-config="prefix=carditrack/common"
       - name: terraform init (latest, no backend)
         if: matrix.tf_version != needs.env.outputs.tf_version
-        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        working-directory: ${{ needs.env.outputs.tf_working_dir_common }}
         run: terraform init -backend=false
-      # Pinned version: save plan file for apply
       - name: terraform plan (pinned)
         if: matrix.tf_version == needs.env.outputs.tf_version
         id: plan-pinned
-        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        working-directory: ${{ needs.env.outputs.tf_working_dir_common }}
         run: |
           set +e
           terraform plan \
-            -var-file=environments/dev.tfvars \
-            -out=dev.tfplan \
+            -var-file=../environments/common.tfvars \
+            -out=common.tfplan \
             -detailed-exitcode \
             -no-color 2>&1 | tee plan.txt
           TF_EXIT=${PIPESTATUS[0]}
           echo "exitcode=${TF_EXIT}" >> $GITHUB_OUTPUT
           [ $TF_EXIT -eq 1 ] && exit 1 || exit 0
-      # Latest version: compatibility check only — validate against latest provider schemas, no state needed
       - name: terraform validate (latest)
         if: matrix.tf_version != needs.env.outputs.tf_version
-        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        working-directory: ${{ needs.env.outputs.tf_working_dir_common }}
         run: terraform validate -no-color 2>&1 | tee plan.txt
       - name: Save plan artifact
         if: matrix.tf_version == needs.env.outputs.tf_version
         uses: actions/upload-artifact@v7
         with:
-          name: dev-tfplan
-          path: ${{ needs.env.outputs.tf_working_dir }}/dev.tfplan
+          name: common-tfplan
+          path: ${{ needs.env.outputs.tf_working_dir_common }}/common.tfplan
           retention-days: 1
       - name: Plan summary
         run: |
-          echo "### Terraform Plan — Dev (${{ matrix.tf_version }})" >> $GITHUB_STEP_SUMMARY
+          echo "### Terraform Plan — Common (${{ matrix.tf_version }})" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cat ${{ needs.env.outputs.tf_working_dir }}/plan.txt >> $GITHUB_STEP_SUMMARY
+          cat ${{ needs.env.outputs.tf_working_dir_common }}/plan.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
       - name: Post plan to PR
         if: github.event_name == 'pull_request' && matrix.tf_version == needs.env.outputs.tf_version
@@ -164,9 +150,9 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const plan = fs.readFileSync('${{ needs.env.outputs.tf_working_dir }}/plan.txt', 'utf8');
+            const plan = fs.readFileSync('${{ needs.env.outputs.tf_working_dir_common }}/plan.txt', 'utf8');
             const truncated = plan.length > 60000 ? plan.slice(0, 60000) + '\n\n... (truncated)' : plan;
-            const body = `### Terraform Plan — Dev (${{ needs.env.outputs.tf_version }})\n\`\`\`hcl\n${truncated}\n\`\`\``;
+            const body = `### Terraform Plan — Common (${{ needs.env.outputs.tf_version }})\n\`\`\`hcl\n${truncated}\n\`\`\``;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -174,9 +160,9 @@ jobs:
               body
             });
 
-  apply-dev:
-    name: Apply (Dev)
-    needs: [env, plan-dev]
+  apply:
+    name: Apply (Common)
+    needs: [env, plan]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
@@ -189,20 +175,20 @@ jobs:
         with:
           terraform_version: ${{ needs.env.outputs.tf_version }}
       - name: terraform init
-        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        working-directory: ${{ needs.env.outputs.tf_working_dir_common }}
         run: |
           terraform init \
-            -backend-config="bucket=${{ needs.env.outputs.tf_state_bucket_dev }}" \
-            -backend-config="prefix=carditrack/dev"
+            -backend-config="bucket=${{ needs.env.outputs.tf_state_bucket_common }}" \
+            -backend-config="prefix=carditrack/common"
       - uses: actions/download-artifact@v8
         with:
-          name: dev-tfplan
-          path: ${{ needs.env.outputs.tf_working_dir }}
+          name: common-tfplan
+          path: ${{ needs.env.outputs.tf_working_dir_common }}
       - name: terraform apply
-        working-directory: ${{ needs.env.outputs.tf_working_dir }}
-        run: terraform apply dev.tfplan
+        working-directory: ${{ needs.env.outputs.tf_working_dir_common }}
+        run: terraform apply common.tfplan
       - name: Output summary
-        working-directory: ${{ needs.env.outputs.tf_working_dir }}
+        working-directory: ${{ needs.env.outputs.tf_working_dir_common }}
         run: |
-          echo "### Terraform Applied — Dev" >> $GITHUB_STEP_SUMMARY
+          echo "### Terraform Applied — Common" >> $GITHUB_STEP_SUMMARY
           terraform output -no-color >> $GITHUB_STEP_SUMMARY

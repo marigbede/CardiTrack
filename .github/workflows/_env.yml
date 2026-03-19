@@ -46,6 +46,12 @@ on:
       tf_state_bucket_prod:
         description: 'GCS bucket name for Terraform prod state'
         value: ${{ jobs.config.outputs.tf_state_bucket_prod }}
+      tf_state_bucket_common:
+        description: 'GCS bucket name for Terraform common state'
+        value: ${{ jobs.config.outputs.tf_state_bucket_common }}
+      tf_working_dir_common:
+        description: 'Terraform working directory for common infrastructure'
+        value: ${{ jobs.config.outputs.tf_working_dir_common }}
       gcs_builds_bucket:
         description: 'GCS bucket for mobile build artifacts'
         value: ${{ jobs.config.outputs.gcs_builds_bucket }}
@@ -75,9 +81,11 @@ jobs:
       gcp_wif_provider:    ${{ steps.out.outputs.gcp_wif_provider }}
       gcp_service_account: ${{ steps.out.outputs.gcp_service_account }}
       registry:            ${{ steps.out.outputs.registry }}
-      tf_state_bucket_dev:  ${{ steps.out.outputs.tf_state_bucket_dev }}
-      tf_state_bucket_prod: ${{ steps.out.outputs.tf_state_bucket_prod }}
-      gcs_builds_bucket:    ${{ steps.out.outputs.gcs_builds_bucket }}
+      tf_state_bucket_dev:    ${{ steps.out.outputs.tf_state_bucket_dev }}
+      tf_state_bucket_prod:   ${{ steps.out.outputs.tf_state_bucket_prod }}
+      tf_state_bucket_common: ${{ steps.out.outputs.tf_state_bucket_common }}
+      tf_working_dir_common:  ${{ steps.out.outputs.tf_working_dir_common }}
+      gcs_builds_bucket:      ${{ steps.out.outputs.gcs_builds_bucket }}
       api_url_dev:          ${{ steps.out.outputs.api_url_dev }}
       web_url_dev:          ${{ steps.out.outputs.web_url_dev }}
       api_url_prod:         ${{ steps.out.outputs.api_url_prod }}
@@ -106,9 +114,11 @@ jobs:
           echo "registry=${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/carditrack" >> $GITHUB_OUTPUT
 
           # ── GCS buckets ─────────────────────────────────────────────────────────
-          echo "tf_state_bucket_dev=carditrack-tf-state-dev"   >> $GITHUB_OUTPUT
-          echo "tf_state_bucket_prod=carditrack-tf-state-prod" >> $GITHUB_OUTPUT
-          echo "gcs_builds_bucket=carditrack-builds"           >> $GITHUB_OUTPUT
+          echo "tf_state_bucket_dev=carditrack-tf-state-dev"     >> $GITHUB_OUTPUT
+          echo "tf_state_bucket_prod=carditrack-tf-state-prod"   >> $GITHUB_OUTPUT
+          echo "tf_state_bucket_common=carditrack-tf-state-common" >> $GITHUB_OUTPUT
+          echo "tf_working_dir_common=infrastructure/common"    >> $GITHUB_OUTPUT
+          echo "gcs_builds_bucket=carditrack-builds"            >> $GITHUB_OUTPUT
 
           # ── Service URLs ─────────────────────────────────────────────────────────
           echo "api_url_dev=https://api.dev.carditrack.com"  >> $GITHUB_OUTPUT
