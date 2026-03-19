@@ -469,14 +469,14 @@ jobs:
         env:
           PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
         run: |
-          if ! gcloud secrets describe carditrack-appetize-api-token --project="$PROJECT" > /dev/null 2>&1; then
-            echo "::warning::carditrack-appetize-api-token not found — skipping Android upload. Set the token in Secret Manager after running Deploy Infrastructure → Common."
+          if ! gcloud secrets describe carditrack-common-appetize-api-token --project="$PROJECT" > /dev/null 2>&1; then
+            echo "::warning::carditrack-common-appetize-api-token not found — skipping Android upload. Set the token in Secret Manager after running Deploy Infrastructure → Common."
             echo "### Appetize upload skipped (Android)" >> $GITHUB_STEP_SUMMARY
-            echo "\`carditrack-appetize-api-token\` not found. Add the token to Secret Manager to enable Appetize uploads." >> $GITHUB_STEP_SUMMARY
+            echo "\`carditrack-common-appetize-api-token\` not found. Add the token to Secret Manager to enable Appetize uploads." >> $GITHUB_STEP_SUMMARY
             echo "available=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-          TOKEN=$(gcloud secrets versions access latest --secret="carditrack-appetize-api-token" --project="$PROJECT")
+          TOKEN=$(gcloud secrets versions access latest --secret="carditrack-common-appetize-api-token" --project="$PROJECT")
           echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
           echo "available=true" >> $GITHUB_OUTPUT
@@ -560,14 +560,14 @@ jobs:
         env:
           PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
         run: |
-          if ! gcloud secrets describe carditrack-appetize-api-token --project="$PROJECT" > /dev/null 2>&1; then
-            echo "::warning::carditrack-appetize-api-token not found — skipping iOS upload. Set the token in Secret Manager after running Deploy Infrastructure → Common."
+          if ! gcloud secrets describe carditrack-common-appetize-api-token --project="$PROJECT" > /dev/null 2>&1; then
+            echo "::warning::carditrack-common-appetize-api-token not found — skipping iOS upload. Set the token in Secret Manager after running Deploy Infrastructure → Common."
             echo "### Appetize upload skipped (iOS)" >> $GITHUB_STEP_SUMMARY
-            echo "\`carditrack-appetize-api-token\` not found. Add the token to Secret Manager to enable Appetize uploads." >> $GITHUB_STEP_SUMMARY
+            echo "\`carditrack-common-appetize-api-token\` not found. Add the token to Secret Manager to enable Appetize uploads." >> $GITHUB_STEP_SUMMARY
             echo "available=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-          TOKEN=$(gcloud secrets versions access latest --secret="carditrack-appetize-api-token" --project="$PROJECT")
+          TOKEN=$(gcloud secrets versions access latest --secret="carditrack-common-appetize-api-token" --project="$PROJECT")
           echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
           echo "available=true" >> $GITHUB_OUTPUT

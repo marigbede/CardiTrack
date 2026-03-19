@@ -111,14 +111,14 @@ jobs:
           echo "gcp_service_account=carditrack-deploy@${GCP_PROJECT_ID}.iam.gserviceaccount.com" >> $GITHUB_OUTPUT
 
           # ── Artifact Registry ───────────────────────────────────────────────────
-          echo "registry=${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/carditrack" >> $GITHUB_OUTPUT
+          echo "registry=${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/carditrack-common" >> $GITHUB_OUTPUT
 
           # ── GCS buckets ─────────────────────────────────────────────────────────
           echo "tf_state_bucket_dev=carditrack-tf-state-dev"     >> $GITHUB_OUTPUT
           echo "tf_state_bucket_prod=carditrack-tf-state-prod"   >> $GITHUB_OUTPUT
           echo "tf_state_bucket_common=carditrack-tf-state-common" >> $GITHUB_OUTPUT
           echo "tf_working_dir_common=infrastructure/common"    >> $GITHUB_OUTPUT
-          echo "gcs_builds_bucket=carditrack-builds"            >> $GITHUB_OUTPUT
+          echo "gcs_builds_bucket=carditrack-common-builds"      >> $GITHUB_OUTPUT
 
           # ── Service URLs ─────────────────────────────────────────────────────────
           echo "api_url_dev=https://api.dev.carditrack.com"  >> $GITHUB_OUTPUT

@@ -4,7 +4,7 @@
 
 locals {
   labels = {
-    environment = "shared"
+    environment = "common"
     project     = var.project_name
     managed_by  = "terraform"
     cost_center = "engineering"
