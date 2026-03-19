@@ -386,8 +386,10 @@ jobs:
       - name: Zip .app bundle
         run: |
           APP=$(find . -type d -name '*.app' | head -1)
-          cd "$(dirname "$APP")"
-          zip -r "$GITHUB_WORKSPACE/ios-app.zip" "$(basename "$APP")"
+          mkdir -p Payload
+          cp -r "$APP" Payload/
+          zip -r "$GITHUB_WORKSPACE/ios-app.zip" Payload/
+          rm -rf Payload
       - uses: actions/upload-artifact@v7
         with:
           name: mobile-ios-build
