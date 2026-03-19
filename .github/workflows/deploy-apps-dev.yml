@@ -511,53 +511,63 @@ jobs:
         if: steps.token.outputs.available == 'true'
         env:
           TOKEN: ${{ steps.token.outputs.token }}
-          KEY: ${{ steps.pubkey.outputs.key }}
+          STORED_KEY: ${{ steps.pubkey.outputs.key }}
           APK: ${{ steps.apk.outputs.path }}
           NOTE: ${{ needs.compute-version.outputs.version }}
         run: |
-          appetize_post() {
-            local url="$1" platform="$2" file="$3" note="$4" token="$5"
-            local payload
-            payload=$(jq -n \
-              --arg platform "$platform" \
-              --arg buildFile "$(base64 -w 0 "$file")" \
-              --arg note "$note" \
-              '{platform: $platform, buildFile: $buildFile, note: $note}')
-            curl -s -w "\n%{http_code}" \
-              -X POST \
-              -H "Content-Type: application/json" \
-              -H "X-API-KEY: $token" \
-              -d "$payload" \
-              "$url"
-          }
-
           BASE="https://api.appetize.io/v2/apps"
-          URL="$BASE"
-          [ -n "$KEY" ] && URL="$BASE/$KEY"
 
-          RESPONSE=$(appetize_post "$URL" "android" "$APK" "$NOTE" "$TOKEN")
-          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-          BODY=$(echo "$RESPONSE" | head -n -1)
-          echo "HTTP $HTTP_CODE: $BODY"
-
-          if [ "$HTTP_CODE" = "404" ] && [ -n "$KEY" ]; then
-            echo "::warning::Stored Android public key not found in Appetize — creating new app and updating Secret Manager"
-            RESPONSE=$(appetize_post "$BASE" "android" "$APK" "$NOTE" "$TOKEN")
-            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-            BODY=$(echo "$RESPONSE" | head -n -1)
-            echo "HTTP $HTTP_CODE (create): $BODY"
-            echo "stale=true" >> $GITHUB_OUTPUT
-          fi
-
-          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-            echo "::error::Appetize API error (HTTP $HTTP_CODE): $BODY"
+          # 1. List apps — verify token and find existing app
+          LIST_RESP=$(curl -s -w "\n%{http_code}" -H "X-API-KEY: $TOKEN" "$BASE")
+          LIST_CODE=$(echo "$LIST_RESP" | tail -1)
+          LIST_BODY=$(echo "$LIST_RESP" | head -n -1)
+          echo "List HTTP $LIST_CODE"
+          if [ "$LIST_CODE" != "200" ]; then
+            echo "::error::Appetize list failed (HTTP $LIST_CODE): $LIST_BODY"
             exit 1
           fi
+
+          # 2. Determine endpoint: update if key exists in list, else create
+          FOUND_KEY=""
+          if [ -n "$STORED_KEY" ]; then
+            FOUND_KEY=$(echo "$LIST_BODY" | jq -r --arg k "$STORED_KEY" '.data[] | select(.publicKey == $k) | .publicKey' 2>/dev/null || true)
+          fi
+
+          if [ -n "$FOUND_KEY" ]; then
+            echo "App found — updating $FOUND_KEY"
+            URL="$BASE/$FOUND_KEY"
+          else
+            echo "App not found — creating new"
+            URL="$BASE"
+          fi
+
+          # 3. Upload
+          PAYLOAD=$(jq -n \
+            --arg platform "android" \
+            --arg buildFile "$(base64 -w 0 "$APK")" \
+            --arg note "$NOTE" \
+            '{platform: $platform, buildFile: $buildFile, note: $note}')
+          RESP=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-API-KEY: $TOKEN" \
+            -d "$PAYLOAD" \
+            "$URL")
+          CODE=$(echo "$RESP" | tail -1)
+          BODY=$(echo "$RESP" | head -n -1)
+          echo "Upload HTTP $CODE: $BODY"
+          if [ "$CODE" -lt 200 ] || [ "$CODE" -ge 300 ]; then
+            echo "::error::Appetize upload failed (HTTP $CODE): $BODY"
+            exit 1
+          fi
+
           PUBLIC_KEY=$(echo "$BODY" | jq -r '.publicKey // empty')
           echo "publicKey=$PUBLIC_KEY" >> $GITHUB_OUTPUT
+          # Signal whether Secret Manager needs updating
+          [ "$FOUND_KEY" != "$PUBLIC_KEY" ] && echo "store=true" >> $GITHUB_OUTPUT || true
 
       - name: Store Android public key
-        if: steps.token.outputs.available == 'true' && (steps.pubkey.outputs.key == '' || steps.appetize.outputs.stale == 'true')
+        if: steps.token.outputs.available == 'true' && steps.appetize.outputs.store == 'true'
         env:
           PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
           KEY: ${{ steps.appetize.outputs.publicKey }}
@@ -626,52 +636,61 @@ jobs:
         if: steps.token.outputs.available == 'true'
         env:
           TOKEN: ${{ steps.token.outputs.token }}
-          KEY: ${{ steps.pubkey.outputs.key }}
+          STORED_KEY: ${{ steps.pubkey.outputs.key }}
           NOTE: ${{ needs.compute-version.outputs.version }}
         run: |
-          appetize_post() {
-            local url="$1" platform="$2" file="$3" note="$4" token="$5"
-            local payload
-            payload=$(jq -n \
-              --arg platform "$platform" \
-              --arg buildFile "$(base64 -w 0 "$file")" \
-              --arg note "$note" \
-              '{platform: $platform, buildFile: $buildFile, note: $note}')
-            curl -s -w "\n%{http_code}" \
-              -X POST \
-              -H "Content-Type: application/json" \
-              -H "X-API-KEY: $token" \
-              -d "$payload" \
-              "$url"
-          }
-
           BASE="https://api.appetize.io/v2/apps"
-          URL="$BASE"
-          [ -n "$KEY" ] && URL="$BASE/$KEY"
 
-          RESPONSE=$(appetize_post "$URL" "ios" "artifacts/ios/ios-app.zip" "$NOTE" "$TOKEN")
-          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-          BODY=$(echo "$RESPONSE" | head -n -1)
-          echo "HTTP $HTTP_CODE: $BODY"
-
-          if [ "$HTTP_CODE" = "404" ] && [ -n "$KEY" ]; then
-            echo "::warning::Stored iOS public key not found in Appetize — creating new app and updating Secret Manager"
-            RESPONSE=$(appetize_post "$BASE" "ios" "artifacts/ios/ios-app.zip" "$NOTE" "$TOKEN")
-            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-            BODY=$(echo "$RESPONSE" | head -n -1)
-            echo "HTTP $HTTP_CODE (create): $BODY"
-            echo "stale=true" >> $GITHUB_OUTPUT
-          fi
-
-          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-            echo "::error::Appetize API error (HTTP $HTTP_CODE): $BODY"
+          # 1. List apps — verify token and find existing app
+          LIST_RESP=$(curl -s -w "\n%{http_code}" -H "X-API-KEY: $TOKEN" "$BASE")
+          LIST_CODE=$(echo "$LIST_RESP" | tail -1)
+          LIST_BODY=$(echo "$LIST_RESP" | head -n -1)
+          echo "List HTTP $LIST_CODE"
+          if [ "$LIST_CODE" != "200" ]; then
+            echo "::error::Appetize list failed (HTTP $LIST_CODE): $LIST_BODY"
             exit 1
           fi
+
+          # 2. Determine endpoint: update if key exists in list, else create
+          FOUND_KEY=""
+          if [ -n "$STORED_KEY" ]; then
+            FOUND_KEY=$(echo "$LIST_BODY" | jq -r --arg k "$STORED_KEY" '.data[] | select(.publicKey == $k) | .publicKey' 2>/dev/null || true)
+          fi
+
+          if [ -n "$FOUND_KEY" ]; then
+            echo "App found — updating $FOUND_KEY"
+            URL="$BASE/$FOUND_KEY"
+          else
+            echo "App not found — creating new"
+            URL="$BASE"
+          fi
+
+          # 3. Upload
+          PAYLOAD=$(jq -n \
+            --arg platform "ios" \
+            --arg buildFile "$(base64 -w 0 "artifacts/ios/ios-app.zip")" \
+            --arg note "$NOTE" \
+            '{platform: $platform, buildFile: $buildFile, note: $note}')
+          RESP=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-API-KEY: $TOKEN" \
+            -d "$PAYLOAD" \
+            "$URL")
+          CODE=$(echo "$RESP" | tail -1)
+          BODY=$(echo "$RESP" | head -n -1)
+          echo "Upload HTTP $CODE: $BODY"
+          if [ "$CODE" -lt 200 ] || [ "$CODE" -ge 300 ]; then
+            echo "::error::Appetize upload failed (HTTP $CODE): $BODY"
+            exit 1
+          fi
+
           PUBLIC_KEY=$(echo "$BODY" | jq -r '.publicKey // empty')
           echo "publicKey=$PUBLIC_KEY" >> $GITHUB_OUTPUT
+          [ "$FOUND_KEY" != "$PUBLIC_KEY" ] && echo "store=true" >> $GITHUB_OUTPUT || true
 
       - name: Store iOS public key
-        if: steps.token.outputs.available == 'true' && (steps.pubkey.outputs.key == '' || steps.appetize.outputs.stale == 'true')
+        if: steps.token.outputs.available == 'true' && steps.appetize.outputs.store == 'true'
         env:
           PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
           KEY: ${{ steps.appetize.outputs.publicKey }}
