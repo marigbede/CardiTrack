@@ -517,13 +517,20 @@ jobs:
         run: |
           ENDPOINT="https://api.appetize.io/v2/apps"
           [ -n "$KEY" ] && ENDPOINT="$ENDPOINT/$KEY"
-          RESPONSE=$(curl -s -f -u "$TOKEN:" \
+          RESPONSE=$(curl -s -w "\n%{http_code}" -u "$TOKEN:" \
             -F "file=@$APK" \
             -F "platform=android" \
             -F "note=$NOTE" \
             "$ENDPOINT")
-          echo "response=$RESPONSE"
-          PUBLIC_KEY=$(echo "$RESPONSE" | jq -r '.publicKey // empty')
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "HTTP $HTTP_CODE"
+          echo "$BODY"
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "::error::Appetize API error (HTTP $HTTP_CODE): $BODY"
+            exit 1
+          fi
+          PUBLIC_KEY=$(echo "$BODY" | jq -r '.publicKey // empty')
           echo "publicKey=$PUBLIC_KEY" >> $GITHUB_OUTPUT
 
       - name: Store Android public key
@@ -601,13 +608,20 @@ jobs:
         run: |
           ENDPOINT="https://api.appetize.io/v2/apps"
           [ -n "$KEY" ] && ENDPOINT="$ENDPOINT/$KEY"
-          RESPONSE=$(curl -s -f -u "$TOKEN:" \
+          RESPONSE=$(curl -s -w "\n%{http_code}" -u "$TOKEN:" \
             -F "file=@artifacts/ios/ios-app.zip" \
             -F "platform=ios" \
             -F "note=$NOTE" \
             "$ENDPOINT")
-          echo "response=$RESPONSE"
-          PUBLIC_KEY=$(echo "$RESPONSE" | jq -r '.publicKey // empty')
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "HTTP $HTTP_CODE"
+          echo "$BODY"
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "::error::Appetize API error (HTTP $HTTP_CODE): $BODY"
+            exit 1
+          fi
+          PUBLIC_KEY=$(echo "$BODY" | jq -r '.publicKey // empty')
           echo "publicKey=$PUBLIC_KEY" >> $GITHUB_OUTPUT
 
       - name: Store iOS public key
