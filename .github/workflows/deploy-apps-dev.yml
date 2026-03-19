@@ -378,7 +378,7 @@ jobs:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet workload install maui-ios
       - run: |
-          dotnet publish src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
+          dotnet build src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
             -f net10.0-ios \
             -c Release \
             -r iossimulator-x64 \
