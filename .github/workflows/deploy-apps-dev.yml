@@ -378,7 +378,7 @@ jobs:
           dotnet-version: ${{ needs.changes.outputs.dotnet_version }}
       - run: dotnet workload install maui-ios
       - run: |
-          dotnet publish src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
+          dotnet build src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
             -f net10.0-ios \
             -c Release \
             -r iossimulator-arm64 \
@@ -387,7 +387,7 @@ jobs:
         run: |
           APP=$(find . -type d -name '*.app' | head -1)
           cd "$(dirname "$APP")"
-          zip -r "$GITHUB_WORKSPACE/ios-app.zip" "$(basename "$APP")"
+          zip -r -y "$GITHUB_WORKSPACE/ios-app.zip" "$(basename "$APP")"
       - uses: actions/upload-artifact@v7
         with:
           name: mobile-ios-build
