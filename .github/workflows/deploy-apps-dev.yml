@@ -481,20 +481,6 @@ jobs:
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
           echo "available=true" >> $GITHUB_OUTPUT
 
-      - name: Fetch Android public key (if known)
-        id: pubkey
-        if: steps.token.outputs.available == 'true'
-        env:
-          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
-        run: |
-          KEY=$(gcloud secrets versions access latest --secret="carditrack-appetize-android-public-key" --project="$PROJECT" 2>/dev/null || true)
-          if [ -z "$KEY" ] || [ "$KEY" = "REPLACE_ME" ]; then
-            echo "key=" >> $GITHUB_OUTPUT
-          else
-            echo "::add-mask::$KEY"
-            echo "key=$KEY" >> $GITHUB_OUTPUT
-          fi
-
       - uses: actions/download-artifact@v8
         if: steps.token.outputs.available == 'true'
         with:
@@ -511,15 +497,13 @@ jobs:
         if: steps.token.outputs.available == 'true'
         env:
           TOKEN: ${{ steps.token.outputs.token }}
-          STORED_KEY: ${{ steps.pubkey.outputs.key }}
           APK: ${{ steps.apk.outputs.path }}
           NOTE: ${{ needs.compute-version.outputs.version }}
         run: |
-          LIST_V2="https://api.appetize.io/v2/apps"
-          UPLOAD_V1="https://api.appetize.io/v1/apps"
+          BASE="https://api.appetize.io/v1/apps"
 
-          # 1. List apps (v2) — verify token and find existing app
-          LIST_RESP=$(curl -s -w "\n%{http_code}" -H "X-API-KEY: $TOKEN" "$LIST_V2")
+          # 1. List apps — verify token and find existing android app
+          LIST_RESP=$(curl -s -w "\n%{http_code}" -H "X-API-KEY: $TOKEN" -H "Accept: */*" "https://api.appetize.io/v1/apps/all")
           LIST_CODE=$(echo "$LIST_RESP" | tail -1)
           LIST_BODY=$(echo "$LIST_RESP" | head -n -1)
           echo "List HTTP $LIST_CODE"
@@ -528,31 +512,23 @@ jobs:
             exit 1
           fi
 
-          # 2. Determine upload URL (v1): update if key found in list, else create
-          FOUND_KEY=""
-          if [ -n "$STORED_KEY" ]; then
-            FOUND_KEY=$(echo "$LIST_BODY" | jq -r --arg k "$STORED_KEY" '.data[] | select(.publicKey == $k) | .publicKey' 2>/dev/null || true)
-          fi
-
+          # 2. Find existing android app; create if not found
+          FOUND_KEY=$(echo "$LIST_BODY" | jq -r '.data[] | select(.platform == "android") | .publicKey' | head -1)
           if [ -n "$FOUND_KEY" ]; then
             echo "App found — updating $FOUND_KEY"
-            URL="$UPLOAD_V1/$FOUND_KEY"
+            URL="$BASE/$FOUND_KEY"
           else
             echo "App not found — creating new"
-            URL="$UPLOAD_V1"
+            URL="$BASE"
           fi
 
-          # 3. Upload (v1)
-          PAYLOAD=$(jq -n \
-            --arg platform "android" \
-            --arg buildFile "$(base64 -w 0 "$APK")" \
-            --arg note "$NOTE" \
-            '{platform: $platform, buildFile: $buildFile, note: $note}')
+          # 3. Upload
           RESP=$(curl -s -w "\n%{http_code}" \
             -X POST \
-            -H "Content-Type: application/json" \
             -H "X-API-KEY: $TOKEN" \
-            -d "$PAYLOAD" \
+            -F "file=@$APK" \
+            -F "platform=android" \
+            -F "note=$NOTE" \
             "$URL")
           CODE=$(echo "$RESP" | tail -1)
           BODY=$(echo "$RESP" | head -n -1)
@@ -561,21 +537,6 @@ jobs:
             echo "::error::Appetize upload failed (HTTP $CODE): $BODY"
             exit 1
           fi
-
-          PUBLIC_KEY=$(echo "$BODY" | jq -r '.publicKey // empty')
-          echo "publicKey=$PUBLIC_KEY" >> $GITHUB_OUTPUT
-          [ "$FOUND_KEY" != "$PUBLIC_KEY" ] && echo "store=true" >> $GITHUB_OUTPUT || true
-
-      - name: Store Android public key
-        if: steps.token.outputs.available == 'true' && steps.appetize.outputs.store == 'true'
-        env:
-          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
-          KEY: ${{ steps.appetize.outputs.publicKey }}
-        run: |
-          echo -n "$KEY" | gcloud secrets versions add carditrack-appetize-android-public-key \
-            --project="$PROJECT" \
-            --data-file=-
-          echo "Android public key stored in Secret Manager."
 
   deploy-appetize-ios:
     name: Deploy → Appetize (iOS)
@@ -611,20 +572,6 @@ jobs:
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
           echo "available=true" >> $GITHUB_OUTPUT
 
-      - name: Fetch iOS public key (if known)
-        id: pubkey
-        if: steps.token.outputs.available == 'true'
-        env:
-          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
-        run: |
-          KEY=$(gcloud secrets versions access latest --secret="carditrack-appetize-ios-public-key" --project="$PROJECT" 2>/dev/null || true)
-          if [ -z "$KEY" ] || [ "$KEY" = "REPLACE_ME" ]; then
-            echo "key=" >> $GITHUB_OUTPUT
-          else
-            echo "::add-mask::$KEY"
-            echo "key=$KEY" >> $GITHUB_OUTPUT
-          fi
-
       - uses: actions/download-artifact@v8
         if: steps.token.outputs.available == 'true'
         with:
@@ -636,13 +583,12 @@ jobs:
         if: steps.token.outputs.available == 'true'
         env:
           TOKEN: ${{ steps.token.outputs.token }}
-          STORED_KEY: ${{ steps.pubkey.outputs.key }}
           NOTE: ${{ needs.compute-version.outputs.version }}
         run: |
-          BASE="https://api.appetize.io/v2/apps"
+          BASE="https://api.appetize.io/v1/apps"
 
-          # 1. List apps — verify token and find existing app
-          LIST_RESP=$(curl -s -w "\n%{http_code}" -H "X-API-KEY: $TOKEN" "$BASE")
+          # 1. List apps — verify token and find existing ios app
+          LIST_RESP=$(curl -s -w "\n%{http_code}" -H "X-API-KEY: $TOKEN" -H "Accept: */*" "https://api.appetize.io/v1/apps/all")
           LIST_CODE=$(echo "$LIST_RESP" | tail -1)
           LIST_BODY=$(echo "$LIST_RESP" | head -n -1)
           echo "List HTTP $LIST_CODE"
@@ -651,12 +597,8 @@ jobs:
             exit 1
           fi
 
-          # 2. Determine endpoint: update if key exists in list, else create
-          FOUND_KEY=""
-          if [ -n "$STORED_KEY" ]; then
-            FOUND_KEY=$(echo "$LIST_BODY" | jq -r --arg k "$STORED_KEY" '.data[] | select(.publicKey == $k) | .publicKey' 2>/dev/null || true)
-          fi
-
+          # 2. Find existing ios app; create if not found
+          FOUND_KEY=$(echo "$LIST_BODY" | jq -r '.data[] | select(.platform == "ios") | .publicKey' | head -1)
           if [ -n "$FOUND_KEY" ]; then
             echo "App found — updating $FOUND_KEY"
             URL="$BASE/$FOUND_KEY"
@@ -666,16 +608,12 @@ jobs:
           fi
 
           # 3. Upload
-          PAYLOAD=$(jq -n \
-            --arg platform "ios" \
-            --arg buildFile "$(base64 -w 0 "artifacts/ios/ios-app.zip")" \
-            --arg note "$NOTE" \
-            '{platform: $platform, buildFile: $buildFile, note: $note}')
           RESP=$(curl -s -w "\n%{http_code}" \
             -X POST \
-            -H "Content-Type: application/json" \
             -H "X-API-KEY: $TOKEN" \
-            -d "$PAYLOAD" \
+            -F "file=@artifacts/ios/ios-app.zip" \
+            -F "platform=ios" \
+            -F "note=$NOTE" \
             "$URL")
           CODE=$(echo "$RESP" | tail -1)
           BODY=$(echo "$RESP" | head -n -1)
@@ -684,21 +622,6 @@ jobs:
             echo "::error::Appetize upload failed (HTTP $CODE): $BODY"
             exit 1
           fi
-
-          PUBLIC_KEY=$(echo "$BODY" | jq -r '.publicKey // empty')
-          echo "publicKey=$PUBLIC_KEY" >> $GITHUB_OUTPUT
-          [ "$FOUND_KEY" != "$PUBLIC_KEY" ] && echo "store=true" >> $GITHUB_OUTPUT || true
-
-      - name: Store iOS public key
-        if: steps.token.outputs.available == 'true' && steps.appetize.outputs.store == 'true'
-        env:
-          PROJECT: ${{ needs.changes.outputs.gcp_project_id }}
-          KEY: ${{ steps.appetize.outputs.publicKey }}
-        run: |
-          echo -n "$KEY" | gcloud secrets versions add carditrack-appetize-ios-public-key \
-            --project="$PROJECT" \
-            --data-file=-
-          echo "iOS public key stored in Secret Manager."
 
   # ── Main only: Push images ───────────────────────────────────────────────────
   push-api-image:

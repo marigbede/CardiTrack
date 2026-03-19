@@ -8,7 +8,7 @@ output "builds_bucket_name" {
   value       = google_storage_bucket.builds.name
 }
 
-output "appetize_secret_ids" {
-  description = "Secret Manager IDs for Appetize credentials"
-  value       = { for k, v in google_secret_manager_secret.appetize : k => v.secret_id }
+output "appetize_api_token_secret_id" {
+  description = "Secret Manager ID for the Appetize API token"
+  value       = google_secret_manager_secret.appetize_api_token.secret_id
 }

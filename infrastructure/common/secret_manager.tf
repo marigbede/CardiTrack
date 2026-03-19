@@ -1,24 +1,15 @@
 # Secret Manager — Shared / Common Secrets
 # Secrets here are not environment-specific.
 # Values are set by operators via:
-#   gcloud secrets versions add <id> --data-file=-
+#   echo -n "your_token" | gcloud secrets versions add carditrack-appetize-api-token --data-file=-
 
 resource "google_project_service" "secretmanager" {
   service            = "secretmanager.googleapis.com"
   disable_on_destroy = false
 }
 
-locals {
-  appetize_secrets = {
-    "appetize-api-token"          = "REPLACE_ME"
-    "appetize-android-public-key" = "REPLACE_ME"
-    "appetize-ios-public-key"     = "REPLACE_ME"
-  }
-}
-
-resource "google_secret_manager_secret" "appetize" {
-  for_each  = local.appetize_secrets
-  secret_id = "${var.project_name}-${each.key}"
+resource "google_secret_manager_secret" "appetize_api_token" {
+  secret_id = "${var.project_name}-appetize-api-token"
 
   replication {
     auto {}
@@ -27,35 +18,18 @@ resource "google_secret_manager_secret" "appetize" {
   depends_on = [google_project_service.secretmanager]
 }
 
-resource "google_secret_manager_secret_version" "appetize" {
-  for_each    = local.appetize_secrets
-  secret      = google_secret_manager_secret.appetize[each.key].id
-  secret_data = each.value
+resource "google_secret_manager_secret_version" "appetize_api_token" {
+  secret      = google_secret_manager_secret.appetize_api_token.id
+  secret_data = "REPLACE_ME"
 
   lifecycle {
     ignore_changes = [secret_data]
   }
 }
 
-locals {
-  appetize_public_key_secrets = {
-    for k, v in local.appetize_secrets : k => v
-    if k != "appetize-api-token"
-  }
-}
-
-# CI/CD service account — read Appetize credentials at deploy time
-resource "google_secret_manager_secret_iam_member" "appetize_deploy_accessor" {
-  for_each  = local.appetize_secrets
-  secret_id = google_secret_manager_secret.appetize[each.key].id
+# CI/CD service account — read token at deploy time
+resource "google_secret_manager_secret_iam_member" "appetize_api_token_accessor" {
+  secret_id = google_secret_manager_secret.appetize_api_token.id
   role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:carditrack-deploy@${var.project_id}.iam.gserviceaccount.com"
-}
-
-# CI/CD service account — write back auto-discovered public keys on first upload
-resource "google_secret_manager_secret_iam_member" "appetize_deploy_version_adder" {
-  for_each  = local.appetize_public_key_secrets
-  secret_id = google_secret_manager_secret.appetize[each.key].id
-  role      = "roles/secretmanager.secretVersionAdder"
   member    = "serviceAccount:carditrack-deploy@${var.project_id}.iam.gserviceaccount.com"
 }
