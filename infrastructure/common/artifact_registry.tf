@@ -35,6 +35,9 @@ resource "google_artifact_registry_repository" "images" {
   cleanup_policies {
     id     = "delete-old"
     action = "DELETE"
+    condition {
+      tag_state = "ANY"
+    }
   }
 }
 
