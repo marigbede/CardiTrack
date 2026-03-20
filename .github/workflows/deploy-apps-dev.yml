@@ -385,7 +385,7 @@ jobs:
             -p:ArchiveOnBuild=false
       - name: Zip .app bundle
         run: |
-          APP=$(find ./src -path '*/bin/*' -type d -name '*.app' | head -1)
+          APP=$(find ./src -path '*/bin/*' -not -path '*/obj/*' -type d -name '*.app' | head -1)
           echo "Selected: $APP ($(du -sh "$APP" | cut -f1))"
           cd "$(dirname "$APP")"
           zip -r -y "$GITHUB_WORKSPACE/ios-app.zip" "$(basename "$APP")"
