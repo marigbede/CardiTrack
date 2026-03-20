@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Name="RootPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:CardiTrack.Mobile"
+             x:Class="CardiTrack.Mobile.WelcomePage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource White}">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0,8,0,0">
+
+        <Grid Grid.Row="0"
+              Padding="20,8,20,8"
+              ColumnDefinitions="Auto,*">
+            <Image Grid.Column="0"
+                   Source="carditrack_logo.png"
+                   HeightRequest="46"
+                   WidthRequest="46"
+                   Aspect="AspectFit"
+                   VerticalOptions="Center" />
+            <Label Grid.Column="1"
+                   Text="Sign up"
+                   Style="{StaticResource WelcomeSignUpLabel}"
+                   HorizontalOptions="End"
+                   VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnSignUpTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+        </Grid>
+
+        <CarouselView x:Name="SlideCarousel"
+                      Grid.Row="1"
+                      ItemsSource="{Binding Source={x:Reference RootPage}, Path=Slides}"
+                      IndicatorView="{x:Reference SlideIndicators}">
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="local:WelcomeSlide">
+                    <ScrollView>
+                        <VerticalStackLayout Padding="0,0,0,24" Spacing="20">
+                            <Border StrokeThickness="0"
+                                    Margin="20,0,20,0"
+                                    HeightRequest="400">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="24" />
+                                </Border.StrokeShape>
+                                <Image Source="{Binding HeroImage}"
+                                       Aspect="AspectFill" />
+                            </Border>
+                            <Label Text="{Binding Title}"
+                                   Style="{StaticResource WelcomeTitleLabel}"
+                                   Margin="24,0" />
+                            <Label Text="{Binding Subtitle}"
+                                   Style="{StaticResource WelcomeSubtitleLabel}"
+                                   Margin="24,0,24,8" />
+                        </VerticalStackLayout>
+                    </ScrollView>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+
+        <VerticalStackLayout Grid.Row="2"
+                             Spacing="14"
+                             Padding="20,4,20,28">
+            <IndicatorView x:Name="SlideIndicators"
+                           IndicatorColor="{StaticResource Gray200}"
+                           SelectedIndicatorColor="{StaticResource Gray950}"
+                           IndicatorSize="8"
+                           MaximumVisible="3"
+                           HorizontalOptions="Center" />
+            <Label Text="Then $8/month - Cancel anytime"
+                   Style="{StaticResource WelcomeDisclaimerLabel}"
+                   HorizontalTextAlignment="Center" />
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
+                <Label Text="By continuing, you agree to "
+                       Style="{StaticResource WelcomeDisclaimerLabel}"
+                       VerticalTextAlignment="Center" />
+                <Label Text="Terms &amp; Privacy"
+                       TextColor="{StaticResource WelcomeCtaBlue}"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="14"
+                       TextDecorations="Underline"
+                       VerticalTextAlignment="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnTermsTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
+            <Button x:Name="ContinueButton"
+                    Text="Continue"
+                    Style="{StaticResource WelcomeCtaButton}"
+                    MaximumWidthRequest="332"
+                    HorizontalOptions="Center"
+                    Clicked="OnContinueClicked" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <ResourceDictionary 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
@@ -41,4 +41,18 @@
     <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+
+    <!-- Splash / onboarding (Figma M1-01 / M1-02 — tune via Dev Mode) -->
+    <Color x:Key="SplashBlue">#2B7FD3</Color>
+    <Color x:Key="SplashBlueDeep">#0A3A6E</Color>
+    <Color x:Key="SplashAccent">#135497</Color>
+    <Color x:Key="WelcomeBodyGray">#4A4A4A</Color>
+    <Color x:Key="WelcomeMuted">#6E6E6E</Color>
+    <Color x:Key="WelcomeCtaBlue">#1E6FCC</Color>
+
+    <LinearGradientBrush x:Key="SplashScreenGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="{StaticResource SplashBlue}" Offset="0.0" />
+        <GradientStop Color="{StaticResource SplashAccent}" Offset="0.5" />
+        <GradientStop Color="{StaticResource SplashBlueDeep}" Offset="1.0" />
+    </LinearGradientBrush>
 </ResourceDictionary>

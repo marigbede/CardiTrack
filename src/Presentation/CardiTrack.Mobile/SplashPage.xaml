@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CardiTrack.Mobile.SplashPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource SplashBlueDeep}">
+
+    <Grid>
+        <Border StrokeThickness="0" Background="{StaticResource SplashScreenGradient}" />
+
+        <Grid x:Name="LoadingPanel" Padding="24,0,24,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Image Grid.Row="0"
+                   Source="carditrack_logo.png"
+                   HeightRequest="88"
+                   WidthRequest="88"
+                   Aspect="AspectFit"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center" />
+
+            <ActivityIndicator Grid.Row="1"
+                               IsRunning="True"
+                               Color="{StaticResource White}"
+                               HeightRequest="32" />
+
+            <BoxView Grid.Row="2" HeightRequest="8" Opacity="0" />
+        </Grid>
+
+        <Grid x:Name="ErrorPanel"
+              IsVisible="False"
+              Padding="28,48,28,32"
+              RowDefinitions="*,Auto,Auto,Auto,*"
+              RowSpacing="12">
+
+            <VerticalStackLayout Grid.Row="1"
+                                 Spacing="14"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center">
+                <Image Source="carditrack_logo.png"
+                       HeightRequest="88"
+                       WidthRequest="88"
+                       HorizontalOptions="Center"
+                       Aspect="AspectFit" />
+                <Label Text="CardiTrack"
+                       TextColor="{StaticResource White}"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="22"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <Label Grid.Row="2"
+                   Text="Hmm, something didn't work."
+                   TextColor="{StaticResource White}"
+                   FontSize="16"
+                   Opacity="0.95"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,8,0,0" />
+
+            <Button Grid.Row="3"
+                    Text="Try again"
+                    Style="{StaticResource SplashPrimaryButton}"
+                    MaximumWidthRequest="332"
+                    HorizontalOptions="Center"
+                    Margin="0,16,0,0"
+                    Clicked="OnRetryClicked" />
+        </Grid>
+    </Grid>
+</ContentPage>
