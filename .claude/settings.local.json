@@ -29,7 +29,8 @@
       "Bash(gh api:*)",
       "Bash(gh workflow:*)",
       "Bash(docker compose:*)",
-      "WebFetch(domain:docs.appetize.io)"
+      "WebFetch(domain:docs.appetize.io)",
+      "Bash(gh run:*)"
     ]
   }
 }
