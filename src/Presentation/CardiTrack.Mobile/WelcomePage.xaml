@@ -35,25 +35,23 @@
                       IndicatorView="{x:Reference SlideIndicators}">
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="local:WelcomeSlide">
-                    <ScrollView>
-                        <VerticalStackLayout Padding="0,0,0,24" Spacing="20">
-                            <Border StrokeThickness="0"
-                                    Margin="20,0,20,0"
-                                    HeightRequest="400">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="24" />
-                                </Border.StrokeShape>
-                                <Image Source="{Binding HeroImage}"
-                                       Aspect="AspectFill" />
-                            </Border>
-                            <Label Text="{Binding Title}"
-                                   Style="{StaticResource WelcomeTitleLabel}"
-                                   Margin="24,0" />
-                            <Label Text="{Binding Subtitle}"
-                                   Style="{StaticResource WelcomeSubtitleLabel}"
-                                   Margin="24,0,24,8" />
-                        </VerticalStackLayout>
-                    </ScrollView>
+                    <VerticalStackLayout Padding="0,0,0,24" Spacing="20">
+                        <Border StrokeThickness="0"
+                                Margin="20,0,20,0"
+                                HeightRequest="400">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="24" />
+                            </Border.StrokeShape>
+                            <Image Source="{Binding HeroImage}"
+                                   Aspect="AspectFill" />
+                        </Border>
+                        <Label Text="{Binding Title}"
+                               Style="{StaticResource WelcomeTitleLabel}"
+                               Margin="24,0" />
+                        <Label Text="{Binding Subtitle}"
+                               Style="{StaticResource WelcomeSubtitleLabel}"
+                               Margin="24,0,24,8" />
+                    </VerticalStackLayout>
                 </DataTemplate>
             </CarouselView.ItemTemplate>
         </CarouselView>

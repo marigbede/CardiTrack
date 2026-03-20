@@ -20,7 +20,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>CardiTrack.Mobile</ApplicationTitle>
+		<ApplicationTitle>CardiTrack</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.codesistance.carditrack.mobile</ApplicationId>
@@ -41,7 +41,7 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#135497" />
 
 		<!-- Splash Screen (aligned to in-app splash blues) -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#135497" BaseSize="128,128" />
@@ -49,6 +49,10 @@
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+		<MauiImage Update="Resources\Images\carditrack_logo.png" BaseSize="88,88" />
+		<MauiImage Update="Resources\Images\welcome_hero_a.png" BaseSize="390,400" />
+		<MauiImage Update="Resources\Images\welcome_hero_b.png" BaseSize="390,400" />
+		<MauiImage Update="Resources\Images\welcome_hero_c.png" BaseSize="390,400" />
 		
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
