@@ -55,4 +55,24 @@
         <GradientStop Color="{StaticResource SplashAccent}" Offset="0.5" />
         <GradientStop Color="{StaticResource SplashBlueDeep}" Offset="1.0" />
     </LinearGradientBrush>
+
+    <!-- Second pass (Figma-style layered gradient) — diagonal highlight over vertical base -->
+    <LinearGradientBrush x:Key="SplashDiagonalOverlay" StartPoint="0,1" EndPoint="1,0">
+        <GradientStop Color="#33FFFFFF" Offset="0.0" />
+        <GradientStop Color="#00FFFFFF" Offset="0.45" />
+        <GradientStop Color="#280A3A6E" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- Welcome screen soft wash -->
+    <LinearGradientBrush x:Key="WelcomePageBackground" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#F0F6FF" Offset="0.0" />
+        <GradientStop Color="#FFFFFF" Offset="0.55" />
+        <GradientStop Color="#FFFFFF" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- Fade photo into content area (vector mask companion) -->
+    <LinearGradientBrush x:Key="HeroBottomFade" StartPoint="0,1" EndPoint="0,0">
+        <GradientStop Color="#E6FFFFFF" Offset="0.0" />
+        <GradientStop Color="#00FFFFFF" Offset="0.72" />
+    </LinearGradientBrush>
 </ResourceDictionary>

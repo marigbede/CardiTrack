@@ -3,10 +3,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CardiTrack.Mobile.SplashPage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="{StaticResource SplashBlueDeep}">
+             BackgroundColor="Transparent">
+
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="{StaticResource SplashBlue}" Offset="0.0" />
+            <GradientStop Color="{StaticResource SplashAccent}" Offset="0.48" />
+            <GradientStop Color="{StaticResource SplashBlueDeep}" Offset="1.0" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
 
     <Grid>
-        <Border StrokeThickness="0" Background="{StaticResource SplashScreenGradient}" />
+        <!-- Layered gradient (Figma-style overlapping fills) -->
+        <Border StrokeThickness="0"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill"
+                Background="{StaticResource SplashDiagonalOverlay}" />
 
         <Grid x:Name="LoadingPanel" Padding="24,0,24,24">
             <Grid.RowDefinitions>
@@ -16,7 +28,7 @@
             </Grid.RowDefinitions>
 
             <Image Grid.Row="0"
-                   Source="carditrack_logo.png"
+                   Source="carditrack_logo.svg"
                    HeightRequest="88"
                    WidthRequest="88"
                    Aspect="AspectFit"
@@ -41,7 +53,7 @@
                                  Spacing="14"
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center">
-                <Image Source="carditrack_logo.png"
+                <Image Source="carditrack_logo.svg"
                        HeightRequest="88"
                        WidthRequest="88"
                        HorizontalOptions="Center"

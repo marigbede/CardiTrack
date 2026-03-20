@@ -5,7 +5,8 @@
              xmlns:local="clr-namespace:CardiTrack.Mobile"
              x:Class="CardiTrack.Mobile.WelcomePage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="{StaticResource White}">
+             BackgroundColor="Transparent"
+             Background="{StaticResource WelcomePageBackground}">
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="0,8,0,0">
 
@@ -13,7 +14,7 @@
               Padding="20,8,20,8"
               ColumnDefinitions="Auto,*">
             <Image Grid.Column="0"
-                   Source="carditrack_logo.png"
+                   Source="carditrack_logo.svg"
                    HeightRequest="46"
                    WidthRequest="46"
                    Aspect="AspectFit"
@@ -35,23 +36,40 @@
                       IndicatorView="{x:Reference SlideIndicators}">
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="local:WelcomeSlide">
-                    <VerticalStackLayout Padding="0,0,0,24" Spacing="20">
-                        <Border StrokeThickness="0"
-                                Margin="20,0,20,0"
-                                HeightRequest="400">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="24" />
-                            </Border.StrokeShape>
-                            <Image Source="{Binding HeroImage}"
-                                   Aspect="AspectFill" />
-                        </Border>
-                        <Label Text="{Binding Title}"
-                               Style="{StaticResource WelcomeTitleLabel}"
-                               Margin="24,0" />
-                        <Label Text="{Binding Subtitle}"
-                               Style="{StaticResource WelcomeSubtitleLabel}"
-                               Margin="24,0,24,8" />
-                    </VerticalStackLayout>
+                    <ScrollView>
+                        <VerticalStackLayout Padding="0,0,0,24" Spacing="20">
+                            <!-- Hero: vector SVG + gradient overlays (Figma mask + layered fills) -->
+                            <Grid Margin="20,0,20,0"
+                                  HeightRequest="400"
+                                  HorizontalOptions="Fill">
+                                <Border StrokeThickness="0"
+                                        HorizontalOptions="Fill"
+                                        VerticalOptions="Fill">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="24,24,0,0" />
+                                    </Border.StrokeShape>
+                                    <Grid>
+                                        <Image Source="{Binding HeroImage}"
+                                               Aspect="AspectFill"
+                                               HorizontalOptions="Fill"
+                                               VerticalOptions="Fill" />
+                                        <!-- Bottom fade into white content -->
+                                        <Border StrokeThickness="0"
+                                                VerticalOptions="End"
+                                                HeightRequest="160"
+                                                InputTransparent="True"
+                                                Background="{StaticResource HeroBottomFade}" />
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                            <Label Text="{Binding Title}"
+                                   Style="{StaticResource WelcomeTitleLabel}"
+                                   Margin="24,0" />
+                            <Label Text="{Binding Subtitle}"
+                                   Style="{StaticResource WelcomeSubtitleLabel}"
+                                   Margin="24,0,24,8" />
+                        </VerticalStackLayout>
+                    </ScrollView>
                 </DataTemplate>
             </CarouselView.ItemTemplate>
         </CarouselView>
