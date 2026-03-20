@@ -380,9 +380,8 @@ jobs:
       - run: |
           dotnet build src/Presentation/CardiTrack.Mobile/CardiTrack.Mobile.csproj \
             -f net10.0-ios \
-            -c Release \
-            -r iossimulator-arm64 \
-            -p:ArchiveOnBuild=false
+            -c Debug \
+            -r iossimulator-arm64
       - name: Zip .app bundle
         run: |
           APP=$(find . -type d -name '*.app' | head -1)
