@@ -1,0 +1,10 @@
+---
+description: Always download real assets from Figma — never create substitutes
+alwaysApply: true
+---
+
+# Figma Asset Handling
+
+- **Always download actual assets** from the Figma file using the Figma MCP tools (`get_design_context` asset URLs, `get_screenshot`). Never hand-draw, approximate, or substitute SVGs/PNGs.
+- If an asset cannot be found or downloaded, **ask the user** to provide it. Do not create a placeholder.
+- This applies to logos, icons, hero images, illustrations, and any other visual asset referenced in the design.

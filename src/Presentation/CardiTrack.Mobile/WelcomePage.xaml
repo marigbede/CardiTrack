@@ -69,7 +69,7 @@
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="9"/>
                 </Border.StrokeShape>
-                <Image Source="carditrack_logo.svg"
+                <Image Source="carditrack_logo.png"
                        WidthRequest="37" HeightRequest="32"
                        Aspect="AspectFit"
                        HorizontalOptions="Center" VerticalOptions="Center"/>

@@ -145,6 +145,34 @@ public partial class CreateAccountPage : ContentPage
         ConfirmEntry.IsEnabled = !loading;
     }
 
+    private void OnEntryFocused(object? sender, FocusEventArgs e)
+    {
+        if (sender is Entry entry && entry.Parent is Border border)
+            border.Stroke = new SolidColorBrush((Color)App.Current!.Resources["InputFocusBorder"]);
+        else if (sender is Entry entry2 && entry2.Parent is Grid grid && grid.Parent is Border parentBorder)
+            parentBorder.Stroke = new SolidColorBrush((Color)App.Current!.Resources["InputFocusBorder"]);
+    }
+
+    private void OnEntryUnfocused(object? sender, FocusEventArgs e)
+    {
+        if (sender is Entry entry && entry.Parent is Border border)
+            border.Stroke = new SolidColorBrush((Color)App.Current!.Resources["InputBorder"]);
+        else if (sender is Entry entry2 && entry2.Parent is Grid grid && grid.Parent is Border parentBorder)
+            parentBorder.Stroke = new SolidColorBrush((Color)App.Current!.Resources["InputBorder"]);
+    }
+
+    private void OnPasswordToggleClicked(object? sender, EventArgs e)
+    {
+        PasswordEntry.IsPassword = !PasswordEntry.IsPassword;
+        PasswordToggle.Source = PasswordEntry.IsPassword ? "icon_eye_off.svg" : "icon_eye.svg";
+    }
+
+    private void OnConfirmToggleClicked(object? sender, EventArgs e)
+    {
+        ConfirmEntry.IsPassword = !ConfirmEntry.IsPassword;
+        ConfirmToggle.Source = ConfirmEntry.IsPassword ? "icon_eye_off.svg" : "icon_eye.svg";
+    }
+
     private async void OnSignInTapped(object? sender, EventArgs e)
     {
         await Navigation.PushAsync(new SignInPage());

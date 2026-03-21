@@ -7,36 +7,11 @@
              BackgroundColor="{StaticResource White}">
 
     <Grid>
-        <!-- ── Gradient background (two blurred ellipses) ── -->
-        <BoxView HorizontalOptions="Fill" VerticalOptions="Fill" Color="{StaticResource White}" />
-
-        <BoxView WidthRequest="434" HeightRequest="678"
-                 CornerRadius="220"
-                 Opacity="0.85"
-                 Margin="-78,-45,0,0"
-                 HorizontalOptions="Start" VerticalOptions="Start">
-            <BoxView.Background>
-                <RadialGradientBrush Center="0.5,0.5" Radius="0.55">
-                    <GradientStop Color="{StaticResource GradientBlue}" Offset="0.0" />
-                    <GradientStop Color="{StaticResource GradientDarkBlue}" Offset="0.5" />
-                    <GradientStop Color="#00174E86" Offset="1.0" />
-                </RadialGradientBrush>
-            </BoxView.Background>
-        </BoxView>
-
-        <BoxView WidthRequest="434" HeightRequest="678"
-                 CornerRadius="220"
-                 Opacity="0.85"
-                 Margin="92,309,0,0"
-                 HorizontalOptions="Start" VerticalOptions="Start">
-            <BoxView.Background>
-                <RadialGradientBrush Center="0.5,0.5" Radius="0.55">
-                    <GradientStop Color="{StaticResource GradientTeal}" Offset="0.0" />
-                    <GradientStop Color="{StaticResource GradientBlue}" Offset="0.45" />
-                    <GradientStop Color="#00174E86" Offset="1.0" />
-                </RadialGradientBrush>
-            </BoxView.Background>
-        </BoxView>
+        <!-- ── Gradient background (pre-rendered SVG with blurred ellipses) ── -->
+        <Image Source="gradient_splash_bg.svg"
+               Aspect="AspectFill"
+               HorizontalOptions="Fill"
+               VerticalOptions="Fill" />
 
         <!-- ── Loading state (default) ── -->
         <Grid x:Name="LoadingPanel"
@@ -52,7 +27,7 @@
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="17"/>
                 </Border.StrokeShape>
-                <Image Source="carditrack_logo.svg"
+                <Image Source="carditrack_logo.png"
                        WidthRequest="79" HeightRequest="68"
                        Aspect="AspectFit"
                        HorizontalOptions="Center" VerticalOptions="Center"/>
@@ -84,7 +59,7 @@
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="17"/>
                     </Border.StrokeShape>
-                    <Image Source="carditrack_logo.svg"
+                    <Image Source="carditrack_logo.png"
                            WidthRequest="79" HeightRequest="68"
                            Aspect="AspectFit"
                            HorizontalOptions="Center" VerticalOptions="Center"/>

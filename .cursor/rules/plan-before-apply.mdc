@@ -1,0 +1,11 @@
+---
+description: Always present a plan before making changes
+alwaysApply: true
+---
+
+# Plan Before Apply
+
+- **Always present a plan** to the user before making any code or file changes.
+- The plan should list what will be changed, created, or deleted, and why.
+- Wait for user approval (explicit or implicit) before proceeding with implementation.
+- For small changes, a brief bullet list is sufficient. For large changes, provide a structured breakdown.

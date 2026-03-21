@@ -13,37 +13,10 @@
                  GRADIENT HEADER (≈202px)
                  ════════════════════════════════════════ -->
             <Grid Grid.Row="0" HeightRequest="210" HorizontalOptions="Fill">
-                <BoxView Color="{StaticResource White}" HorizontalOptions="Fill" VerticalOptions="Fill"/>
-
-                <!-- Blurred ellipse 1 (top-left) -->
-                <BoxView WidthRequest="434" HeightRequest="678"
-                         CornerRadius="220" Opacity="0.85"
-                         Margin="-78,-321,0,0"
-                         HorizontalOptions="Start" VerticalOptions="Start">
-                    <BoxView.Background>
-                        <RadialGradientBrush Center="0.5,0.5" Radius="0.55">
-                            <GradientStop Color="{StaticResource GradientBlue}" Offset="0.0"/>
-                            <GradientStop Color="{StaticResource GradientDarkBlue}" Offset="0.5"/>
-                            <GradientStop Color="#00174E86" Offset="1.0"/>
-                        </RadialGradientBrush>
-                    </BoxView.Background>
-                </BoxView>
-
-                <!-- Blurred ellipse 2 (bottom-right) -->
-                <BoxView WidthRequest="434" HeightRequest="678"
-                         CornerRadius="220" Opacity="0.85"
-                         Margin="92,309,0,0"
-                         HorizontalOptions="Start" VerticalOptions="Start">
-                    <BoxView.Background>
-                        <RadialGradientBrush Center="0.5,0.5" Radius="0.55">
-                            <GradientStop Color="{StaticResource GradientTeal}" Offset="0.0"/>
-                            <GradientStop Color="{StaticResource GradientBlue}" Offset="0.45"/>
-                            <GradientStop Color="#00174E86" Offset="1.0"/>
-                        </RadialGradientBrush>
-                    </BoxView.Background>
-                </BoxView>
-
-                <!-- Header text content -->
+                <Image Source="gradient_auth_header.svg"
+                       Aspect="AspectFill"
+                       HorizontalOptions="Fill"
+                       VerticalOptions="Fill" />
                 <VerticalStackLayout Padding="20,48,20,0"
                                      Spacing="4"
                                      VerticalOptions="Start">
@@ -127,7 +100,9 @@
                         <Entry x:Name="NameEntry"
                                Style="{StaticResource AuthEntry}"
                                Placeholder="Your Name"
-                               ReturnType="Next"/>
+                               ReturnType="Next"
+                               Focused="OnEntryFocused"
+                               Unfocused="OnEntryUnfocused"/>
                     </Border>
                     <Label x:Name="NameError" Style="{StaticResource AuthErrorLabel}" IsVisible="False"/>
 
@@ -138,19 +113,34 @@
                                Style="{StaticResource AuthEntry}"
                                Placeholder="Your email"
                                Keyboard="Email"
-                               ReturnType="Next"/>
+                               ReturnType="Next"
+                               Focused="OnEntryFocused"
+                               Unfocused="OnEntryUnfocused"/>
                     </Border>
                     <Label x:Name="EmailError" Style="{StaticResource AuthErrorLabel}" IsVisible="False"/>
 
                     <!-- Password -->
                     <Label Text="Password" Style="{StaticResource AuthFieldLabel}" Margin="0,8,0,2"/>
                     <Border x:Name="PasswordBorder" Style="{StaticResource AuthEntryBorder}">
-                        <Entry x:Name="PasswordEntry"
-                               Style="{StaticResource AuthEntry}"
-                               Placeholder="At least 8 characters"
-                               IsPassword="True"
-                               ReturnType="Next"
-                               TextChanged="OnPasswordTextChanged"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Entry x:Name="PasswordEntry"
+                                   Grid.Column="0"
+                                   Style="{StaticResource AuthEntry}"
+                                   Placeholder="At least 8 characters"
+                                   IsPassword="True"
+                                   ReturnType="Next"
+                                   TextChanged="OnPasswordTextChanged"
+                                   Focused="OnEntryFocused"
+                                   Unfocused="OnEntryUnfocused"/>
+                            <ImageButton x:Name="PasswordToggle"
+                                         Grid.Column="1"
+                                         Source="icon_eye_off.svg"
+                                         WidthRequest="24" HeightRequest="24"
+                                         BackgroundColor="Transparent"
+                                         VerticalOptions="Center"
+                                         Margin="0,0,4,0"
+                                         Clicked="OnPasswordToggleClicked"/>
+                        </Grid>
                     </Border>
 
                     <!-- Password strength indicator -->
@@ -172,11 +162,24 @@
                     <!-- Confirm Password -->
                     <Label Text="Confirm Password" Style="{StaticResource AuthFieldLabel}" Margin="0,8,0,2"/>
                     <Border x:Name="ConfirmBorder" Style="{StaticResource AuthEntryBorder}">
-                        <Entry x:Name="ConfirmEntry"
-                               Style="{StaticResource AuthEntry}"
-                               Placeholder="Re-enter password"
-                               IsPassword="True"
-                               ReturnType="Done"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Entry x:Name="ConfirmEntry"
+                                   Grid.Column="0"
+                                   Style="{StaticResource AuthEntry}"
+                                   Placeholder="Re-enter password"
+                                   IsPassword="True"
+                                   ReturnType="Done"
+                                   Focused="OnEntryFocused"
+                                   Unfocused="OnEntryUnfocused"/>
+                            <ImageButton x:Name="ConfirmToggle"
+                                         Grid.Column="1"
+                                         Source="icon_eye_off.svg"
+                                         WidthRequest="24" HeightRequest="24"
+                                         BackgroundColor="Transparent"
+                                         VerticalOptions="Center"
+                                         Margin="0,0,4,0"
+                                         Clicked="OnConfirmToggleClicked"/>
+                        </Grid>
                     </Border>
                     <Label x:Name="ConfirmError" Style="{StaticResource AuthErrorLabel}" IsVisible="False"/>
 
@@ -231,28 +234,26 @@
 
                     <!-- Social login buttons -->
                     <Grid ColumnDefinitions="*,12,*">
-                        <!-- Google -->
                         <Border Grid.Column="0" Style="{StaticResource GoogleButton}">
                             <HorizontalStackLayout HorizontalOptions="Center"
                                                    VerticalOptions="Center"
-                                                   Spacing="7">
-                                <Label Text="G" FontFamily="Quicksand" FontAttributes="Bold"
-                                       FontSize="20" TextColor="#4285F4"
-                                       VerticalTextAlignment="Center"/>
+                                                   Spacing="8">
+                                <Image Source="google_icon.svg"
+                                       WidthRequest="22" HeightRequest="22"
+                                       VerticalOptions="Center"/>
                                 <Label Text="Google" FontFamily="Quicksand" FontAttributes="Bold"
                                        FontSize="18" TextColor="{StaticResource Primary}"
                                        VerticalTextAlignment="Center"/>
                             </HorizontalStackLayout>
                         </Border>
 
-                        <!-- Apple -->
                         <Border Grid.Column="2" Style="{StaticResource AppleButton}">
                             <HorizontalStackLayout HorizontalOptions="Center"
                                                    VerticalOptions="Center"
-                                                   Spacing="7">
-                                <Label Text="&#xF8FF;" FontSize="20"
-                                       TextColor="{StaticResource White}"
-                                       VerticalTextAlignment="Center"/>
+                                                   Spacing="8">
+                                <Image Source="apple_icon.svg"
+                                       WidthRequest="22" HeightRequest="22"
+                                       VerticalOptions="Center"/>
                                 <Label Text="Apple" FontFamily="Quicksand" FontAttributes="Bold"
                                        FontSize="18" TextColor="{StaticResource White}"
                                        VerticalTextAlignment="Center"/>

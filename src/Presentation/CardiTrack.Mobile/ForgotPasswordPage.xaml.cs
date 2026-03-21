@@ -57,6 +57,18 @@ public partial class ForgotPasswordPage : ContentPage
         }
     }
 
+    private void OnEntryFocused(object? sender, FocusEventArgs e)
+    {
+        if (sender is Entry entry && entry.Parent is Border border)
+            border.Stroke = new SolidColorBrush((Color)Microsoft.Maui.Controls.Application.Current!.Resources["InputFocusBorder"]);
+    }
+
+    private void OnEntryUnfocused(object? sender, FocusEventArgs e)
+    {
+        if (sender is Entry entry && entry.Parent is Border border)
+            border.Stroke = new SolidColorBrush((Color)Microsoft.Maui.Controls.Application.Current!.Resources["InputBorder"]);
+    }
+
     private async void OnResendTapped(object? sender, EventArgs e)
     {
         await DisplayAlertAsync("Code Sent", "A new code has been sent to your email.", "OK");
