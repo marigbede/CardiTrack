@@ -1,27 +1,42 @@
+using App = Microsoft.Maui.Controls.Application;
+
 namespace CardiTrack.Mobile;
 
 public partial class WelcomePage : ContentPage
 {
     public IReadOnlyList<WelcomeSlide> Slides { get; } = WelcomeSlide.DefaultSlides;
 
+    private readonly BoxView[] _indicators;
+
     public WelcomePage()
     {
         InitializeComponent();
-        SlideCarousel.CurrentItemChanged += (_, _) => UpdateContinueLabel();
+        _indicators = [Ind0, Ind1, Ind2];
+        SlideCarousel.CurrentItemChanged += (_, _) => UpdateSlideState();
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        UpdateContinueLabel();
+        UpdateSlideState();
     }
 
-    private void UpdateContinueLabel()
+    private void UpdateSlideState()
     {
         if (SlideCarousel.CurrentItem is not WelcomeSlide current)
             return;
+
         var idx = IndexOf(current);
-        ContinueButton.Text = idx >= Slides.Count - 1 ? "Get started" : "Continue";
+
+        for (var i = 0; i < _indicators.Length; i++)
+        {
+            _indicators[i].WidthRequest = i == idx ? 32 : 8;
+            _indicators[i].Color = i == idx
+                ? (Color)App.Current!.Resources["ActiveIndicator"]
+                : (Color)App.Current!.Resources["InactiveIndicator"];
+        }
+
+        CtaButton.IsVisible = idx > 0;
     }
 
     private int IndexOf(WelcomeSlide slide)
@@ -31,28 +46,17 @@ public partial class WelcomePage : ContentPage
             if (ReferenceEquals(Slides[i], slide))
                 return i;
         }
-
         return -1;
     }
 
-    private void OnContinueClicked(object? sender, EventArgs e)
+    private void OnCtaClicked(object? sender, EventArgs e)
     {
-        if (SlideCarousel.CurrentItem is not WelcomeSlide current)
-            return;
-
-        var idx = IndexOf(current);
-        if (idx < 0 || idx >= Slides.Count - 1)
-        {
-            WindowNavigation.SetRootPage(this, new AppShell());
-            return;
-        }
-
-        SlideCarousel.ScrollTo(Slides[idx + 1], position: ScrollToPosition.Center, animate: true);
+        WindowNavigation.SetRootPage(this, new NavigationPage(new CreateAccountPage()));
     }
 
-    private async void OnSignUpTapped(object? sender, EventArgs e)
+    private void OnSignUpTapped(object? sender, EventArgs e)
     {
-        await DisplayAlertAsync("Sign up", "Sign-up flow is not wired yet.", "OK");
+        WindowNavigation.SetRootPage(this, new NavigationPage(new CreateAccountPage()));
     }
 
     private async void OnTermsTapped(object? sender, EventArgs e)

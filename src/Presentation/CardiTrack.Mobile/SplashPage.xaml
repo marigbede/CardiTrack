@@ -3,80 +3,114 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CardiTrack.Mobile.SplashPage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="Transparent">
-
-    <ContentPage.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Color="{StaticResource SplashBlue}" Offset="0.0" />
-            <GradientStop Color="{StaticResource SplashAccent}" Offset="0.48" />
-            <GradientStop Color="{StaticResource SplashBlueDeep}" Offset="1.0" />
-        </LinearGradientBrush>
-    </ContentPage.Background>
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{StaticResource White}">
 
     <Grid>
-        <!-- Layered gradient (Figma-style overlapping fills) -->
-        <Border StrokeThickness="0"
-                HorizontalOptions="Fill"
-                VerticalOptions="Fill"
-                Background="{StaticResource SplashDiagonalOverlay}" />
+        <!-- ── Gradient background (two blurred ellipses) ── -->
+        <BoxView HorizontalOptions="Fill" VerticalOptions="Fill" Color="{StaticResource White}" />
 
-        <Grid x:Name="LoadingPanel" Padding="24,0,24,24">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <BoxView WidthRequest="434" HeightRequest="678"
+                 CornerRadius="220"
+                 Opacity="0.85"
+                 Margin="-78,-45,0,0"
+                 HorizontalOptions="Start" VerticalOptions="Start">
+            <BoxView.Background>
+                <RadialGradientBrush Center="0.5,0.5" Radius="0.55">
+                    <GradientStop Color="{StaticResource GradientBlue}" Offset="0.0" />
+                    <GradientStop Color="{StaticResource GradientDarkBlue}" Offset="0.5" />
+                    <GradientStop Color="#00174E86" Offset="1.0" />
+                </RadialGradientBrush>
+            </BoxView.Background>
+        </BoxView>
 
-            <Image Grid.Row="0"
-                   Source="carditrack_logo.svg"
-                   HeightRequest="88"
-                   WidthRequest="88"
-                   Aspect="AspectFit"
-                   VerticalOptions="Center"
-                   HorizontalOptions="Center" />
+        <BoxView WidthRequest="434" HeightRequest="678"
+                 CornerRadius="220"
+                 Opacity="0.85"
+                 Margin="92,309,0,0"
+                 HorizontalOptions="Start" VerticalOptions="Start">
+            <BoxView.Background>
+                <RadialGradientBrush Center="0.5,0.5" Radius="0.55">
+                    <GradientStop Color="{StaticResource GradientTeal}" Offset="0.0" />
+                    <GradientStop Color="{StaticResource GradientBlue}" Offset="0.45" />
+                    <GradientStop Color="#00174E86" Offset="1.0" />
+                </RadialGradientBrush>
+            </BoxView.Background>
+        </BoxView>
 
+        <!-- ── Loading state (default) ── -->
+        <Grid x:Name="LoadingPanel"
+              RowDefinitions="*,Auto,48"
+              Padding="24,0">
+
+            <!-- Centered logo icon -->
+            <Border Grid.Row="0"
+                    BackgroundColor="{StaticResource White}"
+                    WidthRequest="88" HeightRequest="88"
+                    HorizontalOptions="Center" VerticalOptions="Center"
+                    StrokeThickness="0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="17"/>
+                </Border.StrokeShape>
+                <Image Source="carditrack_logo.svg"
+                       WidthRequest="79" HeightRequest="68"
+                       Aspect="AspectFit"
+                       HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Border>
+
+            <!-- Loading spinner near bottom -->
             <ActivityIndicator Grid.Row="1"
                                IsRunning="True"
                                Color="{StaticResource White}"
-                               HeightRequest="32" />
-
-            <BoxView Grid.Row="2" HeightRequest="8" Opacity="0" />
+                               HeightRequest="32" WidthRequest="32"
+                               HorizontalOptions="Center" />
         </Grid>
 
+        <!-- ── Error state (hidden by default) ── -->
         <Grid x:Name="ErrorPanel"
               IsVisible="False"
-              Padding="28,48,28,32"
               RowDefinitions="*,Auto,Auto,Auto,*"
-              RowSpacing="12">
+              RowSpacing="0"
+              Padding="28,0">
 
+            <!-- Logo + app name -->
             <VerticalStackLayout Grid.Row="1"
-                                 Spacing="14"
-                                 HorizontalOptions="Center"
-                                 VerticalOptions="Center">
-                <Image Source="carditrack_logo.svg"
-                       HeightRequest="88"
-                       WidthRequest="88"
-                       HorizontalOptions="Center"
-                       Aspect="AspectFit" />
+                                 Spacing="12"
+                                 HorizontalOptions="Center">
+                <Border BackgroundColor="{StaticResource White}"
+                        WidthRequest="88" HeightRequest="88"
+                        HorizontalOptions="Center"
+                        StrokeThickness="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="17"/>
+                    </Border.StrokeShape>
+                    <Image Source="carditrack_logo.svg"
+                           WidthRequest="79" HeightRequest="68"
+                           Aspect="AspectFit"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
+
                 <Label Text="CardiTrack"
-                       TextColor="{StaticResource White}"
-                       FontFamily="OpenSansSemibold"
-                       FontSize="22"
-                       HorizontalOptions="Center"
-                       HorizontalTextAlignment="Center" />
+                       Style="{StaticResource Heading1White}"
+                       HorizontalTextAlignment="Center">
+                    <Label.Shadow>
+                        <Shadow Brush="#A0174E86" Offset="0,2" Radius="7"/>
+                    </Label.Shadow>
+                </Label>
             </VerticalStackLayout>
 
+            <!-- Error message -->
             <Label Grid.Row="2"
                    Text="Hmm, something didn't work."
-                   TextColor="{StaticResource White}"
-                   FontSize="16"
-                   Opacity="0.95"
+                   Style="{StaticResource Body1SemiBold}"
+                   Opacity="0.9"
                    HorizontalTextAlignment="Center"
-                   Margin="0,8,0,0" />
+                   Margin="0,48,0,0" />
 
+            <!-- Retry button -->
             <Button Grid.Row="3"
-                    Text="Try again"
-                    Style="{StaticResource SplashPrimaryButton}"
+                    Text="Start Free 30-Day Trial"
+                    Style="{StaticResource SecondaryOutlineButton}"
                     MaximumWidthRequest="332"
                     HorizontalOptions="Center"
                     Margin="0,16,0,0"

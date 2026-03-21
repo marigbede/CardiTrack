@@ -5,94 +5,133 @@
              xmlns:local="clr-namespace:CardiTrack.Mobile"
              x:Class="CardiTrack.Mobile.WelcomePage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="Transparent"
-             Background="{StaticResource WelcomePageBackground}">
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{StaticResource White}">
 
-    <Grid RowDefinitions="Auto,*,Auto" Padding="0,8,0,0">
+    <Grid RowDefinitions="*,Auto">
 
+        <!-- ── Carousel (hero + text) ── -->
+        <CarouselView x:Name="SlideCarousel"
+                      Grid.Row="0"
+                      ItemsSource="{Binding Source={x:Reference RootPage}, Path=Slides}"
+                      Loop="False"
+                      IsScrollAnimated="True">
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="local:WelcomeSlide">
+                    <Grid RowDefinitions="Auto,Auto,Auto,*">
+
+                        <!-- Hero image: full-bleed with wave overlay -->
+                        <Grid Grid.Row="0" HeightRequest="571"
+                              HorizontalOptions="Fill">
+                            <Image Source="{Binding HeroImage}"
+                                   Aspect="AspectFill"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Fill" />
+                            <Image Source="wave_overlay.svg"
+                                   Aspect="Fill"
+                                   HeightRequest="120"
+                                   VerticalOptions="End"
+                                   HorizontalOptions="Fill"
+                                   InputTransparent="True"/>
+                        </Grid>
+
+                        <!-- Title -->
+                        <Label Grid.Row="1"
+                               Text="{Binding Title}"
+                               Style="{StaticResource Heading1}"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="WordWrap"
+                               Margin="24,8,24,0" />
+
+                        <!-- Subtitle -->
+                        <Label Grid.Row="2"
+                               Text="{Binding Subtitle}"
+                               Style="{StaticResource BodySubtitle}"
+                               Margin="40,12,40,0" />
+                    </Grid>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+
+        <!-- ── Header overlay (logo + sign-up, on top of hero) ── -->
         <Grid Grid.Row="0"
-              Padding="20,8,20,8"
-              ColumnDefinitions="Auto,*">
-            <Image Grid.Column="0"
-                   Source="carditrack_logo.svg"
-                   HeightRequest="46"
-                   WidthRequest="46"
-                   Aspect="AspectFit"
-                   VerticalOptions="Center" />
+              Padding="20,55,20,0"
+              ColumnDefinitions="Auto,*"
+              VerticalOptions="Start"
+              InputTransparent="False">
+
+            <!-- Logo icon -->
+            <Border Grid.Column="0"
+                    BackgroundColor="{StaticResource White}"
+                    WidthRequest="46" HeightRequest="46"
+                    StrokeThickness="0"
+                    VerticalOptions="Start">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="9"/>
+                </Border.StrokeShape>
+                <Image Source="carditrack_logo.svg"
+                       WidthRequest="37" HeightRequest="32"
+                       Aspect="AspectFit"
+                       HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Border>
+
+            <!-- Sign up link -->
             <Label Grid.Column="1"
                    Text="Sign up"
-                   Style="{StaticResource WelcomeSignUpLabel}"
+                   FontFamily="Quicksand"
+                   FontAttributes="Bold"
+                   FontSize="16"
+                   TextColor="{StaticResource White}"
+                   TextDecorations="Underline"
                    HorizontalOptions="End"
-                   VerticalOptions="Center">
+                   VerticalOptions="Start"
+                   Padding="0,8,0,0">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnSignUpTapped" />
                 </Label.GestureRecognizers>
             </Label>
         </Grid>
 
-        <CarouselView x:Name="SlideCarousel"
-                      Grid.Row="1"
-                      ItemsSource="{Binding Source={x:Reference RootPage}, Path=Slides}"
-                      IndicatorView="{x:Reference SlideIndicators}">
-            <CarouselView.ItemTemplate>
-                <DataTemplate x:DataType="local:WelcomeSlide">
-                    <ScrollView>
-                        <VerticalStackLayout Padding="0,0,0,24" Spacing="20">
-                            <!-- Hero: vector SVG + gradient overlays (Figma mask + layered fills) -->
-                            <Grid Margin="20,0,20,0"
-                                  HeightRequest="400"
-                                  HorizontalOptions="Fill">
-                                <Border StrokeThickness="0"
-                                        HorizontalOptions="Fill"
-                                        VerticalOptions="Fill">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="24,24,0,0" />
-                                    </Border.StrokeShape>
-                                    <Grid>
-                                        <Image Source="{Binding HeroImage}"
-                                               Aspect="AspectFill"
-                                               HorizontalOptions="Fill"
-                                               VerticalOptions="Fill" />
-                                        <!-- Bottom fade into white content -->
-                                        <Border StrokeThickness="0"
-                                                VerticalOptions="End"
-                                                HeightRequest="160"
-                                                InputTransparent="True"
-                                                Background="{StaticResource HeroBottomFade}" />
-                                    </Grid>
-                                </Border>
-                            </Grid>
-                            <Label Text="{Binding Title}"
-                                   Style="{StaticResource WelcomeTitleLabel}"
-                                   Margin="24,0" />
-                            <Label Text="{Binding Subtitle}"
-                                   Style="{StaticResource WelcomeSubtitleLabel}"
-                                   Margin="24,0,24,8" />
-                        </VerticalStackLayout>
-                    </ScrollView>
-                </DataTemplate>
-            </CarouselView.ItemTemplate>
-        </CarouselView>
-
-        <VerticalStackLayout Grid.Row="2"
-                             Spacing="14"
+        <!-- ── Bottom area ── -->
+        <VerticalStackLayout Grid.Row="1"
+                             Spacing="10"
                              Padding="20,4,20,28">
-            <IndicatorView x:Name="SlideIndicators"
-                           IndicatorColor="{StaticResource Gray200}"
-                           SelectedIndicatorColor="{StaticResource Gray950}"
-                           IndicatorSize="8"
-                           MaximumVisible="3"
-                           HorizontalOptions="Center" />
+
+            <!-- Custom pill indicators -->
+            <HorizontalStackLayout x:Name="IndicatorPanel"
+                                   HorizontalOptions="Center"
+                                   Spacing="8">
+                <BoxView x:Name="Ind0" WidthRequest="32" HeightRequest="8"
+                         CornerRadius="4" Color="{StaticResource ActiveIndicator}"/>
+                <BoxView x:Name="Ind1" WidthRequest="8" HeightRequest="8"
+                         CornerRadius="4" Color="{StaticResource InactiveIndicator}"/>
+                <BoxView x:Name="Ind2" WidthRequest="8" HeightRequest="8"
+                         CornerRadius="4" Color="{StaticResource InactiveIndicator}"/>
+            </HorizontalStackLayout>
+
+            <!-- CTA button (hidden on slide 0) -->
+            <Button x:Name="CtaButton"
+                    Text="Start Free 30-Day Trial"
+                    Style="{StaticResource PrimaryGradientButton}"
+                    IsVisible="False"
+                    HorizontalOptions="Fill"
+                    Margin="0,6,0,0"
+                    Clicked="OnCtaClicked" />
+
+            <!-- Pricing disclaimer -->
             <Label Text="Then $8/month - Cancel anytime"
-                   Style="{StaticResource WelcomeDisclaimerLabel}"
+                   Style="{StaticResource Body2}"
                    HorizontalTextAlignment="Center" />
+
+            <!-- Terms & Privacy -->
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
                 <Label Text="By continuing, you agree to "
-                       Style="{StaticResource WelcomeDisclaimerLabel}"
+                       Style="{StaticResource Body2}"
                        VerticalTextAlignment="Center" />
                 <Label Text="Terms &amp; Privacy"
-                       TextColor="{StaticResource WelcomeCtaBlue}"
-                       FontFamily="OpenSansSemibold"
+                       TextColor="{StaticResource Primary}"
+                       FontFamily="Quicksand"
+                       FontAttributes="Bold"
                        FontSize="14"
                        TextDecorations="Underline"
                        VerticalTextAlignment="Center">
@@ -101,12 +140,6 @@
                     </Label.GestureRecognizers>
                 </Label>
             </HorizontalStackLayout>
-            <Button x:Name="ContinueButton"
-                    Text="Continue"
-                    Style="{StaticResource WelcomeCtaButton}"
-                    MaximumWidthRequest="332"
-                    HorizontalOptions="Center"
-                    Clicked="OnContinueClicked" />
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

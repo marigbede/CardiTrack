@@ -2,7 +2,6 @@ namespace CardiTrack.Mobile;
 
 public partial class SplashPage : ContentPage
 {
-    /// <summary>Set to true to verify the error state UI (DEBUG only).</summary>
     private const bool SimulateStartupFailure = false;
 
     private bool _scheduledInitialStartup;
@@ -39,7 +38,6 @@ public partial class SplashPage : ContentPage
                 throw new InvalidOperationException("Simulated splash failure.");
 #endif
 
-            // Future: await startup / session / config load (e.g. API ping).
             await Task.Delay(200);
 
             await MainThread.InvokeOnMainThreadAsync(() =>

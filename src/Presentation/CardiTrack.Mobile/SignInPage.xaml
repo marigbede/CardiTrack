@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CardiTrack.Mobile.SignInPage"
+             Shell.NavBarIsVisible="False"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{StaticResource White}">
+
+    <ScrollView>
+        <Grid RowDefinitions="Auto,*">
+
+            <!-- ════════════════════════════════════════
+                 GRADIENT HEADER
+                 ════════════════════════════════════════ -->
+            <Grid Grid.Row="0" HeightRequest="210" HorizontalOptions="Fill">
+                <BoxView Color="{StaticResource White}" HorizontalOptions="Fill" VerticalOptions="Fill"/>
+
+                <BoxView WidthRequest="434" HeightRequest="678"
+                         CornerRadius="220" Opacity="0.85"
+                         Margin="-78,-321,0,0"
+                         HorizontalOptions="Start" VerticalOptions="Start">
+                    <BoxView.Background>
+                        <RadialGradientBrush Center="0.5,0.5" Radius="0.55">
+                            <GradientStop Color="{StaticResource GradientBlue}" Offset="0.0"/>
+                            <GradientStop Color="{StaticResource GradientDarkBlue}" Offset="0.5"/>
+                            <GradientStop Color="#00174E86" Offset="1.0"/>
+                        </RadialGradientBrush>
+                    </BoxView.Background>
+                </BoxView>
+
+                <BoxView WidthRequest="434" HeightRequest="678"
+                         CornerRadius="220" Opacity="0.85"
+                         Margin="92,309,0,0"
+                         HorizontalOptions="Start" VerticalOptions="Start">
+                    <BoxView.Background>
+                        <RadialGradientBrush Center="0.5,0.5" Radius="0.55">
+                            <GradientStop Color="{StaticResource GradientTeal}" Offset="0.0"/>
+                            <GradientStop Color="{StaticResource GradientBlue}" Offset="0.45"/>
+                            <GradientStop Color="#00174E86" Offset="1.0"/>
+                        </RadialGradientBrush>
+                    </BoxView.Background>
+                </BoxView>
+
+                <VerticalStackLayout Padding="20,48,20,0"
+                                     Spacing="4"
+                                     VerticalOptions="Start">
+                    <Label Text="Welcome Back"
+                           Style="{StaticResource Heading1White}" />
+                    <Label Text="Sign in to keep watching over your family"
+                           Style="{StaticResource Body1SemiBold}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- ════════════════════════════════════════
+                 WHITE CARD FORM
+                 ════════════════════════════════════════ -->
+            <Border Grid.Row="1"
+                    BackgroundColor="{StaticResource White}"
+                    StrokeThickness="0"
+                    Margin="0,-30,0,0"
+                    Padding="20,20,20,36">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="30,30,0,0"/>
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="6">
+
+                    <!-- Email Address -->
+                    <Label Text="Email Address" Style="{StaticResource AuthFieldLabel}"/>
+                    <Border x:Name="EmailBorder" Style="{StaticResource AuthEntryBorder}">
+                        <Entry x:Name="EmailEntry"
+                               Style="{StaticResource AuthEntry}"
+                               Placeholder="Your email"
+                               Keyboard="Email"
+                               ReturnType="Next"/>
+                    </Border>
+
+                    <!-- Password -->
+                    <Label Text="Password" Style="{StaticResource AuthFieldLabel}" Margin="0,8,0,2"/>
+                    <Border x:Name="PasswordBorder" Style="{StaticResource AuthEntryBorder}">
+                        <Entry x:Name="PasswordEntry"
+                               Style="{StaticResource AuthEntry}"
+                               Placeholder="Enter your password"
+                               IsPassword="True"
+                               ReturnType="Done"/>
+                    </Border>
+
+                    <!-- Remember me + Forgot password row -->
+                    <Grid ColumnDefinitions="Auto,Auto,*"
+                          Margin="0,8,0,0">
+                        <CheckBox Grid.Column="0"
+                                  x:Name="RememberCheck"
+                                  Color="{StaticResource Primary}"
+                                  WidthRequest="20" HeightRequest="20"
+                                  VerticalOptions="Center"/>
+                        <Label Grid.Column="1"
+                               Text="Remember me"
+                               Style="{StaticResource Body2Medium}"
+                               TextColor="{StaticResource BodyText}"
+                               VerticalTextAlignment="Center"
+                               Margin="4,0,0,0"/>
+                        <Label Grid.Column="2"
+                               Text="Forgot password"
+                               Style="{StaticResource PrimaryLink}"
+                               HorizontalOptions="End"
+                               VerticalTextAlignment="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnForgotPasswordTapped"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+
+                    <!-- Sign in button -->
+                    <Button x:Name="SignInBtn"
+                            Text="Sign in"
+                            Style="{StaticResource AuthGradientButton}"
+                            HorizontalOptions="Fill"
+                            Margin="0,20,0,0"
+                            Clicked="OnSignInClicked"/>
+
+                    <!-- Divider -->
+                    <Grid ColumnDefinitions="*,Auto,*"
+                          Margin="0,12,0,12">
+                        <BoxView Grid.Column="0" Style="{StaticResource DividerLine}"/>
+                        <Label Grid.Column="1"
+                               Text="Or continue with"
+                               Style="{StaticResource Body2}"
+                               TextColor="{StaticResource MutedText}"
+                               Margin="16,0"/>
+                        <BoxView Grid.Column="2" Style="{StaticResource DividerLine}"/>
+                    </Grid>
+
+                    <!-- Social login buttons -->
+                    <Grid ColumnDefinitions="*,12,*">
+                        <Border Grid.Column="0" Style="{StaticResource GoogleButton}">
+                            <HorizontalStackLayout HorizontalOptions="Center"
+                                                   VerticalOptions="Center"
+                                                   Spacing="7">
+                                <Label Text="G" FontFamily="Quicksand" FontAttributes="Bold"
+                                       FontSize="20" TextColor="#4285F4"
+                                       VerticalTextAlignment="Center"/>
+                                <Label Text="Google" FontFamily="Quicksand" FontAttributes="Bold"
+                                       FontSize="18" TextColor="{StaticResource Primary}"
+                                       VerticalTextAlignment="Center"/>
+                            </HorizontalStackLayout>
+                        </Border>
+
+                        <Border Grid.Column="2" Style="{StaticResource AppleButton}">
+                            <HorizontalStackLayout HorizontalOptions="Center"
+                                                   VerticalOptions="Center"
+                                                   Spacing="7">
+                                <Label Text="&#xF8FF;" FontSize="20"
+                                       TextColor="{StaticResource White}"
+                                       VerticalTextAlignment="Center"/>
+                                <Label Text="Apple" FontFamily="Quicksand" FontAttributes="Bold"
+                                       FontSize="18" TextColor="{StaticResource White}"
+                                       VerticalTextAlignment="Center"/>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </Grid>
+
+                    <!-- Sign-up link -->
+                    <HorizontalStackLayout HorizontalOptions="Center"
+                                           Margin="0,24,0,0"
+                                           Spacing="2">
+                        <Label Text="Don't have an account"
+                               Style="{StaticResource Body2}"
+                               VerticalTextAlignment="Center"/>
+                        <Label Text="Sign Up"
+                               Style="{StaticResource PrimaryLink}"
+                               VerticalTextAlignment="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnSignUpTapped"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </ScrollView>
+</ContentPage>

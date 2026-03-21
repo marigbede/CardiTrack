@@ -1,0 +1,152 @@
+using App = Microsoft.Maui.Controls.Application;
+
+namespace CardiTrack.Mobile;
+
+public partial class CreateAccountPage : ContentPage
+{
+    private readonly BoxView[] _strengthBars;
+
+    public CreateAccountPage()
+    {
+        InitializeComponent();
+        _strengthBars = [Str0, Str1, Str2, Str3];
+    }
+
+    private void OnPasswordTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        var strength = EvaluatePasswordStrength(e.NewTextValue ?? string.Empty);
+        UpdateStrengthIndicator(strength);
+    }
+
+    private static int EvaluatePasswordStrength(string password)
+    {
+        if (string.IsNullOrEmpty(password)) return 0;
+        var score = 0;
+        if (password.Length >= 4) score++;
+        if (password.Length >= 8) score++;
+        if (password.Any(char.IsUpper) && password.Any(char.IsLower)) score++;
+        if (password.Any(c => !char.IsLetterOrDigit(c))) score++;
+        return score;
+    }
+
+    private void UpdateStrengthIndicator(int score)
+    {
+        var (color, label) = score switch
+        {
+            0 => ((Color)App.Current!.Resources["Divider"], ""),
+            1 => ((Color)App.Current!.Resources["ErrorRed"], "Password strength: Weak"),
+            2 => ((Color)App.Current!.Resources["Primary"], "Password strength: Medium"),
+            3 => ((Color)App.Current!.Resources["Primary"], "Password strength: Strong"),
+            _ => ((Color)App.Current!.Resources["StrengthStrong"], "Password strength: Strong"),
+        };
+
+        var emptyColor = (Color)App.Current!.Resources["Divider"];
+
+        for (var i = 0; i < _strengthBars.Length; i++)
+            _strengthBars[i].Color = i < score ? color : emptyColor;
+
+        StrengthLabel.Text = label;
+        StrengthLabel.TextColor = color;
+    }
+
+    private bool ValidateForm()
+    {
+        var valid = true;
+        var errorBorder = (Color)App.Current!.Resources["ErrorRed"];
+        var normalBorder = (Color)App.Current!.Resources["InputBorder"];
+
+        if (string.IsNullOrWhiteSpace(NameEntry.Text))
+        {
+            NameBorder.Stroke = new SolidColorBrush(errorBorder);
+            NameError.Text = "Name is required";
+            NameError.IsVisible = true;
+            valid = false;
+        }
+        else
+        {
+            NameBorder.Stroke = new SolidColorBrush(normalBorder);
+            NameError.IsVisible = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(EmailEntry.Text) || !EmailEntry.Text.Contains('@'))
+        {
+            EmailBorder.Stroke = new SolidColorBrush(errorBorder);
+            EmailError.Text = "Valid email is required";
+            EmailError.IsVisible = true;
+            valid = false;
+        }
+        else
+        {
+            EmailBorder.Stroke = new SolidColorBrush(normalBorder);
+            EmailError.IsVisible = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(PasswordEntry.Text) || PasswordEntry.Text.Length < 8)
+        {
+            PasswordBorder.Stroke = new SolidColorBrush(errorBorder);
+            valid = false;
+        }
+        else
+        {
+            PasswordBorder.Stroke = new SolidColorBrush(normalBorder);
+        }
+
+        if (ConfirmEntry.Text != PasswordEntry.Text)
+        {
+            ConfirmBorder.Stroke = new SolidColorBrush(errorBorder);
+            ConfirmError.Text = "Password do not match";
+            ConfirmError.IsVisible = true;
+            valid = false;
+        }
+        else
+        {
+            ConfirmBorder.Stroke = new SolidColorBrush(normalBorder);
+            ConfirmError.IsVisible = false;
+        }
+
+        return valid;
+    }
+
+    private async void OnCreateAccountClicked(object? sender, EventArgs e)
+    {
+        if (!ValidateForm())
+            return;
+
+        if (!TermsCheck.IsChecked)
+        {
+            await DisplayAlertAsync("Terms Required", "Please agree to the Terms of Service and Privacy Policy.", "OK");
+            return;
+        }
+
+        SetLoadingState(true);
+
+        try
+        {
+            await Task.Delay(1500);
+            await DisplayAlertAsync("Success", "Account created (placeholder).", "OK");
+        }
+        catch
+        {
+            ErrorBanner.IsVisible = true;
+        }
+        finally
+        {
+            SetLoadingState(false);
+        }
+    }
+
+    private void SetLoadingState(bool loading)
+    {
+        CreateBtn.Text = loading ? "Create Account..." : "Create Account";
+        CreateBtn.IsEnabled = !loading;
+        NameEntry.IsEnabled = !loading;
+        EmailEntry.IsEnabled = !loading;
+        PasswordEntry.IsEnabled = !loading;
+        ConfirmEntry.IsEnabled = !loading;
+    }
+
+    private async void OnSignInTapped(object? sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new SignInPage());
+    }
+}
