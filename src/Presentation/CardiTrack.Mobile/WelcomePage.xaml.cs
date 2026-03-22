@@ -28,6 +28,9 @@ public partial class WelcomePage : ContentPage
 
         var idx = IndexOf(current);
 
+        SlideTitle.Text = current.Title;
+        SlideSubtitle.Text = current.Subtitle;
+
         for (var i = 0; i < _indicators.Length; i++)
         {
             _indicators[i].WidthRequest = i == idx ? 32 : 8;

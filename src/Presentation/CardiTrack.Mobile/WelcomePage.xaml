@@ -8,59 +8,40 @@
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="{StaticResource White}">
 
-    <Grid RowDefinitions="*,Auto">
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
 
-        <!-- ── Carousel (hero + text) ── -->
+        <!-- ── Carousel (hero image only — swipes between slides) ── -->
         <CarouselView x:Name="SlideCarousel"
                       Grid.Row="0"
+                      HeightRequest="571"
                       ItemsSource="{Binding Source={x:Reference RootPage}, Path=Slides}"
                       Loop="False"
                       IsScrollAnimated="True">
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="local:WelcomeSlide">
-                    <Grid RowDefinitions="Auto,Auto,Auto,*">
-
-                        <!-- Hero image: full-bleed with wave overlay -->
-                        <Grid Grid.Row="0" HeightRequest="571"
-                              HorizontalOptions="Fill">
-                            <Image Source="{Binding HeroImage}"
-                                   Aspect="AspectFill"
-                                   HorizontalOptions="Fill"
-                                   VerticalOptions="Fill" />
-                            <Image Source="wave_overlay.svg"
-                                   Aspect="Fill"
-                                   HeightRequest="120"
-                                   VerticalOptions="End"
-                                   HorizontalOptions="Fill"
-                                   InputTransparent="True"/>
-                        </Grid>
-
-                        <!-- Title -->
-                        <Label Grid.Row="1"
-                               Text="{Binding Title}"
-                               Style="{StaticResource Heading1}"
-                               HorizontalTextAlignment="Center"
-                               LineBreakMode="WordWrap"
-                               Margin="24,8,24,0" />
-
-                        <!-- Subtitle -->
-                        <Label Grid.Row="2"
-                               Text="{Binding Subtitle}"
-                               Style="{StaticResource BodySubtitle}"
-                               Margin="40,12,40,0" />
+                    <Grid>
+                        <Image Source="{Binding HeroImage}"
+                               Aspect="AspectFill"
+                               HorizontalOptions="Fill"
+                               VerticalOptions="Fill" />
+                        <Image Source="wave_overlay.svg"
+                               Aspect="Fill"
+                               HeightRequest="120"
+                               VerticalOptions="End"
+                               HorizontalOptions="Fill"
+                               InputTransparent="True"/>
                     </Grid>
                 </DataTemplate>
             </CarouselView.ItemTemplate>
         </CarouselView>
 
-        <!-- ── Header overlay (logo + sign-up, on top of hero) ── -->
+        <!-- ── Header overlay (logo + sign-up, static on top of hero) ── -->
         <Grid Grid.Row="0"
               Padding="20,55,20,0"
               ColumnDefinitions="Auto,*"
               VerticalOptions="Start"
               InputTransparent="False">
 
-            <!-- Logo icon -->
             <Border Grid.Column="0"
                     BackgroundColor="{StaticResource White}"
                     WidthRequest="46" HeightRequest="46"
@@ -75,7 +56,6 @@
                        HorizontalOptions="Center" VerticalOptions="Center"/>
             </Border>
 
-            <!-- Sign up link -->
             <Label Grid.Column="1"
                    Text="Sign up"
                    FontFamily="Quicksand"
@@ -92,8 +72,22 @@
             </Label>
         </Grid>
 
-        <!-- ── Bottom area ── -->
-        <VerticalStackLayout Grid.Row="1"
+        <!-- ── Static title (updated by code-behind on slide change) ── -->
+        <Label x:Name="SlideTitle"
+               Grid.Row="1"
+               Style="{StaticResource Heading1}"
+               HorizontalTextAlignment="Center"
+               LineBreakMode="WordWrap"
+               Margin="24,8,24,0" />
+
+        <!-- ── Static subtitle ── -->
+        <Label x:Name="SlideSubtitle"
+               Grid.Row="2"
+               Style="{StaticResource BodySubtitle}"
+               Margin="40,12,40,0" />
+
+        <!-- ── Bottom area (static) ── -->
+        <VerticalStackLayout Grid.Row="4"
                              Spacing="10"
                              Padding="20,4,20,28">
 
