@@ -37,7 +37,7 @@
 
         <!-- ── Header overlay (logo + sign-up, static on top of hero) ── -->
         <Grid Grid.Row="0"
-              Padding="20,55,20,0"
+              Padding="20,16,20,0"
               ColumnDefinitions="Auto,*"
               VerticalOptions="Start"
               InputTransparent="False">
@@ -64,8 +64,7 @@
                    TextColor="{StaticResource White}"
                    TextDecorations="Underline"
                    HorizontalOptions="End"
-                   VerticalOptions="Start"
-                   Padding="0,8,0,0">
+                   VerticalOptions="Center">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnSignUpTapped" />
                 </Label.GestureRecognizers>
@@ -78,18 +77,18 @@
                Style="{StaticResource Heading1}"
                HorizontalTextAlignment="Center"
                LineBreakMode="WordWrap"
-               Margin="24,8,24,0" />
+               Margin="24,20,24,0" />
 
         <!-- ── Static subtitle ── -->
         <Label x:Name="SlideSubtitle"
                Grid.Row="2"
                Style="{StaticResource BodySubtitle}"
-               Margin="40,12,40,0" />
+               Margin="40,16,40,0" />
 
         <!-- ── Bottom area (static) ── -->
         <VerticalStackLayout Grid.Row="4"
-                             Spacing="10"
-                             Padding="20,4,20,28">
+                             Spacing="0"
+                             Padding="20,0,20,28">
 
             <!-- Custom pill indicators -->
             <HorizontalStackLayout x:Name="IndicatorPanel"
@@ -103,22 +102,23 @@
                          CornerRadius="4" Color="{StaticResource InactiveIndicator}"/>
             </HorizontalStackLayout>
 
-            <!-- CTA button (hidden on slide 0) -->
+            <!-- CTA button (Button 5 — x=54 w=332 in 440px frame) -->
             <Button x:Name="CtaButton"
                     Text="Start Free 30-Day Trial"
                     Style="{StaticResource PrimaryGradientButton}"
-                    IsVisible="False"
                     HorizontalOptions="Fill"
-                    Margin="0,6,0,0"
+                    Margin="34,30,34,0"
                     Clicked="OnCtaClicked" />
 
             <!-- Pricing disclaimer -->
             <Label Text="Then $8/month - Cancel anytime"
                    Style="{StaticResource Body2}"
-                   HorizontalTextAlignment="Center" />
+                   HorizontalTextAlignment="Center"
+                   Margin="0,16,0,0" />
 
             <!-- Terms & Privacy -->
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="0"
+                                   Margin="0,30,0,0">
                 <Label Text="By continuing, you agree to "
                        Style="{StaticResource Body2}"
                        VerticalTextAlignment="Center" />

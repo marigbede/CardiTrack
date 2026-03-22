@@ -38,8 +38,6 @@ public partial class WelcomePage : ContentPage
                 ? (Color)App.Current!.Resources["ActiveIndicator"]
                 : (Color)App.Current!.Resources["InactiveIndicator"];
         }
-
-        CtaButton.IsVisible = idx > 0;
     }
 
     private int IndexOf(WelcomeSlide slide)
