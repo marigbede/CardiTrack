@@ -41,18 +41,18 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#135497" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.png" Color="#135497" />
 
 		<!-- Splash Screen (aligned to in-app splash blues) -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#174E86" BaseSize="128,128" />
+		<MauiSplashScreen Include="Resources\Splash\splash.png" Color="#174E86" BaseSize="128,128" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 		<MauiImage Update="Resources\Images\carditrack_logo.png" BaseSize="88,88" />
-		<MauiImage Update="Resources\Images\welcome_hero_a.svg" />
-		<MauiImage Update="Resources\Images\welcome_hero_b.svg" />
-		<MauiImage Update="Resources\Images\welcome_hero_c.svg" />
+		<MauiImage Update="Resources\Images\welcome_hero_a.png" Resize="True" BaseSize="440,571" />
+		<MauiImage Update="Resources\Images\welcome_hero_b.png" Resize="True" BaseSize="440,571" />
+		<MauiImage Update="Resources\Images\welcome_hero_c.png" Resize="True" BaseSize="440,571" />
 		
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />

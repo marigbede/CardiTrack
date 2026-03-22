@@ -24,9 +24,9 @@
                                Aspect="AspectFill"
                                HorizontalOptions="Fill"
                                VerticalOptions="Fill" />
-                        <Image Source="wave_overlay.svg"
+                        <Image Source="{Binding WaveOverlay}"
                                Aspect="Fill"
-                               HeightRequest="120"
+                               HeightRequest="150"
                                VerticalOptions="End"
                                HorizontalOptions="Fill"
                                InputTransparent="True"/>
