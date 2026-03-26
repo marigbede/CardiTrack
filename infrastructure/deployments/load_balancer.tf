@@ -65,7 +65,7 @@ resource "google_compute_security_policy" "waf" {
     action   = "deny(403)"
     priority = 50
     match {
-      expr { expression = "request.headers['user-agent'].matches('(?i)curl.*') || request.headers['user-agent'].matches('(?i)libredtail-http.*') || request.headers['user-agent'].matches('(?i)go-http-client/1\\.1.*') || request.headers['user-agent'].matches('(?i).*censysinspect.*')" }
+      expr { expression = "request.headers['user-agent'].matches('(?i)curl.*') || request.headers['user-agent'].matches('(?i)libredtail-http.*') || request.headers['user-agent'].matches('(?i)go-http-client/1[.]1.*') || request.headers['user-agent'].matches('(?i).*censysinspect.*')" }
     }
     description = "Block known bad user agents (curl, libredtail-http, Go-http-client/1.1, CensysInspect)"
   }
