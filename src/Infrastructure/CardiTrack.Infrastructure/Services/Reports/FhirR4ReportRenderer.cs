@@ -26,10 +26,18 @@ namespace CardiTrack.Infrastructure.Services.Reports;
 /// <para>
 /// <strong>No free text crosses into a FHIR export</strong> — no medical notes, no alert message
 /// bodies, no caregiver device labels (docs/technical/data_protection_architecture.md §70, §85).
-/// Alerts appear as coded observations of the reading that triggered them, not as prose. What does
-/// carry through is the member's real identity: unlike the AI narrative path, this document is
-/// going to the subject's own care team, and a <c>Patient</c> resource without a name is useless
-/// to the receiving system.
+/// What does carry through is the member's real identity: unlike the AI narrative path, this
+/// document is going to the subject's own care team, and a <c>Patient</c> resource without a name
+/// is useless to the receiving system.
+/// </para>
+/// <para>
+/// <strong>Alerts are not in the bundle</strong>, in MVP 1. They are CardiTrack's own statistical
+/// findings, and the honest FHIR shapes for them (<c>DetectedIssue</c>, <c>Flag</c>, or an
+/// <c>Observation</c> carrying the triggering reading) each imply a different clinical meaning to
+/// the receiving system — a choice with an external judge, which is the same reason a reading with
+/// no agreed LOINC code is omitted rather than given an invented one. <c>GenerateReportValidator</c>
+/// therefore refuses a FHIR request that would carry nothing but alerts, so the gap is a 400 the
+/// caregiver can act on rather than a bundle that arrives quietly missing what they asked for.
 /// </para>
 /// <para>
 /// Every resource is labelled <c>R</c> (restricted) under the FHIR confidentiality vocabulary, so

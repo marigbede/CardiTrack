@@ -46,7 +46,8 @@ public partial class ExportHealthDataPage : ContentPage
         (ReportFormat.Csv, "CSV spreadsheet",
             "The raw daily numbers, to open in Excel or Numbers."),
         (ReportFormat.FhirR4, "FHIR R4",
-            "Accepted by most US patient portals and EHR systems — for a doctor's office."),
+            "Accepted by most US patient portals and EHR systems — for a doctor's office. "
+            + "Carries readings and devices; alerts are in the PDF and CSV."),
     ];
 
     private readonly ICardiTrackApiClient _api;
@@ -268,6 +269,17 @@ public partial class ExportHealthDataPage : ContentPage
         if (!anySection)
         {
             EstimateLabel.Text = "Choose at least one kind of data to include.";
+            ExportButton.IsEnabled = false;
+            return;
+        }
+
+        // The API refuses this too; saying so here means the caregiver finds out while they can
+        // still fix it, rather than after tapping Export.
+        if (_selectedFormat == ReportFormat.FhirR4 && !MetricsCheck.IsChecked && !DevicesCheck.IsChecked)
+        {
+            EstimateLabel.Text =
+                "FHIR R4 carries readings and devices — tick one of those, or choose PDF or CSV "
+                + "to export alerts.";
             ExportButton.IsEnabled = false;
             return;
         }

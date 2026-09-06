@@ -166,6 +166,49 @@ public class GenerateReportValidatorTests
         Assert.False(_validator.Validate(Build(format: (ReportFormat)99)).IsValid);
     }
 
+    // ── FHIR section coverage ───────────────────────────────────────────────────
+
+    [Fact]
+    public void Rejects_AFhirRequestCarryingOnlyAlerts()
+    {
+        // FHIR R4 doesn't carry alerts in MVP 1, so this would render a lone Patient resource —
+        // a "successful" export missing the only thing asked for.
+        var result = _validator.Validate(Build(
+            format: ReportFormat.FhirR4,
+            includeMetrics: false, includeAlerts: true, includeDevices: false));
+
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public void Accepts_AFhirRequestWithAlertsAlongsideReadings()
+    {
+        // Ticking alerts as well is fine — the readings still arrive, and M1-17's format card
+        // says what FHIR carries. Only the carries-nothing case is refused.
+        var result = _validator.Validate(Build(
+            format: ReportFormat.FhirR4,
+            includeMetrics: true, includeAlerts: true, includeDevices: false));
+
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void Accepts_AFhirRequestCarryingOnlyDevices()
+    {
+        Assert.True(_validator.Validate(Build(
+            format: ReportFormat.FhirR4,
+            includeMetrics: false, includeAlerts: false, includeDevices: true)).IsValid);
+    }
+
+    [Fact]
+    public void Accepts_APdfRequestCarryingOnlyAlerts()
+    {
+        // The FHIR rule is scoped to FHIR: the PDF and CSV do render alerts.
+        Assert.True(_validator.Validate(Build(
+            format: ReportFormat.Pdf,
+            includeMetrics: false, includeAlerts: true, includeDevices: false)).IsValid);
+    }
+
     // ── Sections ────────────────────────────────────────────────────────────────
 
     [Fact]

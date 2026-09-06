@@ -404,6 +404,23 @@ public class ReportRendererTests
     }
 
     [Fact]
+    public async Task Fhir_CarriesNoAlerts_AndSaysSo()
+    {
+        // Pins the documented MVP 1 gap rather than the absence being incidental: alerts are
+        // CardiTrack's own findings, and the honest FHIR shapes for them each imply a different
+        // clinical meaning to the receiving system. GenerateReportValidator refuses a FHIR request
+        // that would carry nothing but alerts, so this gap cannot reach a caregiver silently.
+        var bundle = await RenderBundleAsync(BuildData(alerts: [BuildAlert()]));
+
+        Assert.DoesNotContain(
+            bundle.Entry.Select(e => e.Resource),
+            r => r is DetectedIssue or Flag);
+        Assert.DoesNotContain(
+            bundle.Entry.Select(e => e.Resource).OfType<Observation>(),
+            o => o.Code.Coding.Any(c => c.Code == "alert"));
+    }
+
+    [Fact]
     public async Task Fhir_IgnoresTheNarrative_EvenWhenOneIsOffered()
     {
         var rendered = await new FhirR4ReportRenderer()

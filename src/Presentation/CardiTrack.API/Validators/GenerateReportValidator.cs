@@ -58,5 +58,16 @@ public class GenerateReportValidator : AbstractValidator<GenerateReportRequest>
         RuleFor(x => x)
             .Must(x => x.IncludeMetrics || x.IncludeAlerts || x.IncludeDevices)
                 .WithMessage("Choose at least one kind of data to include");
+
+        // FHIR R4 does not carry alerts in MVP 1 (see FhirR4ReportRenderer), so a bundle asked
+        // for with only alerts ticked would be a lone Patient resource — a "successful" export
+        // missing the one thing that was requested. Refusing it makes the gap a 400 the caregiver
+        // can act on. Ticking alerts alongside readings is fine: they get the readings, and the
+        // format card on M1-17 says what FHIR carries.
+        RuleFor(x => x)
+            .Must(x => x.IncludeMetrics || x.IncludeDevices)
+                .WithMessage("FHIR R4 exports carry readings and devices — tick one of those too, "
+                    + "or choose PDF or CSV to export alerts")
+            .When(x => x.Format == ReportFormat.FhirR4);
     }
 }

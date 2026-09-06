@@ -62,7 +62,7 @@ Flat shape — date range and section toggles are **top-level fields**, not nest
 | `includeDevices` | boolean | No | Include device provenance — device **types** only, never caregiver labels (default `false`) |
 | `title` | string | No | Rendered onto the PDF cover; ignored by CSV and FHIR |
 
-`GenerateReportValidator` enforces the rules above. At least one of `includeMetrics` / `includeAlerts` / `includeDevices` must be true.
+`GenerateReportValidator` enforces the rules above. At least one of `includeMetrics` / `includeAlerts` / `includeDevices` must be true, and for `format: 3` (FHIR R4) at least one of `includeMetrics` / `includeDevices` must be true — see the FHIR note under the download endpoint.
 
 ### Response `202 Accepted` (wrapped in `ApiResponse<T>`)
 
@@ -177,7 +177,7 @@ What each format contains:
 
 - **PDF** — the AI narrative (labelled as AI-generated), then a daily table per member, then alerts. A confidentiality footer and page numbers on every page, because printed pages get separated. A reading the device never reported prints as an em dash, never a zero.
 - **CSV** — one row per member per day for the daily metrics, then an alerts block, then a devices block, separated by blank lines. UTF-8 **with a BOM** (without it Excel on Windows mangles non-ASCII names); invariant numbers and ISO dates. A missing reading is an empty cell, never a zero.
-- **FHIR R4** — a `collection` `Bundle` of `Patient`, `Device` and one `Observation` per metric per day, LOINC-coded with UCUM units, every resource labelled `R` (restricted). Resource ids are real GUIDs, because `urn:uuid:` is a registered scheme and a strict parser rejects anything else. A reading with no agreed LOINC code is omitted rather than given an invented one.
+- **FHIR R4** — a `collection` `Bundle` of `Patient`, `Device` and one `Observation` per metric per day, LOINC-coded with UCUM units, every resource labelled `R` (restricted). Resource ids are real GUIDs, because `urn:uuid:` is a registered scheme and a strict parser rejects anything else. A reading with no agreed LOINC code is omitted rather than given an invented one. **Alerts are not in the bundle in MVP 1** — they are CardiTrack's own statistical findings, and `DetectedIssue`, `Flag` and an `Observation` of the triggering reading each imply a different clinical meaning to the receiving system. A FHIR request whose only selected section is alerts is **refused with 400** rather than answered with a lone `Patient`; ticking alerts alongside readings is accepted and the readings are returned.
 
 > **Still not implemented:** HL7 v2 (MVP 2, rejected at validation), LOINC/CCD (MVP 2), SNOMED CT (MVP 3), and `X-HIPAA-Confidential` response headers.
 
