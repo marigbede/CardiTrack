@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using CardiTrack.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CardiTrack.Infrastructure.Migrations
 {
     [DbContext(typeof(CardiTrackDbContext))]
-    partial class CardiTrackDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260906170034_AddReportsTable")]
+    partial class AddReportsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1402,150 +1405,6 @@ namespace CardiTrack.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("MemberStatusLines", (string)null);
-                });
-
-            modelBuilder.Entity("CardiTrack.Domain.Entities.MetricAlarm", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CardiMemberId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ContextGate")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<int>("DatapointsToAlarm")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("DerivedFromAlarmId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("EvaluationPeriods")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true);
-
-                    b.Property<bool>("IsEnabled")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Metric")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
-
-                    b.Property<string>("MissingDataTreatment")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
-
-                    b.Property<string>("Operator")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("PeriodMinutes")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Severity")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("Statistic")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("ThresholdKind")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<decimal>("ThresholdValue")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DerivedFromAlarmId");
-
-                    b.HasIndex("CardiMemberId", "DerivedFromAlarmId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_MetricAlarms_OneOverridePerMemberPerDefault")
-                        .HasFilter("\"DerivedFromAlarmId\" IS NOT NULL AND \"IsActive\"");
-
-                    b.HasIndex("OrganizationId", "CardiMemberId");
-
-                    b.ToTable("MetricAlarms", (string)null);
-                });
-
-            modelBuilder.Entity("CardiTrack.Domain.Entities.MetricAlarmState", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CardiMemberId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<Guid?>("LastAlertId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("LastEvaluatedUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("MetricAlarmId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<DateTime>("StateSinceUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CardiMemberId");
-
-                    b.HasIndex("MetricAlarmId", "CardiMemberId")
-                        .IsUnique();
-
-                    b.ToTable("MetricAlarmStates", (string)null);
                 });
 
             modelBuilder.Entity("CardiTrack.Domain.Entities.MetricRollupHourly", b =>

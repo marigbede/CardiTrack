@@ -31,6 +31,7 @@ public interface IUnitOfWork : IDisposable
     IMemberChatTurnUsageRepository MemberChatTurnUsages { get; }
     IMemberStatusLineRepository MemberStatusLines { get; }
     IMemberAdviseRepository MemberAdvises { get; }
+    IReportRepository Reports { get; }
 
     Task<int> SaveChangesAsync();
 
