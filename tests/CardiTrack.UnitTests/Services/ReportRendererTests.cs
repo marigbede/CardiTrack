@@ -356,6 +356,31 @@ public class ReportRendererTests
     }
 
     [Theory]
+    [InlineData("8867-4", "vital-signs")]   // heart rate
+    [InlineData("40443-4", "vital-signs")]  // resting heart rate
+    [InlineData("59408-5", "vital-signs")]  // SpO2
+    [InlineData("9279-1", "vital-signs")]   // respiratory rate
+    [InlineData("55423-8", "activity")]     // steps
+    [InlineData("93832-4", "activity")]     // sleep duration
+    public async Task Fhir_CategorisesEachObservationForTheReceivingPortal(string loinc, string category)
+    {
+        // Portals group and validate on Observation.category, and several drive their vitals view
+        // from it — so a heart rate filed under "activity" lands where a clinician's vitals panel
+        // will not look for it.
+        var day = FullDay();
+        day.BreathingRate = 14.2m;
+
+        var bundle = await RenderBundleAsync(BuildData(logs: [day]));
+        var observation = Assert.Single(
+            bundle.Entry.Select(e => e.Resource).OfType<Observation>(),
+            o => o.Code.Coding.Any(c => c.Code == loinc));
+
+        var coding = Assert.Single(Assert.Single(observation.Category).Coding);
+        Assert.Equal("http://terminology.hl7.org/CodeSystem/observation-category", coding.System);
+        Assert.Equal(category, coding.Code);
+    }
+
+    [Theory]
     [InlineData("55423-8")] // steps
     [InlineData("40443-4")] // resting heart rate
     [InlineData("8867-4")]  // heart rate

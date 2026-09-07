@@ -115,6 +115,11 @@ public partial class ExportHealthDataPage : ContentPage
 
         ShowOnly(SkeletonPanel);
 
+        // Anything left in the cache by a previous visit — the caregiver hit back, or the OS
+        // killed the app, on a path no explicit cleanup can cover. Swept on arrival rather than
+        // on the way out, because leaving is also what happens when the share sheet opens.
+        DiscardCachedExports();
+
         try
         {
             // Both up front: without the member list there is nothing to export, and without the
@@ -462,10 +467,55 @@ public partial class ExportHealthDataPage : ContentPage
 
     private void OnStartOverClicked(object? sender, EventArgs e)
     {
+        // Delete, not just dereference. The comment on WriteToCacheAsync calls this copy a
+        // liability with no reader, and the caregiver asking for a different export is the one
+        // moment we know for certain they are finished with this one.
+        DiscardCachedExports();
+
         _ready = null;
         _readyPath = null;
         ShowOnly(FormPanel);
         UpdateEstimate();
+    }
+
+    /// <summary>
+    /// Removes every export this screen has left in the app cache.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Deliberately not called from <c>OnDisappearing</c>: opening the share sheet disappears this
+    /// page too, and deleting the file there would pull it out from under the app the caregiver
+    /// just chose to send it to. Sweeping on arrival instead covers every way of leaving —
+    /// including the ones no handler sees — at the cost of the file surviving until the next
+    /// visit, which is the trade an unkillable cleanup path cannot avoid.
+    /// </para>
+    /// <para>
+    /// Scoped to the export naming scheme, so nothing else in the cache is this method's to
+    /// delete. Failures are swallowed: a file the OS has locked or already evicted is not
+    /// something to fail a screen over, and the next sweep retries it.
+    /// </para>
+    /// </remarks>
+    private static void DiscardCachedExports()
+    {
+        try
+        {
+            foreach (var path in Directory.EnumerateFiles(
+                         FileSystem.CacheDirectory, "carditrack-export-*"))
+            {
+                try
+                {
+                    File.Delete(path);
+                }
+                catch (Exception)
+                {
+                    // One undeletable file must not stop the sweep clearing the rest.
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // No cache directory yet, or it is unreadable — nothing to clean either way.
+        }
     }
 
     // ── Plumbing ────────────────────────────────────────────────────────────────

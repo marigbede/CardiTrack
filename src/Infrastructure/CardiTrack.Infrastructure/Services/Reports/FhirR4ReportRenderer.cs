@@ -54,6 +54,20 @@ public class FhirR4ReportRenderer : IReportRenderer
     private static readonly JsonSerializerOptions FhirJson =
         new JsonSerializerOptions().ForFhir(ModelInfo.ModelInspector).Pretty();
 
+    /// <summary>
+    /// Receiving portals group and validate on <c>Observation.category</c>, and several drive
+    /// their vitals view from it — so heart rate, respiratory rate and SpO₂ are
+    /// <c>vital-signs</c> (the classes US Core's vital-signs profile covers), while step count and
+    /// sleep duration are <c>activity</c>. Categorising everything as <c>activity</c>, as this did,
+    /// filed a wearer's heart rate where a clinician's vitals panel would not look for it.
+    /// </summary>
+    private const string VitalSignsCategory = "vital-signs";
+
+    private const string ActivityCategory = "activity";
+
+    private const string CategorySystem =
+        "http://terminology.hl7.org/CodeSystem/observation-category";
+
     private const string LoincSystem = "http://loinc.org";
     private const string UcumSystem = "http://unitsofmeasure.org";
 
@@ -61,14 +75,14 @@ public class FhirR4ReportRenderer : IReportRenderer
     /// One entry per metric we can code honestly. The unit is UCUM: portals convert on these, so a
     /// wrong unit code is worse than a missing observation.
     /// </summary>
-    private static readonly (Func<ActivityLog, decimal?> Value, string Loinc, string Display, string Unit, string UnitCode)[] DailyMetrics =
+    private static readonly (Func<ActivityLog, decimal?> Value, string Loinc, string Display, string Unit, string UnitCode, string Category)[] DailyMetrics =
     [
-        (l => l.Steps, "55423-8", "Number of steps in unspecified time Pedometer", "steps", "{steps}"),
-        (l => l.RestingHeartRate, "40443-4", "Heart rate --resting", "beats/minute", "/min"),
-        (l => l.AvgHeartRate, "8867-4", "Heart rate", "beats/minute", "/min"),
-        (l => l.SpO2Average, "59408-5", "Oxygen saturation in Arterial blood by Pulse oximetry", "%", "%"),
-        (l => l.SleepMinutes, "93832-4", "Sleep duration", "minutes", "min"),
-        (l => l.BreathingRate, "9279-1", "Respiratory rate", "breaths/minute", "/min")
+        (l => l.Steps, "55423-8", "Number of steps in unspecified time Pedometer", "steps", "{steps}", ActivityCategory),
+        (l => l.RestingHeartRate, "40443-4", "Heart rate --resting", "beats/minute", "/min", VitalSignsCategory),
+        (l => l.AvgHeartRate, "8867-4", "Heart rate", "beats/minute", "/min", VitalSignsCategory),
+        (l => l.SpO2Average, "59408-5", "Oxygen saturation in Arterial blood by Pulse oximetry", "%", "%", VitalSignsCategory),
+        (l => l.SleepMinutes, "93832-4", "Sleep duration", "minutes", "min", ActivityCategory),
+        (l => l.BreathingRate, "9279-1", "Respiratory rate", "breaths/minute", "/min", VitalSignsCategory)
     ];
 
     public ReportFormat Format => ReportFormat.FhirR4;
@@ -177,7 +191,7 @@ public class FhirR4ReportRenderer : IReportRenderer
 
     private static IEnumerable<Observation> BuildDailyObservations(ActivityLog log, Guid patientId)
     {
-        foreach (var (value, loinc, display, unit, unitCode) in DailyMetrics)
+        foreach (var (value, loinc, display, unit, unitCode, category) in DailyMetrics)
         {
             if (value(log) is not { } reading)
                 continue; // A metric the device did not report is absent, not zero.
@@ -189,9 +203,7 @@ public class FhirR4ReportRenderer : IReportRenderer
                 Status = ObservationStatus.Final,
                 Category =
                 [
-                    new CodeableConcept(
-                        "http://terminology.hl7.org/CodeSystem/observation-category",
-                        "activity", "Activity", null)
+                    new CodeableConcept(CategorySystem, category, DisplayFor(category), null)
                 ],
                 Code = new CodeableConcept(LoincSystem, loinc, display, null),
                 Subject = new ResourceReference(ToUrn(patientId)),
@@ -208,6 +220,9 @@ public class FhirR4ReportRenderer : IReportRenderer
             };
         }
     }
+
+    private static string DisplayFor(string category) =>
+        category == VitalSignsCategory ? "Vital Signs" : "Activity";
 
     /// <summary>
     /// Our <see cref="Gender"/> onto FHIR's administrative gender. Anything we do not hold a
